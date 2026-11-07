@@ -49,11 +49,13 @@ export const NEWS = [
   { text: 'Telegram-Influencer startet Spendenaktion für „Strahlenschutz-Bunker“. Bunker = Gartenhäuschen.', when: (s, d) => d.rawCps >= 500 },
 
   // Fakten (echt!)
-  { fact: true, text: 'Geheimakte: 5G nutzt Radiowellen – dieselbe Art Strahlung wie Radio, WLAN und LTE.' },
-  { fact: true, text: 'Geheimakte: Mobilfunkstrahlung ist nicht-ionisierend. Sie hat zu wenig Energie, um DNA zu schädigen.' },
-  { fact: true, text: 'Geheimakte: Die Grenzwerte in Deutschland liegen weit unter der Schwelle, ab der Gewebe merklich erwärmt wird.' },
-  { fact: true, text: 'Geheimakte: Die meiste Strahlung bekommst du von deinem eigenen Handy am Ohr – nicht vom Mast.' },
-  { fact: true, text: 'Geheimakte: Je besser der Empfang, desto weniger Leistung muss dein Handy senden.' },
-  { fact: true, text: 'Geheimakte: Viren verbreiten sich nicht über Funkwellen. Wirklich nicht.' },
-  { fact: true, text: 'Geheimakte: Wo Sendeanlagen stehen, zeigt die echte EMF-Datenbank der Bundesnetzagentur.' },
+  { fact: true, text: 'Geheimakte: 5G nutzt Radiowellen – dieselbe Art Strahlung wie Radio, WLAN und LTE.', href: '/geheimakte/#was-ist-5g' },
+  { fact: true, text: 'Geheimakte: Mobilfunkstrahlung ist nicht-ionisierend. Sie hat zu wenig Energie, um DNA zu schädigen.', href: '/geheimakte/#keine-gedanken' },
+  { fact: true, text: 'Geheimakte: Die Grenzwerte in Deutschland liegen weit unter der Schwelle, ab der Gewebe merklich erwärmt wird.', href: '/geheimakte/#grenzwerte' },
+  { fact: true, text: 'Geheimakte: Die meiste Strahlung bekommst du von deinem eigenen Handy am Ohr – nicht vom Mast.', href: '/geheimakte/#mehr-masten' },
+  { fact: true, text: 'Geheimakte: Je besser der Empfang, desto weniger Leistung muss dein Handy senden.', href: '/geheimakte/#mehr-masten' },
+  { fact: true, text: 'Geheimakte: Viren verbreiten sich nicht über Funkwellen. Wirklich nicht.', href: '/geheimakte/#corona' },
+  { fact: true, text: 'Geheimakte: „Anti-5G“-Anhänger waren teils selbst radioaktiv – 5G ist es nicht.', href: '/geheimakte/#aluhut-industrie' },
+  { fact: true, text: 'Geheimakte: Eine WHO-Studienauswertung (2024) fand keinen Zusammenhang zwischen Handys und Hirntumoren.', href: '/geheimakte/#krebs' },
+  { fact: true, text: 'Geheimakte: Wo Sendeanlagen stehen, zeigt die echte EMF-Datenbank der Bundesnetzagentur.', href: '/geheimakte/#masten-karte' },
 ];

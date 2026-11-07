@@ -3,10 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Geheimakte – Projekt Sendemast</title>
+<title>Geheimakte: Was die BAfG verschweigt – Projekt Sendemast</title>
+<meta name="description" content="Geleakt: Die Geheimakte der Bundesanstalt für Gedankenfunk. Der schockierende Inhalt: einfach die Wahrheit über 5G – verständlich erklärt, mit Quellen.">
 <meta name="theme-color" content="#070b08">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Geheimakte 5G – was die BAfG verschweigt">
+<meta property="og:description" content="Ist 5G gefährlich? Die geleakte Akte enthält etwas Schockierendes: Fakten. Mit Quellen von BfS, WHO und ICNIRP.">
+<meta property="og:url" content="https://5gsendemast.de/geheimakte/">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/akte.css">
 </head>
 <body>
 <header class="topbar">
@@ -21,18 +27,233 @@
     <a class="btn" href="/portal/">[ PORTAL ]</a>
   </nav>
 </header>
-<main class="page">
-<div class="stamp">STRENG GEHEIM</div>
-<h1>Was die BAfG Ihnen verschweigt</h1>
-<p>Diese Akte wird gerade geschwärzt … äh, recherchiert. Bald steht hier – mit Quellen – warum 5G nach aktuellem Stand der Wissenschaft harmlos ist.</p>
-<p>Kurzfassung vorab: 5G nutzt Radiowellen. Diese Strahlung ist <strong>nicht-ionisierend</strong> und hat viel zu wenig Energie, um Zellen oder DNA zu schädigen. Die Grenzwerte in Deutschland liegen weit unter der Schwelle, ab der Gewebe merklich erwärmt wird. Mehr dazu beim <a href="https://www.bfs.de/DE/themen/emf/mobilfunk/mobilfunk_node.html" rel="noopener">Bundesamt für Strahlenschutz</a>.</p>
-<p><a class="btn" href="/">Zurück zum Dienst</a></p>
+
+<main class="page akte-page">
+  <div class="leak-banner" role="note">
+    <span>[!] GELEAKTES DOKUMENT</span>
+    <span>Aktenzeichen BAfG-5G/<span class="redacted" aria-hidden="true">0000</span> · Verteiler: <span class="redacted" aria-hidden="true">Präsident, Reptiloiden</span></span>
+  </div>
+
+  <div class="stamp">STRENG GEHEIM</div>
+  <h1>Was die BAfG Ihnen verschweigt</h1>
+  <p class="lead">
+    Diese Akte hätte niemals an die Öffentlichkeit gelangen dürfen. Ein:e Whistleblower:in aus der Bundesanstalt für Gedankenfunk hat sie uns zugespielt.
+    Ihr Inhalt ist so brisant, dass wir lange gezögert haben, sie zu veröffentlichen. Denn was darin steht, ist schockierend:
+    <strong>Es ist einfach die Wahrheit über 5G.</strong>
+  </p>
+  <p class="lead">Jede Akte beginnt mit dem, was sich die BAfG wünschen würde. Darunter steht, was tatsächlich stimmt – mit Quellen zum Nachprüfen.</p>
+
+  <section class="tldr" aria-labelledby="tldr-title">
+    <h2 id="tldr-title">Die Kurzfassung für Eilige</h2>
+    <ul>
+      <li>5G funkt mit Radiowellen – derselben Art Wellen wie Radio, WLAN und die älteren Mobilfunknetze.</li>
+      <li>Diese Strahlung ist <strong>nicht-ionisierend</strong>: zu energiearm, um Erbgut zu schädigen. Der wichtigste nachgewiesene Effekt ist Erwärmung.</li>
+      <li>Die Grenzwerte liegen <strong>50-fach</strong> unter der Schwelle, ab der sich der Körper merklich erwärmt.</li>
+      <li>Die stärksten Felder im Alltag kommen meist vom <strong>eigenen Handy am Ohr</strong>, nicht vom Mast.</li>
+      <li>Eine große, von der WHO beauftragte Auswertung (2024) fand <strong>keinen Zusammenhang</strong> zwischen Handynutzung und Hirntumoren.</li>
+      <li>Gedanken kann man mit 5G nicht lesen. Die BAfG gibt es übrigens auch nicht.</li>
+    </ul>
+  </section>
+
+  <nav aria-label="Inhalt der Akte">
+    <ol class="toc">
+      <li><a href="#was-ist-5g"><span class="nr">01</span>Was 5G wirklich ist</a></li>
+      <li><a href="#keine-gedanken"><span class="nr">02</span>Warum 5G keine Gedanken liest</a></li>
+      <li><a href="#grenzwerte"><span class="nr">03</span>Unsere Grenzwerte (leider)</a></li>
+      <li><a href="#mehr-masten"><span class="nr">04</span>Mehr Masten, weniger Strahlung</a></li>
+      <li><a href="#krebs"><span class="nr">05</span>Und Krebs?</a></li>
+      <li><a href="#corona"><span class="nr">06</span>Corona? Nicht unsere Abteilung</a></li>
+      <li><a href="#den-haag"><span class="nr">07</span>Die toten Vögel von Den Haag</a></li>
+      <li><a href="#elektrosensibel"><span class="nr">08</span>Elektrosensibilität</a></li>
+      <li><a href="#aluhut-industrie"><span class="nr">09</span>Die Aluhut-Industrie</a></li>
+      <li><a href="#masten-karte"><span class="nr">10</span>Wo stehen die Masten?</a></li>
+      <li><a href="#offene-fragen"><span class="nr">11</span>Was noch erforscht wird</a></li>
+      <li><a href="#quellen"><span class="nr">··</span>Quellenverzeichnis</a></li>
+    </ol>
+  </nav>
+
+  <!-- 01 -->
+  <article class="akte" id="was-ist-5g">
+    <div class="akte-head"><span>AKTE 01 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Was 5G wirklich ist</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„5G ist unser geheimer Gedankenkanal. Niemand weiß, was da wirklich gesendet wird.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>5G ist die fünfte Generation des Mobilfunks. Wie schon 2G, 3G und 4G überträgt es Daten mit <strong>Radiowellen</strong> – also derselben Art elektromagnetischer Wellen, die seit Jahrzehnten für Radio, Fernsehen und WLAN genutzt werden.</p>
+    <p>In Deutschland nutzt 5G bisher vor allem Frequenzbereiche, in denen schon vorher Mobilfunk betrieben wurde, etwa das 2-GHz-Band, sowie den Bereich um 3,6 GHz. Künftig können auch höhere Frequenzen wie 26 GHz hinzukommen.<sup class="q"><a href="#q1">[1]</a></sup></p>
+    <p>Neu ist vor allem die Technik: Moderne Antennen können ihre Leistung gezielt in Richtung der Geräte lenken, die gerade Daten brauchen („Beamforming“), statt gleichmäßig in alle Richtungen zu senden.<sup class="q"><a href="#q1">[1]</a></sup> Und was gesendet wird? Katzenvideos, Sprachnachrichten und Wetter-Apps.</p>
+  </article>
+
+  <!-- 02 -->
+  <article class="akte" id="keine-gedanken">
+    <div class="akte-head"><span>AKTE 02 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Warum unsere Strahlung leider keine Gedanken liest</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Mit genug Gigahertz durchdringen wir jedes Gehirn und lesen jeden Gedanken.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>„Strahlung“ klingt gefährlich, ist aber ein Sammelbegriff. Physikalisch gibt es einen entscheidenden Unterschied:</p>
+    <ul>
+      <li><strong>Ionisierende Strahlung</strong> – etwa Röntgenstrahlung oder radioaktive Strahlung – hat genug Energie, um Elektronen aus Atomen zu schlagen. Sie kann dadurch das Erbgut direkt schädigen.</li>
+      <li><strong>Nicht-ionisierende Strahlung</strong> – dazu gehören Radiowellen und damit auch 5G – hat dafür viel zu wenig Energie pro „Lichtteilchen“.</li>
+    </ul>
+    <p>Der wichtigste bekannte Wirkmechanismus von Funkwellen im Körper ist <strong>Erwärmung</strong>. Bei den Feldstärken, denen Menschen im Alltag ausgesetzt sind, ist dieser Temperaturanstieg laut WHO vernachlässigbar.<sup class="q"><a href="#q2">[2]</a></sup></p>
+    <p>Und Gedanken lesen? Dafür bräuchte es mindestens einen Empfänger im Kopf, der Gehirnaktivität in Funksignale übersetzt. Den hat die BAfG nie verbaut. Wir haben nachgesehen.</p>
+  </article>
+
+  <!-- 03 -->
+  <article class="akte" id="grenzwerte">
+    <div class="akte-head"><span>AKTE 03 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Unsere Grenzwerte (leider)</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Grenzwerte? Die sind doch nur eine unverbindliche Empfehlung.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>In Deutschland sind die Grenzwerte für Funkanlagen <strong>gesetzlich</strong> festgelegt, in der 26. Bundes-Immissionsschutzverordnung (26. BImSchV).<sup class="q"><a href="#q3">[3]</a></sup> Sie beruhen auf den Empfehlungen der Internationalen Kommission zum Schutz vor nichtionisierender Strahlung (ICNIRP).<sup class="q"><a href="#q4">[4]</a></sup></p>
+    <p>Die Logik dahinter: Erst wenn der ganze Körper etwa <strong>4 Watt pro Kilogramm</strong> Energie aufnimmt, steigt die Körpertemperatur um rund 1 °C. Für die Bevölkerung liegt der Grenzwert <strong>50-mal niedriger</strong>, bei 0,08 Watt pro Kilogramm.<sup class="q"><a href="#q4">[4]</a></sup> Zum Vergleich: Schon leichtes Fieber erhöht die Körpertemperatur um mehr als 1 °C.</p>
+    <p>Das Bundesamt für Strahlenschutz (BfS) fasst es so zusammen: <em>„Innerhalb der gültigen Grenzwerte gibt es keine bestätigten Belege für eine schädigende Wirkung.“</em><sup class="q"><a href="#q1">[1]</a></sup></p>
+  </article>
+
+  <!-- 04 -->
+  <article class="akte" id="mehr-masten">
+    <div class="akte-head"><span>AKTE 04 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Mehr Masten, weniger Strahlung – ein Skandal</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Jeder neue Mast bedeutet mehr Strahlung und mehr Kontrolle.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>Die stärksten Funkfelder im Alltag stammen meist nicht vom Mast auf dem Nachbardach, sondern vom <strong>eigenen Handy am Ohr</strong>. Das BfS schreibt: Die Feldstärken, die Handys nah am Körper erzeugen, <em>„sind stärker als die Feldstärken, die Mobilfunkbasisstationen verursachen.“</em><sup class="q"><a href="#q5">[5]</a></sup></p>
+    <p>Handys regeln ihre Sendeleistung automatisch: <strong>Je schlechter die Verbindung zur nächsten Basisstation, desto stärker muss das Handy senden.</strong><sup class="q"><a href="#q6">[6]</a></sup> Ein gut ausgebautes Netz mit Masten in der Nähe sorgt deshalb oft dafür, dass das eigene Handy mit weniger Leistung auskommt.</p>
+    <p>Wer vorsorglich weniger abbekommen möchte, telefoniert laut BfS bei gutem Empfang und nutzt Headset oder Freisprechfunktion.<sup class="q"><a href="#q6">[6]</a></sup> Aus Sicht der BAfG eine Katastrophe.</p>
+  </article>
+
+  <!-- 05 -->
+  <article class="akte" id="krebs">
+    <div class="akte-head"><span>AKTE 05 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Und Krebs?</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Sogar die WHO sagt, Handystrahlung ist krebserregend. Wir haben gewonnen!“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>2011 hat die Internationale Agentur für Krebsforschung (IARC), eine Einrichtung der WHO, hochfrequente Felder als <strong>„möglicherweise krebserregend“</strong> (Gruppe 2B) eingestuft. Grundlage waren begrenzte Hinweise aus Beobachtungsstudien zur Handynutzung.<sup class="q"><a href="#q7">[7]</a></sup></p>
+    <p>„Möglicherweise“ bedeutet: Ein Zusammenhang konnte damals weder belegt noch sicher ausgeschlossen werden. In derselben Gruppe steht zum Beispiel auch traditionell eingelegtes Gemüse nach asiatischer Art.<sup class="q"><a href="#q8">[8]</a></sup></p>
+    <p>Seitdem ist die Datenlage deutlich besser geworden. Eine von der WHO beauftragte systematische Übersichtsarbeit hat 2024 Studien aus fast drei Jahrzehnten ausgewertet (63 davon flossen in die Analyse ein). Ergebnis: <strong>kein Zusammenhang zwischen Handynutzung und Hirntumoren</strong> – auch nicht bei Menschen, die seit mehr als zehn Jahren oder besonders viel telefonieren.<sup class="q"><a href="#q9">[9]</a></sup><sup class="q"><a href="#q10">[10]</a></sup></p>
+    <p>Die IARC will die Einstufung neu bewerten.<sup class="q"><a href="#q7">[7]</a></sup> Das ist normaler wissenschaftlicher Alltag: Bewertungen werden überprüft, wenn es neue Daten gibt.</p>
+  </article>
+
+  <!-- 06 -->
+  <article class="akte" id="corona">
+    <div class="akte-head"><span>AKTE 06 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Corona? Nicht unsere Abteilung</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Wir funken die Viren direkt ins Wohnzimmer.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>Viren sind biologische Partikel. Sie verbreiten sich über Tröpfchen und Aerosole von Mensch zu Mensch – nicht über Radiowellen. Ein Funksignal kann kein Virus transportieren und auch keins erzeugen.</p>
+    <p>Die Behauptung, 5G verbreite Corona oder löse die Symptome aus, wurde vielfach geprüft und widerlegt. Covid-19 breitete sich auch in Ländern stark aus, die damals kein 5G-Netz hatten, etwa in Brasilien und Indien.<sup class="q"><a href="#q11">[11]</a></sup></p>
+  </article>
+
+  <!-- 07 -->
+  <article class="akte" id="den-haag">
+    <div class="akte-head"><span>AKTE 07 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Die toten Vögel von Den Haag</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Ein kleiner 5G-Testlauf. Ups.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>Im Herbst 2018 wurden im Huijgenspark in Den Haag über 300 tote Stare gefunden. Kurz darauf verbreitete sich im Netz die Geschichte, ein 5G-Test habe sie getötet.</p>
+    <p>Nach Angaben des niederländischen Wirtschaftsministeriums gab es im Oktober 2018 aber <strong>gar keinen 5G-Test in Den Haag</strong>. Der einzige Test, ein einziger Tag im Juni 2018, fand in einem Bürogebäude etwa eine halbe Stunde Fußweg entfernt statt.</p>
+    <p>Bei 15 untersuchten Vögeln stellten Fachleute als Todesursache <strong>innere Blutungen durch Aufprallverletzungen</strong> fest. Außerdem fanden sie Spuren eines Giftstoffs aus Beeren, die Stare fressen. Ob er eine Rolle spielte, ist unklar.<sup class="q"><a href="#q12">[12]</a></sup></p>
+  </article>
+
+  <!-- 08 -->
+  <article class="akte" id="elektrosensibel">
+    <div class="akte-head"><span>AKTE 08 · OHNE WITZ</span><span class="stempel ernst">ERNST GEMEINT</span></div>
+    <h2>Elektrosensibilität</h2>
+    <p class="myth" style="border-left-color: var(--amber); background: rgba(255,176,46,0.06)"><span class="label" style="color: var(--amber)">HINWEIS DER REDAKTION</span>Hier hört der Spaß auf. Diese Seite macht sich über Mythen und Abzocke lustig – nicht über Menschen, denen es schlecht geht.</p>
+    <p>Manche Menschen leiden unter Kopfschmerzen, Schlafstörungen oder Kribbeln und führen das auf Funkwellen zurück. <strong>Diese Beschwerden sind real</strong> und können sehr belastend sein.</p>
+    <p>In sogenannten Doppelblind-Studien weiß weder die Versuchsperson noch die Versuchsleitung, ob gerade ein Feld eingeschaltet ist. In solchen Studien konnten Betroffene nicht zuverlässig erkennen, ob sie einem Feld ausgesetzt waren. Die Beschwerden traten unabhängig davon auf.<sup class="q"><a href="#q13">[13]</a></sup><sup class="q"><a href="#q14">[14]</a></sup></p>
+    <p>Das spricht dafür, dass die Ursache woanders liegt. Betroffene verdienen deshalb eine gründliche ärztliche Abklärung – und keine teuren „Schutzprodukte“ (siehe nächste Akte).</p>
+  </article>
+
+  <!-- 09 -->
+  <article class="akte" id="aluhut-industrie">
+    <div class="akte-head"><span>AKTE 09 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Die Aluhut-Industrie</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Unsere treuesten Verbündeten: die Händler von Anti-5G-Produkten.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>Gegen 5G werden Anhänger, Armbänder, Aufkleber und sogar USB-Sticks verkauft. Eine nachgewiesene Schutzwirkung haben sie nicht.</p>
+    <p>Es kommt noch besser: 2021 warnte die niederländische Behörde für nukleare Sicherheit und Strahlenschutz (ANVS) vor zehn solcher „Anti-5G“-Produkte. Sie enthielten radioaktive Stoffe und gaben selbst <strong>ionisierende Strahlung</strong> ab – also genau die Art Strahlung, die Erbgut schädigen kann und die 5G nicht hat.<sup class="q"><a href="#q15">[15]</a></sup><sup class="q"><a href="#q16">[16]</a></sup> Wer sich davor „schützen“ wollte, hat sich die eigentliche Strahlenquelle um den Hals gehängt.</p>
+    <p>Und der klassische Aluhut? 2005 haben Studierende am MIT augenzwinkernd Alufolien-Helme vermessen. Die meisten Frequenzen wurden etwas abgeschwächt, einige aber sogar <strong>verstärkt</strong> – laut den Autoren ausgerechnet Bereiche, die in den USA für staatliche Funkdienste reserviert sind.<sup class="q"><a href="#q17">[17]</a></sup> Das war ein kleiner, nicht ganz ernst gemeinter Versuch. Die BAfG bedankt sich trotzdem für jede getragene Zusatzantenne.</p>
+  </article>
+
+  <!-- 10 -->
+  <article class="akte" id="masten-karte">
+    <div class="akte-head"><span>AKTE 10 · VERSCHLUSSSACHE</span><span class="stempel">WIDERLEGT</span></div>
+    <h2>Wo stehen die Masten wirklich?</h2>
+    <p class="myth"><span class="label">BAFG-INTERN</span>„Die Standorte unserer Masten sind streng geheim.“</p>
+    <p class="fact-label">WAS WIRKLICH STIMMT</p>
+    <p>Gar nicht geheim: Die <strong>Bundesnetzagentur</strong> stellt eine öffentliche EMF-Datenbank mit Karte bereit. Darin sind Funkanlagen verzeichnet, die eine Standortbescheinigung brauchen, außerdem Orte, an denen gemessen wurde. Die Positionen können bis zu 80 Meter ungenau sein.<sup class="q"><a href="#q18">[18]</a></sup></p>
+    <p>Mit der Standortbescheinigung legt die Bundesnetzagentur vor dem Betrieb Sicherheitsabstände um die Antennen fest, damit die Grenzwerte überall eingehalten werden, wo sich Menschen aufhalten können. Wer also wissen will, was bei ihm in der Nähe funkt, kann einfach nachsehen. Ganz ohne Telegram-Gruppe.</p>
+  </article>
+
+  <!-- 11 -->
+  <article class="akte" id="offene-fragen">
+    <div class="akte-head"><span>AKTE 11 · EHRLICHKEIT</span><span class="stempel ernst">OFFEN</span></div>
+    <h2>Was noch erforscht wird</h2>
+    <p>Wissenschaft ist nie „fertig“, und das gehört zu einer ehrlichen Akte dazu:</p>
+    <ul>
+      <li>Zu sehr hohen Frequenzen über 20 GHz gibt es bisher weniger Studien. Das BfS sieht hier Forschungsbedarf und lässt unter anderem Wirkungen auf Hautzellen untersuchen. Erste Ergebnisse zeigten keine Effekte, die über Zufallsbefunde hinausgingen.<sup class="q"><a href="#q1">[1]</a></sup><sup class="q"><a href="#q19">[19]</a></sup></li>
+      <li>Die IARC plant, ihre Einstufung von 2011 neu zu bewerten.<sup class="q"><a href="#q7">[7]</a></sup></li>
+      <li>Das BfS empfiehlt grundsätzlich, die eigene Belastung vorsorglich gering zu halten, etwa mit Headset.<sup class="q"><a href="#q6">[6]</a></sup></li>
+    </ul>
+    <p class="callout"><b>Wichtig:</b> Dass weiter geforscht wird, heißt nicht, dass etwas verheimlicht wird. Behörden, die mögliche Risiken untersuchen, obwohl keine bestätigt sind, machen einfach ihren Job – genau so soll Strahlenschutz funktionieren.</p>
+  </article>
+
+  <section class="fazit" aria-labelledby="fazit-title">
+    <h2 id="fazit-title">Fazit der Geheimakte</h2>
+    <p>Die Bundesanstalt für Gedankenfunk gibt es nicht. Die Gedankenkontrolle auch nicht.</p>
+    <p>Was es gibt: Grenzwerte mit großem Sicherheitsabstand, jahrzehntelange Forschung – und Leute, die mit der Angst vor 5G Geld verdienen.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="/">Zurück zum Dienst</a>
+      <button class="btn" type="button" id="share-akte">Akte weiterleiten</button>
+    </div>
+    <p id="share-status" class="dim" aria-live="polite" style="font-size:12px;margin:8px 0 0"></p>
+  </section>
+
+  <section class="quellen" id="quellen" aria-labelledby="quellen-title">
+    <h2 id="quellen-title">Quellenverzeichnis</h2>
+    <p class="dim">Alle Quellen abgerufen am 07.11.2026.</p>
+    <ol>
+      <li id="q1">Bundesamt für Strahlenschutz (BfS): <a href="https://www.bfs.de/DE/themen/emf/mobilfunk/basiswissen/5g/5g_node.html" rel="noopener">5G</a> (Stand: 24.03.2026).</li>
+      <li id="q2">Weltgesundheitsorganisation (WHO): <a href="https://www.who.int/news-room/questions-and-answers/item/radiation-5g-mobile-networks-and-health" rel="noopener">Radiation: 5G mobile networks and health</a> (27.02.2020, englisch).</li>
+      <li id="q3"><a href="https://www.gesetze-im-internet.de/bimschv_26/" rel="noopener">Sechsundzwanzigste Verordnung zur Durchführung des Bundes-Immissionsschutzgesetzes (26. BImSchV)</a>, gesetze-im-internet.de.</li>
+      <li id="q4">ICNIRP: <a href="https://www.icnirp.org/cms/upload/publications/ICNIRPrfgdl2020.pdf" rel="noopener">Guidelines for Limiting Exposure to Electromagnetic Fields (100 kHz to 300 GHz)</a>. Health Physics 118(5): 483–524, 2020 (englisch).</li>
+      <li id="q5">BfS: <a href="https://www.bfs.de/DE/themen/emf/mobilfunk/basiswissen/mobiltelefon/mobiltelefon_node.html" rel="noopener">Mobilfunkendgeräte</a>.</li>
+      <li id="q6">BfS: <a href="https://www.bfs.de/DE/themen/emf/mobilfunk/vorsorge/expositionsverringerung-handy/expositionsverringerung-handy.html" rel="noopener">Weniger Strahlung beim Telefonieren mit dem Handy</a>.</li>
+      <li id="q7">BfS: <a href="https://www.bfs.de/DE/themen/emf/hff/wirkung/iarc/iarc_node.html" rel="noopener">Einstufung hochfrequenter Felder durch die IARC</a>.</li>
+      <li id="q8">IARC: <a href="https://monographs.iarc.who.int/agents-classified-by-the-iarc/" rel="noopener">Agents Classified by the IARC Monographs</a> (Liste, englisch).</li>
+      <li id="q9">Karipidis K. et al.: The effect of exposure to radiofrequency fields on cancer risk in the general and working population: A systematic review of human observational studies – Part I. Environment International 191, 108983 (2024). <a href="https://doi.org/10.1016/j.envint.2024.108983" rel="noopener">doi:10.1016/j.envint.2024.108983</a></li>
+      <li id="q10">ARPANSA: <a href="https://www.arpansa.gov.au/who-review-finds-no-link-between-mobile-phone-use-and-brain-cancer" rel="noopener">WHO review finds no link between mobile phone use and brain cancer</a> (04.09.2024, englisch).</li>
+      <li id="q11">CORRECTIV: <a href="https://correctiv.org/faktencheck/2020/06/17/5g-und-coronavirus-es-gibt-keine-belege-fuer-einen-zusammenhang/" rel="noopener">5G und Coronavirus: Es gibt keine Belege für einen Zusammenhang</a> (17.06.2020).</li>
+      <li id="q12">Full Fact: <a href="https://fullfact.org/online/birds-5G-netherlands/" rel="noopener">Hundreds of birds were found dead in the Netherlands but it had nothing to do with 5G</a> (englisch).</li>
+      <li id="q13">Rubin G. J., Das Munshi J., Wessely S.: Electromagnetic hypersensitivity: a systematic review of provocation studies. Psychosomatic Medicine 67(2), 2005. <a href="https://pubmed.ncbi.nlm.nih.gov/15784787/" rel="noopener">PubMed</a></li>
+      <li id="q14">BfS: <a href="https://www.bfs.de/SharedDocs/Glossareintraege/DE/E/elektrosensibilitaet.html" rel="noopener">Glossar: Elektrosensibilität</a>.</li>
+      <li id="q15">RIVM: <a href="https://www.rivm.nl/bibliotheek/rapporten/2021-0239.pdf" rel="noopener">Rapport 2021-0239 zu „Anti-5G“-Produkten</a> (niederländisch), Grundlage der ANVS-Warnung vom Dezember 2021.</li>
+      <li id="q16">t3n: <a href="https://t3n.de/news/strahlenschutzbehoerde-warnt-1438816/" rel="noopener">Strahlenschutzbehörde warnt vor radioaktiven Anti-5G-Produkten</a> (Dezember 2021).</li>
+      <li id="q17">Rahimi A., Recht B., Taylor J., Vawter N.: <a href="https://web.archive.org/web/20051201015503/http://people.csail.mit.edu/rahimi/helmet/" rel="noopener">On the Effectiveness of Aluminium Foil Helmets: An Empirical Study</a>. MIT, 2005 (englisch, nicht begutachtet; archivierte Fassung).</li>
+      <li id="q18">Bundesnetzagentur: <a href="https://www.bundesnetzagentur.de/DE/Vportal/TK/Funktechnik/EMF/start.html" rel="noopener">Elektromagnetische Felder (EMF) – EMF-Datenbank und Karte</a>.</li>
+      <li id="q19">Meyer, Gronau, Drees (Constructor University Bremen) im Auftrag des BfS: <a href="https://nbn-resolving.org/urn:nbn:de:0221-2024091646255" rel="noopener">Wirkungen auf Zellen der Körperoberfläche bei Expositionen mit Zenti- und Millimeterwellen (5G-Frequenzen)</a>, Vorhaben 3619S82470, 2024.</li>
+    </ol>
+  </section>
 </main>
+
 <footer class="legal-bar">
-  <span><strong>Satire.</strong> Die Bundesanstalt für Gedankenfunk existiert nicht. 5G ist nach aktuellem Stand der Wissenschaft unbedenklich → <a href="/geheimakte/">Geheimakte</a></span>
+  <span><strong>Satire.</strong> Die Bundesanstalt für Gedankenfunk existiert nicht. Die Inhalte dieser Geheimakte sind dagegen ernst gemeint und mit Quellen belegt.</span>
   <a href="/impressum/">Impressum</a>
   <a href="/datenschutz/">Datenschutz</a>
 </footer>
 <div class="scanlines" aria-hidden="true"></div>
+<script type="module">
+  const btn = document.getElementById('share-akte');
+  const status = document.getElementById('share-status');
+  btn.addEventListener('click', async () => {
+    const data = { title: 'Geheimakte 5G', text: 'Geleakt: Was die Bundesanstalt für Gedankenfunk über 5G verschweigt. (Spoiler: die Wahrheit)', url: 'https://5gsendemast.de/geheimakte/' };
+    try {
+      if (navigator.share) { await navigator.share(data); return; }
+      await navigator.clipboard.writeText(`${data.text} ${data.url}`);
+      status.textContent = 'Link in die Zwischenablage kopiert.';
+    } catch (e) {
+      if (e?.name !== 'AbortError') status.textContent = 'Teilen nicht möglich – Link: ' + data.url;
+    }
+  });
+</script>
 </body>
 </html>

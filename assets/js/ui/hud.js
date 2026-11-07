@@ -103,7 +103,7 @@ export class Ticker {
     el.classList.remove('run');
     el.classList.toggle('fact', !!item.fact);
     el.textContent = item.fact ? `+++ ${item.text} → MEHR ERFAHREN +++` : `+++ ${item.text} +++`;
-    el.href = item.fact ? '/geheimakte/' : '#';
+    el.href = item.fact ? item.href || '/geheimakte/' : '#';
     el.tabIndex = item.fact ? 0 : -1;
     if (reducedMotion()) {
       clearTimeout(this.timer);

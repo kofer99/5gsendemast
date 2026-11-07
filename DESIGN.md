@@ -1,7 +1,33 @@
 # Designdokument: 5gsendemast.de – „Projekt Sendemast“
 
-> Stand: 07.11.2026 · Version 0.1 (Entwurf)
+> Stand: 07.11.2026 · Version 0.2
 > Verbindliche Grundlage für die Umsetzung. Änderungen werden hier zuerst eingetragen und dann umgesetzt.
+
+---
+
+## 0. Projektstand & Todos
+
+> Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
+
+### ❗ Wichtig für 08.11.2026
+- [ ] **Geheimakte komplett durchlesen** (`/geheimakte/`). Inhalt und Ton prüfen und jede Aussage gegen die verlinkte Quelle gegenlesen. Erst danach geht die Seite online. Auffälligkeiten direkt hier notieren.
+  - Besonders prüfen: Akte 03 (Grenzwerte: 4 W/kg, Faktor 50, 0,08 W/kg – im ICNIRP-PDF selbst nicht maschinell gelesen, nur über Sekundärquellen abgeglichen), Akte 05 (Krebs/IARC), Akte 08 (Elektrosensibilität – Ton).
+  - Zwei Links waren beim Test nicht erreichbar: Quelle [10] (ARPANSA, Zeitüberschreitung) und der BfS-Dokumentenserver (DORIS, Serverfehler 503 – daher über nbn-resolving.org verlinkt). Im Browser nachprüfen.
+- [ ] Spiel nach dem neuen Balancing einmal komplett durchspielen (OPTIONEN → „Neuer Einsatz“). Fühlt sich der Weg zu 100 % gut an?
+- [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
+
+### Wo wir stehen geblieben sind (07.11.2026)
+- **Fertig:** Spielkern mit Karte, 8 Anlagen, Upgrades, Erfolgen, Aluhutträgern, Goldenem Mast, News-Ticker, Speichern/Export/Import, Offline-Fortschritt (M1–M3 Basis). Balancing überarbeitet (§4.3). Geheimakte mit 11 Akten und 19 Quellen (§6).
+- **Behobene Fehler der letzten Sitzung:** „Neuer Einsatz“/Import wurde vom Autospeichern überschrieben; Leertaste löste fokussierten Kaufen-Knopf aus; stille Teilkäufe bei ×10/×100.
+- **Platzhalter:** Portal, Bestenliste, Impressum, Datenschutz (Impressum/Datenschutz: eigene Daten eintragen!).
+- **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README).
+- **Noch nicht online:** kein GitHub-Remote, kein Hosting. Repo ist lokal unter `D:\FunProjectDomain`.
+
+### Nächste Schritte (Reihenfolge offen)
+1. Mitarbeiterportal der BAfG (§7)
+2. Bestenliste mit Cloudflare Pages Functions + D1 (§5)
+3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)
+4. Phasen 2–5 und Prestige (M4)
 
 ---
 
@@ -268,26 +294,26 @@ Ein reines Browser-Spiel lässt sich nie vollständig gegen Cheats absichern. Da
 
 ## 6. Geheimakte (Faktenseite)
 
-**Aufmachung:** Die Seite sieht aus wie ein geleaktes, gestempeltes Dokument mit „STRENG GEHEIM“. Der Witz: Es steht einfach die Wahrheit drin. Jeder Abschnitt hat eine Satire-Überschrift und darunter die nüchterne Erklärung.
+**Status:** ✅ umgesetzt (`geheimakte/index.html`, Stil `assets/css/akte.css`), Quellen abgerufen am 07.11.2026. **Vor dem Launch vom Projektinhaber gegenlesen (siehe §0).**
 
-**Abschnitte**
-1. **„Was 5G wirklich ist“**: Mobilfunk mit Radiowellen. In Deutschland liegen die Frequenzen u. a. bei 700 MHz, ca. 2 GHz, 3,4–3,7 GHz und 26 GHz. Das sind Wellen wie bei Radio, WLAN und LTE.
-2. **„Warum die Strahlung keine Gedanken liest“**: Die Strahlung ist nicht-ionisierend. Die Energie reicht nicht, um chemische Bindungen oder DNA zu schädigen. Der einzige nachgewiesene biologische Effekt ist geringe Erwärmung.
-3. **„Unsere Grenzwerte (leider)“**: Die Grenzwerte aus der 26. BImSchV und von der ICNIRP (2020) liegen mit großem Sicherheitsabstand unter der Schwelle, ab der eine relevante Erwärmung auftritt.
-4. **„Mehr Masten, weniger Strahlung, verdammt!“**: Das Handy am Ohr trägt am meisten zur eigenen Belastung bei. Mit mehr Masten in der Nähe sendet das Handy mit weniger Leistung.
-5. **„Corona? Nicht unsere Abteilung“**: Viren verbreiten sich nicht über Funk. Es gab auch Corona-Ausbrüche in Regionen ganz ohne 5G.
-6. **„Die toten Vögel von Den Haag“**: Der virale Mythos und was wirklich dahintersteckte (vor der Veröffentlichung recherchieren und belegen).
-7. **„Wo stehen die Masten wirklich?“**: Link zur echten EMF-Datenbank der Bundesnetzagentur.
-8. **„Die Aluhut-Industrie“**: Abschirmprodukte und wer daran verdient.
+**Aufmachung:** Geleaktes Dokument mit Stempel „STRENG GEHEIM“ und geschwärztem Aktenzeichen. Der Witz: Es steht einfach die Wahrheit drin. Jede Akte beginnt mit einer rot markierten „BAfG-intern“-Behauptung, darunter steht „Was wirklich stimmt“ mit nummerierten Quellenverweisen. Oben gibt es eine Kurzfassung für Eilige und ein Inhaltsverzeichnis, unten ein Fazit mit „Akte weiterleiten“ und das Quellenverzeichnis.
 
-**Quellen** (vor der Veröffentlichung jede einzeln prüfen und mit Abrufdatum verlinken)
-- Bundesamt für Strahlenschutz (BfS): Themenseiten „5G“ und „Mobilfunk“
-- WHO: Fragen und Antworten zu Radiofrequenzfeldern und 5G
-- ICNIRP Guidelines 2020
-- Bundesnetzagentur: EMF-Datenbank
-- Deutsches Mobilfunk-Forschungsprogramm (DMF)
+**Akten**
+1. Was 5G wirklich ist – Radiowellen; v. a. 2-GHz-Band und 3,6 GHz, künftig auch 26 GHz; Beamforming
+2. Warum 5G keine Gedanken liest – ionisierend vs. nicht-ionisierend; Erwärmung als Hauptmechanismus
+3. Unsere Grenzwerte (leider) – 26. BImSchV, ICNIRP 2020: 4 W/kg ≈ 1 °C, Grenzwert 50-fach darunter (0,08 W/kg)
+4. Mehr Masten, weniger Strahlung – eigenes Handy erzeugt stärkere Felder als Basisstationen; Leistungsregelung
+5. Und Krebs? – IARC 2B (2011), WHO-beauftragte Übersichtsarbeit 2024 (Karipidis et al.): kein Zusammenhang mit Hirntumoren
+6. Corona? Nicht unsere Abteilung – CORRECTIV-Faktencheck (WHO-Mythbusters enthält 5G nicht mehr)
+7. Die toten Vögel von Den Haag – kein 5G-Test im Oktober 2018; Aufprallverletzungen (Full Fact)
+8. Elektrosensibilität – **ohne Witz**: Beschwerden sind real; Doppelblind-Studien zeigen keinen Zusammenhang mit Feldern
+9. Die Aluhut-Industrie – radioaktive „Anti-5G“-Produkte (ANVS/RIVM 2021); MIT-Alufolienhelm-Versuch 2005
+10. Wo stehen die Masten? – EMF-Datenbank der Bundesnetzagentur
+11. Was noch erforscht wird – Frequenzen > 20 GHz, IARC-Neubewertung, BfS-Vorsorgeempfehlung
 
-**Regel:** Für die Faktenseite gilt **null Fantasie**. Jede Aussage braucht eine Quelle.
+**Bewusst weggelassen**, weil nicht in einer Primärquelle bestätigt: „Basisstationen meist unter 1 % des Grenzwerts“, „Handy sendet bei gutem Empfang bis zu 99,9 % weniger“, 700-MHz-Band.
+
+**Regeln:** Für die Faktenseite gilt **null Fantasie** – jede Aussage braucht eine Quelle. Quellen mit Abrufdatum; Links vor jeder Veröffentlichung erneut prüfen (z. B. `curl`-Schleife über alle `href`). Fakten-Meldungen im News-Ticker verlinken auf die passende Akte (`href` in `news.js`).
 
 ---
 
@@ -422,7 +448,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
 | M2 ✅ | Karte | Bundesländer-SVG, Masten platzieren, Kontrolle, Übernahme-Effekte |
 | M3 ✅ (Basis) | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Offen: Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades, mehr News |
 | M4 | Eskalation | Phasen 2–5, Prestige |
-| M5 | Seiten | Geheimakte, Portal, Impressum, Datenschutz |
+| M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). Offen: Portal, Impressum/Datenschutz ausfüllen |
 | M6 | Online | Bestenliste (Functions + D1), Teilen, OG-Bild |
 | M7 | Launch | Hosting, Domain, Balancing-Feinschliff, Mobile-Test |
 
