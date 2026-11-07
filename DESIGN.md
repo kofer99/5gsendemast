@@ -1,0 +1,437 @@
+# Designdokument: 5gsendemast.de – „Projekt Sendemast“
+
+> Stand: 07.11.2026 · Version 0.1 (Entwurf)
+> Verbindliche Grundlage für die Umsetzung. Änderungen werden hier zuerst eingetragen und dann umgesetzt.
+
+---
+
+## 1. Vision
+
+5gsendemast.de ist eine **Satire-Website**, die 5G-Verschwörungsmythen auf die Schippe nimmt. Herzstück ist ein **eskalierendes Idle-/Clicker-Spiel** im Stil von Cookie Clicker: Der Spieler arbeitet für die fiktive **„Bundesanstalt für Gedankenfunk“ (BAfG)** und stellt Sendemasten auf einer Deutschlandkarte auf, um die Bevölkerung zu „kontrollieren“. Das Spiel beginnt klein und endet völlig absurd mit der Kontrolle über das Universum.
+
+Die Pointe kommt mit der **„Geheimakte“**: Sie ist witzig verpackt, aber inhaltlich korrekt und erklärt, warum 5G harmlos ist.
+
+**Ziele**
+1. Ein Spiel, das wirklich Spaß macht und süchtig macht. Der Gag allein trägt nicht.
+2. Die Seite soll geteilt werden („Ich kontrolliere schon 12 Mio. Deutsche“).
+3. Echte Aufklärung, ohne belehrend zu sein.
+4. Kosten von 0 € im Betrieb (abgesehen von der Domain).
+
+**Nicht-Ziele**
+- Kein Login, keine Accounts, kein Tracking, keine Werbung.
+- Keine Monetarisierung.
+- Kein Framework- oder Build-Overhead.
+
+---
+
+## 2. Ton & Satire-Richtlinien
+
+| Erlaubt / erwünscht | Tabu |
+|---|---|
+| Mythen überzeichnen (Chemtrails, Reptiloiden, Mikrochips, Bielefeld) | Echte Personen namentlich verspotten |
+| Abzocke durch Aluhut-Händler und Abschirmprodukte persiflieren | Menschen mit echten Beschwerden verhöhnen (z. B. „Elektrosensible“: Die Symptome sind real, nur die Ursache ist nicht 5G) |
+| Behördensprache und Bürokratie parodieren | Echte Logos, Marken oder Behörden imitieren (Telekom, Vodafone, BNetzA, BfS …) |
+| Absurde Steigerung bis ins Weltall | Falschinformationen *ohne* erkennbaren Witz |
+| Echte Fakten auf der Faktenseite | Verwechslungsgefahr mit einer echten Behörde |
+
+- Die **BAfG ist erkennbar fiktiv**. Sie hat kein Bundesadler-Logo und keine Bundesfarben im Behördenlook.
+- Jede Seite hat im Footer einen **Satire-Hinweis**: *„Satire. Die Bundesanstalt für Gedankenfunk existiert nicht. 5G ist nach aktuellem Stand der Wissenschaft unbedenklich → Geheimakte“*.
+- Sprache: Deutsch, Du-Form im Spiel, Beamtendeutsch im Portal.
+
+---
+
+## 3. Seitenstruktur
+
+| Pfad | Inhalt |
+|---|---|
+| `/` | Das Spiel (Hauptbildschirm) |
+| `/geheimakte/` | Faktenseite: „Was die BAfG dir verschweigt“ (der Gag: Es ist einfach die Wahrheit) |
+| `/portal/` | Fake-Mitarbeiterportal der BAfG |
+| `/bestenliste/` | Globale Bestenliste (Top 100, Filter: diese Woche / ewig) |
+| `/impressum/` | Impressum (Platzhalter) |
+| `/datenschutz/` | Datenschutzerklärung (Platzhalter) |
+| `/api/*` | Backend für die Bestenliste (Cloudflare Pages Functions) |
+
+Die Navigation im Spiel-Header enthält Geheimakte, Bestenliste und Portal. Der Footer enthält Impressum, Datenschutz und den Satire-Hinweis.
+
+---
+
+## 4. Spielmechanik
+
+### 4.1 Ressourcen
+
+| Wert | Bedeutung |
+|---|---|
+| **Funkpunkte (FP)** | Währung. Entsteht durch Klicks und Anlagen, wird für Anlagen und Upgrades ausgegeben. |
+| **Kontrollierte Bürger** | Fortschrittswert, wird nie ausgegeben. Er ergibt sich aus der Abdeckung der Bundesländer (siehe 4.4) und ist die **Hauptzahl** im Header und in der Bestenliste. |
+| **Aluhut-Tränen** | Prestige-Währung (siehe 4.9). |
+
+> Hinweis zu den Mockups: Dort steht nur „kontrollierte Bürger“. In der Umsetzung kommt die FP-Anzeige direkt darunter dazu.
+
+### 4.2 Klicken
+- Ein Klick auf die Karte oder auf den Button **„Strahlungsimpuls senden“** bringt FP pro Klick (Start: 1).
+- Visuelles Feedback: eine Funkwellen-Animation an der Klickstelle und eine aufsteigende Zahl „+1.250“.
+- Die Klick-Upgrades skalieren mit (z. B. „Klick = +1 % der FP/s“).
+
+### 4.3 Anlagen (Generatoren)
+
+Die Kosten steigen pro Kauf: `Preis = Basispreis × 1,15^Anzahl`. Werte sind Startwerte für das Balancing.
+
+| # | Anlage | Basispreis (FP) | FP/s | Flavor-Text | Ort |
+|---|---|---|---|---|---|
+| 1 | Kleiner Funkmast | 15 | 0,1 | „Völlig harmlos. Offiziell.“ | Karte DE |
+| 2 | Getarnte Tanne | 100 | 1 | „Nadeln aus Glasfaser.“ | Karte DE |
+| 3 | Kirchturm-Sender | 1.100 | 8 | „Sonntags doppelte Reichweite.“ | Karte DE |
+| 4 | Windrad | 12.000 | 47 | „Dreht sich nur zur Tarnung.“ | Karte DE |
+| 5 | Smart-Toaster-Netz | 130.000 | 260 | „Toastet auch Gedanken.“ | Karte DE |
+| 6 | Chemtrail-Staffel | 1,4 Mio. | 1.400 | „Jetzt mit Lavendelduft.“ | Karte DE |
+| 7 | Reptiloiden-Rechenzentrum | 20 Mio. | 7.800 | „Klimaanlage auf 38 °C.“ | Karte DE |
+| 8 | HAARP-Außenstelle Bielefeld | 330 Mio. | 44.000 | „Existiert nicht. Wie Bielefeld.“ | Karte DE (fester Ort) |
+| 9 | Euro-Funknetz | 5,1 Mrd. | 260.000 | „Brüssel hat's genehmigt.“ | Karte Europa |
+| 10 | Satelliten-Schwarm „Gedankenlink“ | 75 Mrd. | 1,6 Mio. | „Jetzt auch mit Funkloch-Garantie.“ | Karte Welt |
+| 11 | Mond-Sendemast | 1 Bio. | 10 Mio. | „Erklärt die Gezeiten.“ | Karte Orbit |
+| 12 | ∞G-Quantenturm | 14 Bio. | 65 Mio. | „Sendet, bevor du denkst.“ | Karte Universum |
+
+- Eine Anlage wird erst sichtbar, wenn insgesamt 30 % ihres Basispreises verdient wurden. Davor erscheint sie als „??? Gesperrt“. Der Kleine Funkmast ist immer sichtbar.
+- Kaufmenge ist umschaltbar: ×1, ×10, ×100, Max.
+
+**Reichweite (Stand Balancing 07.11.2026, zweite Runde):**
+
+| Anlage | Reichweite je Stück | Wirkung |
+|---|---|---|
+| Funkmast | 1.000 | lokal |
+| Tanne | 6.000 | lokal |
+| Kirchturm | 30.000 | lokal |
+| Windrad | 150.000 | lokal |
+| Smart-Toaster | 700.000 | lokal |
+| Chemtrail | 700.000 | landesweit |
+| Reptiloiden | 2 Mio. | landesweit |
+| HAARP | 15 Mio. | landesweit (steht fest in Bielefeld) |
+
+Dazu kommen 5 Reichweiten-Upgrades mit je **+20 %**, insgesamt ×2,49. Vorher waren es drei Upgrades mit ×2, das führte zu Sprüngen von 30 % auf 60 %.
+
+**Regel:** Kein einzelner Kauf soll mehr als ca. 4 Prozentpunkte bringen. Ausnahme: späte Reichweiten-Upgrades (max. ca. 7) und HAARP als bewusstes Highlight.
+
+Simulation (`tests/sim.html`: 3 Klicks/s, Goldene Masten und Aluhüte sofort angeklickt, Masten von Hand mit Einweihungsbonus):
+
+| Zeit | Kontrolle |
+|---|---|
+| 15 Min. | 1 % |
+| 30 Min. | 13 % |
+| 45 Min. | 24 % |
+| 60 Min. | 47 % |
+| 1 Std. 38 Min. | 100 % |
+
+Größter Einzelsprung: +7 Prozentpunkte (Reichweiten-Upgrade 3), Chemtrail-Staffel +1,4.
+
+### 4.4 Die Karte & „Masten platzieren“
+
+**Darstellung:** eine stilisierte SVG-Karte Deutschlands mit den **16 Bundesländern**. Grundlage sind Natural-Earth-Daten (gemeinfrei), vereinfacht mit mapshaper.
+
+**Platzieren:**
+- Nach dem Kauf einer Kartenanlage (#1–7) hat der Spieler „einen Mast in der Hand“. Ein Klick auf die Karte stellt ihn dort auf. Bei lokalen Anlagen (#1–5) entscheidet der Ort über die Wirkung. Bei landesweiten Anlagen (#6–7) ist der Ort nur Optik, das steht auch in der Hand-Anzeige. Die HAARP-Außenstelle (#8) erscheint immer automatisch in Bielefeld.
+- Die Reichweite jeder Anlage steht sichtbar in der Shop-Zeile („Reichweite 400 · im Bundesland“). Abdeckungskreise auf der Karte wachsen logarithmisch mit der Reichweite.
+- Der Tooltip eines Bundeslands zeigt, wie viele Menschen durch Anlagen im Land und wie viele durch landesweite Anlagen erreicht werden.
+- Gegen Klick-Ermüdung gibt es den Schalter **„Auto-Platzieren“**. Er setzt neue Masten automatisch ins schwächste Bundesland. Bei Käufen ×10 und mehr ist er immer aktiv.
+- Jede Anlage hat eine Reichweite *R* (Mast 1, Tanne 3, Kirchturm 20 … in „Bürger-Einheiten“, zum Balancing).
+
+**Einweihungsbonus:** Wer einen Mast von Hand platziert, bekommt `max(5 s Produktion, 3 Impulse)` FP. Das belohnt aktives Spielen. Wer gezielt kleine Länder wie Bremen oder das Saarland füllt, übernimmt außerdem früher das erste Bundesland. Auto-Platzieren verteilt dagegen gleichmäßig.
+
+**Kontrolle pro Bundesland:**
+```
+lokal_BL    = Σ (Anlagen im BL × Reichweite × Reichweiten-Multiplikator)   (Überschuss verfällt)
+Rest_BL     = max(0, Einwohner_BL − lokal_BL)
+national    = Σ (landesweite Anlagen × Reichweite × Multiplikator)
+Füllgrad    = min(1, national / Σ Rest_BL)
+Kontrolle_BL = (min(Einwohner_BL, lokal_BL) + Rest_BL × Füllgrad) / Einwohner_BL
+Kontrollierte Menschen = Σ Einwohner_BL × Kontrolle_BL
+```
+Landesweite Anlagen füllen also die Lücken proportional auf, ohne dass Reichweite verschwendet wird.
+- Die Einfärbung des Bundeslands richtet sich nach dem Kontrollgrad.
+- Bei 100 % gilt das Bundesland als **„übernommen“**: Es gibt eine Bonus-Animation, eine Ticker-Meldung und +5 % FP/s dauerhaft.
+- Jedes Bundesland hat einen eigenen Gag bei der Übernahme (Bayern: „Weißwurst-Frequenz aktiviert“, Saarland: „War eh schon in der Kantine“, Berlin: „Flughafen-Sender fertig, Eröffnung 2047“).
+
+**Einwohner (gerundet, Mio.):** NRW 18,1 · Bayern 13,4 · Baden-Württemberg 11,3 · Niedersachsen 8,1 · Hessen 6,4 · Rheinland-Pfalz 4,2 · Sachsen 4,1 · Berlin 3,9 · Schleswig-Holstein 3,0 · Brandenburg 2,6 · Sachsen-Anhalt 2,2 · Thüringen 2,1 · Hamburg 1,9 · Mecklenburg-Vorpommern 1,6 · Saarland 1,0 · Bremen 0,7 → **≈ 84,6 Mio.** (Zahlen vor dem Release noch einmal mit Destatis abgleichen)
+
+**Bielefeld-Gag:** Bielefeld wird als „? nicht gefunden“ markiert. Die HAARP-Außenstelle (#8) kann nur dort gebaut werden. Danach erscheint Bielefeld, mit Achievement „Es existiert doch!“.
+
+### 4.5 Eskalationsphasen
+
+| Phase | Karte | Bevölkerungsziel | Freischaltung |
+|---|---|---|---|
+| 1 | Deutschland | 84,6 Mio. | Start |
+| 2 | Europa | ≈ 745 Mio. | 100 % Deutschland |
+| 3 | Welt | ≈ 8,1 Mrd. | 100 % Europa |
+| 4 | Orbit & Mond | „Astronauten + Mondkälber“ | 100 % Welt |
+| 5 | Universum | ∞ (Aliens haben auch Handys) | Mond-Sendemast ×1 |
+
+Ein Kartenwechsel per Tab zeigt jeweils nur die aktuelle Ebene. Beim Phasenwechsel läuft eine kurze Zwischensequenz („Die BAfG gratuliert. Ihr Dienstwagen wurde auf Raumschiff hochgestuft.“).
+
+### 4.6 Upgrades
+- Pro Anlage: ×2-Upgrades bei 1 / 5 / 25 / 50 / 100 / 150 / 200 Stück (Cookie-Clicker-Muster). Beispiele: „5G+“, „5G Ultra“, „5G Ultra Max Pro“, „5,5G“, „Aluhut-Durchdringung“.
+- Klick-Upgrades: „Doppelklick-Erlass“, „Dienstfinger aus Titan“.
+- Synergien, z. B. „Kirchturm × Tanne: Weihnachtsgottesdienst-Bonus“.
+- Bundesland-Upgrades nach der Übernahme.
+
+### 4.7 Gegenspieler: Aluhutträger
+- Alle 30–90 s erscheint ein **Aluhutträger** in einem kontrollierten Bundesland. Er tritt erst ab 2.000 kontrollierten Menschen auf, gleichzeitig sind höchstens 1–4 aktiv.
+- Jeder aktive Aluhutträger senkt die gesamte Produktion um 10 % (höchstens −50 %).
+- Ein Klick „überzeugt“ ihn per Gratis-WLAN. Dafür gibt es `max(30 s Produktion, 10 Impulse)` FP, und er zieht ab.
+- **Telegram-Influencer** (umgesetzt): erscheint ab 500 FP/s mit 15 % Wahrscheinlichkeit, braucht 10 Klicks und bringt die 10-fache Belohnung.
+- Geplant: **Aluhut-Demo** (5 Figuren) und **Wünschelruten-Trupp** (wandert über die Karte).
+- Nach 60 s ohne Reaktion verschwindet er von selbst. Es gibt keine dauerhafte Strafe, damit das Spiel idle-tauglich bleibt.
+
+### 4.8 Bonus-Events: der „Goldene Mast“
+Ein goldener Mast erscheint alle 2–5 min an einer zufälligen Stelle und bleibt 13 s sichtbar.
+
+| Effekt | Wirkung | Dauer |
+|---|---|---|
+| Frequenzrausch | FP/s ×7 | 77 s |
+| Glücksfund | +15 % des Guthabens (max. 15 min Produktion) | sofort |
+| Klickwahn | FP pro Klick ×777 | 13 s |
+| Funkloch *(selten, negativ)* | FP/s ×0,5 | 30 s |
+
+### 4.9 Prestige: „Neustart nach Weltherrschaft“
+- Verfügbar ab Phase 3 (Welt 100 %).
+- Der Spieler gibt alles auf und bekommt dafür **Aluhut-Tränen**: `floor(sqrt(Gesamt-FP_jemals / 1e12))`, abzüglich der bereits erhaltenen Tränen.
+- Jede Träne bringt dauerhaft +2 % FP/s.
+- Ein Prestige-Shop mit „Himmlischen Patenten“ bietet z. B. „Masten starten mit 10 Stück“ und „Goldene Masten 10 % häufiger“.
+- Flavor: „Die Menschheit wurde per Software-Update zurückgesetzt.“
+
+### 4.10 News-Ticker
+- Fortlaufende Meldungen, abhängig von Fortschritt und Phase. Zum Start mindestens 80 Texte.
+- Beispiele:
+  - „Telegram-Gruppe ‚Wahrheitsfunk‘ entdeckt Mast in Wanne-Eickel. Aluhut-Absatz +300 %“
+  - „Oma Gisela (84) empfängt jetzt Radio über ihre Plomben“
+  - „Studie: 9 von 10 Tauben sind Drohnen. Die zehnte ist Bundesbeamter.“
+  - „Heilpraktiker verkauft Orgonit gegen Funkwellen. Funkwellen unbeeindruckt.“
+- Gelegentlich steht eine **echte Fakten-Meldung** im Ticker, gekennzeichnet mit „🔍 Geheimakte:“. Sie verlinkt auf die Faktenseite.
+
+### 4.11 Achievements
+Etwa 40 zum Start. Beispiele: „Erster Mast“, „Bielefeld existiert doch!“, „Ganz Bayern hört mit“, „Ein Aluhut weniger“ (100 überzeugt), „Funkloch-Überlebender“, „Das Ende der Welt (und der Anfang des Mondes)“. Jedes Achievement gibt +1 % FP/s.
+
+### 4.12 Speichern & Offline-Fortschritt
+- Gespeichert wird in `localStorage` als versioniertes JSON (`save.version` für Migrationen), automatisch alle 30 s und beim Schließen des Tabs.
+- Export und Import als Text-String (Base64) für Backups und Gerätewechsel.
+- Offline-Fortschritt: 50 % der FP/s, höchstens 12 h. Beim Zurückkommen erscheint ein Dialog: „Während du weg warst, hat die BAfG 4,2 Mio. FP für dich gefunkt.“
+- „Spielstand löschen“ mit doppelter Bestätigung.
+
+### 4.13 Zahlenformat
+- Deutsches Format mit `Intl.NumberFormat('de-DE')`.
+- Große Zahlen: Tsd., Mio., Mrd., Bio., Brd., Trio., Trd., Quadr., … und danach wissenschaftlich (1,23e45).
+- Für die Spielwerte reichen JS-Doubles (max. ≈ 1,8e308).
+
+### 4.14 Teilen
+- Der Button **„Prahlen“** nutzt die Web Share API. Fallback: Text in die Zwischenablage kopieren.
+- Text: *„Ich kontrolliere bereits 12,4 Mio. Deutsche 📡 Wie viele schaffst du? 5gsendemast.de“*
+- Open-Graph-Bild (statisch) für schöne Vorschauen in Messengern.
+
+---
+
+## 5. Bestenliste
+
+**Eintrag:** Der Spieler gibt nur einen Spitznamen ein (3–16 Zeichen, a–z, 0–9, Umlaute, `-` und `_`). Name und Score werden vom Server gespeichert. Es gibt keinen Login und keine E-Mail.
+
+**Gewertet wird:** die Zahl der jemals kontrollierten Bürger beziehungsweise der Gesamt-FP inklusive Prestige (endgültig beim Balancing festlegen).
+
+**API (Cloudflare Pages Functions + D1)**
+
+| Methode | Pfad | Zweck |
+|---|---|---|
+| `GET` | `/api/leaderboard?range=week\|all` | Top 100 |
+| `POST` | `/api/score` | Eintrag oder Update: `{ name, score, phase, playtimeSec, runId }` |
+
+**Datenbank (D1, SQLite)**
+```sql
+CREATE TABLE scores (
+  run_id      TEXT PRIMARY KEY,   -- zufällige ID je Spielstand (im Save)
+  name        TEXT NOT NULL,
+  score       REAL NOT NULL,
+  phase       INTEGER NOT NULL,
+  playtime    INTEGER NOT NULL,
+  ip_hash     TEXT NOT NULL,      -- SHA-256(IP + täglich rotierendes Salt), nie Klar-IP
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL
+);
+CREATE INDEX idx_scores_score ON scores(score DESC);
+```
+
+**Missbrauchsschutz (plausibilisieren statt verhindern)**
+
+Ein reines Browser-Spiel lässt sich nie vollständig gegen Cheats absichern. Das ist bewusst akzeptiert.
+- Der Server prüft die Plausibilität: Ist der Score für diese Spielzeit überhaupt möglich (maximale theoretische Rate)?
+- Rate-Limit: höchstens 1 Submit pro Minute je `ip_hash`.
+- Namensfilter: Schimpfwort- und Blockliste, keine URLs.
+- Admins können Einträge per `wrangler d1 execute` löschen.
+
+---
+
+## 6. Geheimakte (Faktenseite)
+
+**Aufmachung:** Die Seite sieht aus wie ein geleaktes, gestempeltes Dokument mit „STRENG GEHEIM“. Der Witz: Es steht einfach die Wahrheit drin. Jeder Abschnitt hat eine Satire-Überschrift und darunter die nüchterne Erklärung.
+
+**Abschnitte**
+1. **„Was 5G wirklich ist“**: Mobilfunk mit Radiowellen. In Deutschland liegen die Frequenzen u. a. bei 700 MHz, ca. 2 GHz, 3,4–3,7 GHz und 26 GHz. Das sind Wellen wie bei Radio, WLAN und LTE.
+2. **„Warum die Strahlung keine Gedanken liest“**: Die Strahlung ist nicht-ionisierend. Die Energie reicht nicht, um chemische Bindungen oder DNA zu schädigen. Der einzige nachgewiesene biologische Effekt ist geringe Erwärmung.
+3. **„Unsere Grenzwerte (leider)“**: Die Grenzwerte aus der 26. BImSchV und von der ICNIRP (2020) liegen mit großem Sicherheitsabstand unter der Schwelle, ab der eine relevante Erwärmung auftritt.
+4. **„Mehr Masten, weniger Strahlung, verdammt!“**: Das Handy am Ohr trägt am meisten zur eigenen Belastung bei. Mit mehr Masten in der Nähe sendet das Handy mit weniger Leistung.
+5. **„Corona? Nicht unsere Abteilung“**: Viren verbreiten sich nicht über Funk. Es gab auch Corona-Ausbrüche in Regionen ganz ohne 5G.
+6. **„Die toten Vögel von Den Haag“**: Der virale Mythos und was wirklich dahintersteckte (vor der Veröffentlichung recherchieren und belegen).
+7. **„Wo stehen die Masten wirklich?“**: Link zur echten EMF-Datenbank der Bundesnetzagentur.
+8. **„Die Aluhut-Industrie“**: Abschirmprodukte und wer daran verdient.
+
+**Quellen** (vor der Veröffentlichung jede einzeln prüfen und mit Abrufdatum verlinken)
+- Bundesamt für Strahlenschutz (BfS): Themenseiten „5G“ und „Mobilfunk“
+- WHO: Fragen und Antworten zu Radiofrequenzfeldern und 5G
+- ICNIRP Guidelines 2020
+- Bundesnetzagentur: EMF-Datenbank
+- Deutsches Mobilfunk-Forschungsprogramm (DMF)
+
+**Regel:** Für die Faktenseite gilt **null Fantasie**. Jede Aussage braucht eine Quelle.
+
+---
+
+## 7. Mitarbeiterportal der BAfG
+
+Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
+- **Login-Seite (Fake):** Benutzername und Passwort werden **nicht** übertragen und nicht gespeichert. Jede Eingabe führt zu „Zugang gewährt. Wir wussten ohnehin, dass Sie es sind.“ Es gibt **kein echtes Formular**, das irgendwohin sendet.
+- **Stellenangebote:** „Reptiloid (m/w/d) in Teilzeit“, „Chemtrail-Pilot:in mit Lavendel-Erfahrung“, „Sachbearbeiter:in Bielefeld-Leugnung“.
+- **Rundschreiben:** „Dienstanweisung 5G/2026-17: Masten sind ab sofort als Tannen zu tarnen.“
+- **Kantinenplan:** „Montag: Mikrochip-Suppe. Dienstag: Gedankenstrom-Auflauf.“
+- **Organigramm** mit absurden Abteilungen.
+- Mit dem Spiel verknüpft: Achievements schalten Portal-Inhalte frei, z. B. eine „Beförderungsurkunde“ als teilbares Bild.
+
+---
+
+## 8. Rechtliches (Deutschland)
+
+> Das ist keine Rechtsberatung. Bei Unsicherheit einen Anwalt oder einen Generator wie e-recht24 nutzen.
+
+- **Impressum** (§ 5 DDG) mit Platzhaltern für Name, Anschrift und E-Mail.
+- **Datenschutzerklärung:**
+  - Hosting bei Cloudflare (Verarbeitung der IP-Adresse beim Seitenaufruf, Auftragsverarbeitung)
+  - Bestenliste: Spitzname, Score und gehashte IP, mit Zweck, Speicherdauer und Rechtsgrundlage
+  - `localStorage` nur für Spielstand und Einstellungen. Das ist technisch notwendig und vom Nutzer gewünscht (§ 25 Abs. 2 TDDDG), deshalb ist **kein Cookie-Banner** nötig.
+- **Keine externen Ressourcen:** Schriften (VT323, IBM Plex Mono bzw. Bangers, Nunito) werden **selbst gehostet**, kein Google-Fonts-CDN (DSGVO, vgl. LG München 2022). Es gibt kein Analytics und keine externen Skripte.
+- **Satire-Kennzeichnung** auf allen Seiten, keine fremden Marken oder Logos.
+- **Schriftlizenzen:** Alle genannten Fonts stehen unter der SIL Open Font License. Die Lizenztexte werden mit ausgeliefert.
+
+---
+
+## 9. Visuelles Design
+
+**Mockups beider Stile:** https://claude.ai/artifact/RjhqHpwmQNhnUzk9bDgqLo
+
+| | Stil A: Geheimbehörde-Terminal | Stil B: Bunter Comic |
+|---|---|---|
+| Hintergrund | #070B08, Raster und Scanlines | #FFF1C9 mit Halbton-Punkten |
+| Primär | Phosphorgrün #3DFF8A | Rot #C62E22, Blau #2F6FE4, Gelb #FFC93C |
+| Warnung | Bernstein #FFB02E | Gelb und schwarzer Rand |
+| Schrift | VT323 (Zahlen, Titel), IBM Plex Mono | Bangers (Titel), Nunito (Text) |
+| Formen | 1px-Linien, eckig, Glow | 3px schwarze Konturen, runde Ecken, Offset-Schatten |
+| Wirkung | „Wir sind die Verschwörung“ | Lustig, zugänglich, teilbar |
+
+**→ Entschieden: Stil A (Geheimbehörde-Terminal)** gilt für alle Seiten. Die Geheimakte darf als „gescanntes Dokument“ heller sein (Papier, Stempel), bleibt aber im Behörden-Look.
+
+**Layout Hauptbildschirm (Desktop ≥ 1024 px):**
+- Header: Logo, Bürger-Zähler, FP/s, Navigation
+- Links (ca. 60 %): Karte mit Abdeckungsbalken und Impuls-Button
+- Rechts (ca. 40 %): Shop mit den Tabs Anlagen, Upgrades und Prestige
+- Unten: News-Ticker
+
+**Mobil (< 1024 px):** Header kompakt mit Zähler, darunter die Karte im Vollbild. Der Shop ist ein ausklappbares Bottom-Sheet, der Ticker sitzt über der Bottom-Navigation.
+
+**Barrierefreiheit**
+- Echte `<button>`-Elemente, vollständig per Tastatur bedienbar (Leertaste = Impuls)
+- Kontrast mindestens 4,5:1
+- `prefers-reduced-motion` schaltet Flackern, Scanlines und Wackeln ab
+- Zahlenänderungen werden nicht per Screenreader-Spam angesagt (`aria-live` gedrosselt)
+
+---
+
+## 10. Technik
+
+**Stack:** reines HTML, CSS und JavaScript mit ES-Modulen. Kein Framework und kein Build-Schritt nötig.
+
+**Ordnerstruktur**
+```
+/
+├── index.html                 # Spiel
+├── geheimakte/index.html
+├── portal/index.html
+├── bestenliste/index.html
+├── impressum/index.html
+├── datenschutz/index.html
+├── assets/
+│   ├── css/                   # base.css, game.css, pages.css
+│   ├── fonts/                 # selbst gehostet + OFL-Lizenzen
+│   ├── img/                   # og-image, Icons (SVG)
+│   └── js/
+│       ├── main.js            # Einstieg, Game-Loop
+│       ├── state.js           # Spielzustand, Save/Load, Migration
+│       ├── data/              # buildings.js, upgrades.js, news.js, achievements.js, states.js (Bundesländer)
+│       ├── systems/           # economy.js, map.js, events.js, prestige.js, offline.js
+│       ├── ui/                # render.js, shop.js, ticker.js, dialogs.js
+│       └── util/format.js     # Zahlenformat
+├── functions/api/             # Cloudflare Pages Functions
+│   ├── leaderboard.js
+│   └── score.js
+├── migrations/0001_init.sql   # D1-Schema
+├── tools/                     # Skripte (z. B. Karten-Vereinfachung)
+├── wrangler.toml
+├── DESIGN.md
+└── README.md
+```
+
+**Game-Loop**
+- Die Logik läuft in festen Ticks mit 10 Hz (`setInterval`).
+- Gerendert wird per `requestAnimationFrame`, und nur geänderte DOM-Teile werden aktualisiert.
+- Bei verstecktem Tab läuft keine Darstellung. Der Fortschritt wird per Zeitdifferenz nachgerechnet.
+
+**Daten statt Code:** Anlagen, Upgrades, News und Achievements sind reine Datenlisten. Das erleichtert Balancing und neue Gags.
+
+**Tests:** Die Kernformeln (Kosten, Produktion, Kontrolle, Offline, Prestige) bekommen kleine Unit-Tests ohne Abhängigkeiten. Dazu kommt ein Balancing-Skript, das einen Durchlauf simuliert, um die Zeit bis zur jeweiligen Phase zu prüfen.
+
+**Balancing-Ziele (Richtwerte)**
+- Erste Anlage nach ca. 15 s, erstes übernommenes Bundesland nach ca. 5 min
+- Deutschland zu 100 % nach ca. 1–2 h aktivem Spiel
+- Erster Prestige nach ca. 1–2 Tagen (inklusive Idle-Zeit)
+
+**Performance:** Startseite unter 300 KB (ohne Fonts), Lighthouse ≥ 90.
+
+---
+
+## 11. Hosting & Deployment
+
+1. **GitHub:** privates oder öffentliches Repository, Push auf `main`
+2. **Cloudflare Pages:** mit dem GitHub-Repo verbinden. Build-Befehl: keiner. Ausgabeordner: `/`. Jeder Push deployt automatisch, Branches erhalten Preview-URLs.
+3. **D1:** Datenbank `sendemast-db` anlegen, Migration ausführen und in den Pages-Einstellungen binden (`DB`)
+4. **Domain:** `5gsendemast.de` in Cloudflare als Zone hinzufügen und **die Nameserver bei CheckDomain** auf die beiden Cloudflare-Nameserver umstellen
+5. In Pages die Custom Domains `5gsendemast.de` und `www.5gsendemast.de` hinzufügen, mit Weiterleitung von www auf die Hauptdomain
+6. HTTPS (automatisch) prüfen und „Always Use HTTPS“ aktivieren
+7. Vorhandene DNS-Einträge (z. B. E-Mail/MX bei CheckDomain) **vor** dem Nameserver-Wechsel in Cloudflare übernehmen
+
+---
+
+## 12. Meilensteine
+
+| # | Meilenstein | Ergebnis |
+|---|---|---|
+| M0 ✅ | Konzept | Dieses Dokument, Mockups, Stil-Entscheidung |
+| M1 ✅ | Spielkern | Klicken, Anlagen 1–8, Speichern, Zahlenformat, Ticker (statische Karte) |
+| M2 ✅ | Karte | Bundesländer-SVG, Masten platzieren, Kontrolle, Übernahme-Effekte |
+| M3 ✅ (Basis) | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Offen: Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades, mehr News |
+| M4 | Eskalation | Phasen 2–5, Prestige |
+| M5 | Seiten | Geheimakte, Portal, Impressum, Datenschutz |
+| M6 | Online | Bestenliste (Functions + D1), Teilen, OG-Bild |
+| M7 | Launch | Hosting, Domain, Balancing-Feinschliff, Mobile-Test |
+
+---
+
+## 13. Offene Entscheidungen
+
+- [x] **Artstil:** A – Geheimbehörde-Terminal (entschieden 07.11.2026)
+- [ ] Endgültiger Spielname („Projekt Sendemast“?)
+- [x] Score-Basis der Bestenliste: **kontrollierte Menschen** (höchster je erreichter Wert, über Prestige hinweg kumuliert)
+- [x] Repository: **öffentlich**
+- [x] E-Mail läuft über die Domain bei CheckDomain → MX/TXT-Einträge beim DNS-Umzug (M7) unbedingt übernehmen

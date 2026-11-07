@@ -1,0 +1,95 @@
+// Spielstand: anlegen, speichern, laden, exportieren.
+export const SAVE_KEY = 'sendemast.save';
+export const SAVE_VERSION = 1;
+
+function randomId() {
+  const a = new Uint8Array(12);
+  (globalThis.crypto || {}).getRandomValues?.(a);
+  return Array.from(a, (x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+export function newState(now = Date.now()) {
+  return {
+    version: SAVE_VERSION,
+    runId: randomId(),
+    startedAt: now,
+    lastTick: now,
+    playtime: 0,
+    fp: 0,          // aktuelles Guthaben
+    fpRun: 0,       // in diesem Durchlauf verdient
+    fpAll: 0,       // insgesamt verdient (über Prestige hinweg)
+    clicks: 0,
+    clickFp: 0,
+    owned: {},      // { mast: 12, ... }
+    placed: {},     // { mast: { BY: 3, NW: 9 } } – nur lokale Anlagen
+    hand: [],       // gekaufte, noch nicht platzierte Anlagen
+    markers: [],    // { b, s, x, y } – nur für die Darstellung
+    manualPlaced: 0,
+    upgrades: [],
+    achievements: [],
+    taken: [],      // übernommene Bundesländer
+    bestControlled: 0,
+    aluhutConverted: 0,
+    goldenClicked: 0,
+    funklochSeen: 0,
+    offlineReturns: 0,
+    buffs: [],      // { id, until, mult?, clickMult? }
+    germanyDone: false,
+    introSeen: false,
+    settings: { autoPlace: false, buyAmount: 1 },
+    nickname: '',
+  };
+}
+
+/** Füllt fehlende Felder auf und migriert alte Versionen. */
+export function normalize(raw, now = Date.now()) {
+  if (!raw || typeof raw !== 'object') throw new Error('Kein gültiger Spielstand');
+  const base = newState(now);
+  const s = { ...base, ...raw, settings: { ...base.settings, ...(raw.settings || {}) } };
+  for (const key of ['owned', 'placed']) if (typeof s[key] !== 'object' || !s[key]) s[key] = {};
+  for (const key of ['hand', 'markers', 'upgrades', 'achievements', 'taken', 'buffs']) if (!Array.isArray(s[key])) s[key] = [];
+  for (const key of ['fp', 'fpRun', 'fpAll', 'clicks', 'playtime', 'lastTick']) if (!Number.isFinite(s[key])) s[key] = base[key];
+  s.version = SAVE_VERSION;
+  return s;
+}
+
+export function serialize(s) {
+  return JSON.stringify(s);
+}
+
+export function saveState(s, storage = globalThis.localStorage) {
+  try {
+    storage.setItem(SAVE_KEY, serialize(s));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function loadState(storage = globalThis.localStorage) {
+  try {
+    const txt = storage.getItem(SAVE_KEY);
+    return txt ? normalize(JSON.parse(txt)) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearState(storage = globalThis.localStorage) {
+  try { storage.removeItem(SAVE_KEY); } catch { /* egal */ }
+}
+
+// Export als Base64 (UTF-8-sicher)
+export function exportState(s) {
+  const bytes = new TextEncoder().encode(serialize(s));
+  let bin = '';
+  bytes.forEach((b) => { bin += String.fromCharCode(b); });
+  return 'BAfG1:' + btoa(bin);
+}
+
+export function importState(text) {
+  const t = String(text).trim().replace(/^BAfG1:/, '');
+  const bin = atob(t);
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return normalize(JSON.parse(new TextDecoder().decode(bytes)));
+}

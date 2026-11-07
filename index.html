@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Projekt Sendemast – 5gsendemast.de</title>
+<meta name="description" content="Satire-Idle-Game: Stelle 5G-Sendemasten auf und „kontrolliere“ Deutschland. Keine Sorge – 5G ist harmlos. Die Geheimakte erklärt, warum.">
+<meta name="theme-color" content="#070b08">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Projekt Sendemast – Kontrolliere Deutschland mit 5G">
+<meta property="og:description" content="Das Idle-Game der Bundesanstalt für Gedankenfunk. Satire. 5G ist harmlos.">
+<meta property="og:url" content="https://5gsendemast.de/">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/vt323-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/game.css">
+<script type="module" src="/assets/js/main.js"></script>
+</head>
+<body class="game">
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Projekt Sendemast – Startseite">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 10 L7 22 M12 10 L17 22 M8.5 18 H15.5 M9.7 15 H14.3"/><circle cx="12" cy="8" r="1.6"/><path d="M8.5 4.5 a5 5 0 0 0 0 7 M15.5 4.5 a5 5 0 0 1 0 7 M5.8 2 a8.5 8.5 0 0 0 0 12 M18.2 2 a8.5 8.5 0 0 1 0 12"/></svg>
+      <span class="brand-text">
+        <span class="brand-title">PROJEKT SENDEMAST</span>
+        <span class="brand-sub">BUNDESANSTALT FÜR GEDANKENFUNK // VERSCHLUSSSACHE</span>
+      </span>
+    </a>
+    <div class="counter">
+      <div class="counter-main">
+        <span class="counter-label">KONTROLLIERTE MENSCHEN</span>
+        <output id="controlled" class="counter-value">0</output>
+      </div>
+      <div class="counter-side">
+        <div><b id="fp">0</b> FP</div>
+        <div><span id="cps">0</span> FP/Sek.</div>
+        <div class="dim"><span id="perclick">1</span> pro Impuls</div>
+      </div>
+    </div>
+    <nav class="topnav" aria-label="Hauptnavigation">
+      <a class="btn" href="/geheimakte/">[ GEHEIMAKTE ]</a>
+      <a class="btn" href="/bestenliste/">[ BESTENLISTE ]</a>
+      <a class="btn" href="/portal/">[ PORTAL ]</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="map-panel" aria-labelledby="map-title">
+      <div class="panel-head">
+        <h1 id="map-title">&gt; LAGEKARTE DEUTSCHLAND</h1>
+        <div class="coverage">
+          <span class="dim">ABDECKUNG</span>
+          <span class="bar" aria-hidden="true"><span id="coverage-fill"></span></span>
+          <span id="coverage-pct">0 %</span>
+        </div>
+      </div>
+      <div class="map-area"><div class="map-frame" id="map-frame"></div></div>
+      <div class="map-foot">
+        <div id="hand-info" class="hand-info" aria-live="polite"></div>
+        <button id="pulse-btn" class="btn btn-primary" type="button">&gt;&gt; STRAHLUNGSIMPULS SENDEN</button>
+      </div>
+      <div id="buffs" class="buffs" aria-live="polite"></div>
+    </section>
+
+    <aside class="shop-panel" aria-label="Beschaffung">
+      <div class="tabs" role="tablist">
+        <button class="tab" type="button" role="tab" id="t-anlagen" aria-controls="tab-anlagen" aria-selected="true">ANLAGEN</button>
+        <button class="tab" type="button" role="tab" id="t-erfolge" aria-controls="tab-erfolge" aria-selected="false" tabindex="-1">ERFOLGE</button>
+        <button class="tab" type="button" role="tab" id="t-akte" aria-controls="tab-akte" aria-selected="false" tabindex="-1">OPTIONEN</button>
+        <button class="tab" type="button" role="tab" id="t-prestige" aria-controls="tab-prestige" aria-selected="false" tabindex="-1">PRESTIGE</button>
+      </div>
+
+      <div class="tabpanel" id="tab-anlagen" role="tabpanel" aria-labelledby="t-anlagen">
+        <div class="upgrades-block">
+          <div class="section-label">VERFÜGBARE UPGRADES</div>
+          <div id="upgrades" class="upgrade-grid"></div>
+        </div>
+        <div class="buy-bar">
+          <div class="amounts"><span class="dim">MENGE</span><span id="amounts" class="amounts"></span></div>
+          <label class="toggle"><input type="checkbox" id="autoplace"> AUTO-PLATZIEREN</label>
+        </div>
+        <div id="buildings" class="building-list"></div>
+      </div>
+
+      <div class="tabpanel" id="tab-erfolge" role="tabpanel" aria-labelledby="t-erfolge" hidden>
+        <div class="panel-pad" id="achievements"></div>
+      </div>
+
+      <div class="tabpanel" id="tab-akte" role="tabpanel" aria-labelledby="t-akte" hidden>
+        <div class="panel-pad">
+          <div class="section-label">PERSONALAKTE // STATISTIK</div>
+          <dl class="stats" id="stats"></dl>
+          <div class="section-label">SPIELSTAND</div>
+          <div class="btn-row">
+            <button class="btn" type="button" id="btn-save">Speichern</button>
+            <button class="btn" type="button" id="btn-export">Exportieren</button>
+            <button class="btn" type="button" id="btn-import">Importieren</button>
+            <button class="btn" type="button" id="btn-share">Prahlen</button>
+          </div>
+          <p class="dim" style="margin:0;font-size:12px">Automatisches Speichern alle 30 Sekunden – nur in deinem Browser (localStorage). Keine Cookies, kein Tracking.</p>
+          <div class="btn-row"><button class="btn btn-danger" type="button" id="btn-reset">Neuer Einsatz (Spielstand löschen)</button></div>
+        </div>
+      </div>
+
+      <div class="tabpanel" id="tab-prestige" role="tabpanel" aria-labelledby="t-prestige" hidden>
+        <div class="panel-pad">
+          <div class="section-label">EINSATZPHASEN</div>
+          <div id="phases"></div>
+          <p class="dim" style="margin:0;font-size:12.5px">PRESTIGE: ZUGANG VERWEIGERT. Freigabe nach Erreichen der Weltherrschaft (Phase 3). Dann: Neustart gegen „Aluhut-Tränen“ – dauerhaft +2 % FP/Sek. je Träne.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="ticker" role="region" aria-label="Nachrichtenticker">
+    <div class="ticker-label">EILMELDUNG</div>
+    <div class="ticker-track"><a id="ticker-text" class="ticker-text" href="#" tabindex="-1"></a></div>
+  </div>
+
+  <footer class="legal-bar">
+    <span><strong>Satire.</strong> Die Bundesanstalt für Gedankenfunk existiert nicht. 5G ist nach aktuellem Stand der Wissenschaft unbedenklich → <a href="/geheimakte/">Geheimakte</a></span>
+    <a href="/impressum/">Impressum</a>
+    <a href="/datenschutz/">Datenschutz</a>
+  </footer>
+</div>
+
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<dialog id="dialog" class="dialog">
+  <form method="dialog">
+    <h2 id="dialog-title"></h2>
+    <div id="dialog-body" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="dialog-actions" class="dialog-actions"></div>
+  </form>
+</dialog>
+<div class="scanlines" aria-hidden="true"></div>
+<noscript><p style="padding:20px">Die BAfG benötigt JavaScript, um Ihre Gedanken zu empfangen.</p></noscript>
+</body>
+</html>

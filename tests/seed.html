@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>Seed – Testspielstand</title><link rel="stylesheet" href="/assets/css/base.css"><link rel="stylesheet" href="/assets/css/game.css"></head>
+<body>
+<p>Erzeugt einen Test-Spielstand mit Fortschritt und leitet zum Spiel weiter. Parameter: <code>?level=1|2|3</code></p>
+<div style="width:583px;height:790px;position:relative"><div class="map-frame" id="f" style="height:790px"></div></div>
+<script type="module">
+import { MapView } from '/assets/js/ui/map.js';
+import { Game } from '/assets/js/core/game.js';
+import { newState, saveState } from '/assets/js/core/state.js';
+const level = Number(new URLSearchParams(location.search).get('level') || 2);
+const map = new MapView(document.getElementById('f'), document.createElement('div'));
+const s = newState(); s.introSeen = true;
+const g = new Game(s, { pointIn: (c) => map.randomPoint(c) });
+const plan = { 1: { mast: 12, tanne: 6 }, 2: { mast: 35, tanne: 25, kirche: 18, windrad: 8, toaster: 2 }, 3: { mast: 45, tanne: 40, kirche: 35, windrad: 30, toaster: 22, chemtrail: 10, reptil: 2 } }[level];
+s.fp = 1e15; s.settings.autoPlace = true;
+for (const [id, n] of Object.entries(plan)) g.buy(id, n);
+s.settings.autoPlace = false;
+for (let i = 0; i < 30 * level; i++) g.click(0, 0);
+s.clicks = 400 * level; s.fp = [0, 900, 2.5e5, 4e7][level]; s.fpAll = [0, 2000, 3e6, 9e8][level];
+g.tick(); g.checkAchievements();
+const extra = new URLSearchParams(location.search).get('hand');
+if (extra) { s.fp += 1e7; g.buy(extra); } else g.buy('mast');
+saveState(s);
+location.href = '/';
+</script>
+</body>
+</html>
