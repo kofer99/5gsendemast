@@ -9,6 +9,11 @@
 
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
+> **▶ HIER GEHT'S WEITER (nächste Sitzung):**
+> 1. Du: Geheimakte gegen die Quellen prüfen und Phasen 2–5 per `/tests/seed.html?phase=N` anspielen (Spielstand vorher exportieren). Rückmeldungen hier unter „Offen“ notieren.
+> 2. Danach entscheiden, welcher der „Nächsten Schritte“ unten als Erstes kommt. Vorschlag: zuerst den Rest von M3 (Aluhut-Demo, Wünschelruten-Trupp, Synergie-Upgrades), weil das Spiel dann inhaltlich rund ist, danach Portal und Bestenliste.
+> 3. Kleinere offene Technikpunkte: zweiten Durchlauf nach Prestige simulieren (`tests/sim.js` erweitern); einzelne Käufe verschieben in späten Phasen die Kontrolle um bis zu 10–19 Prozentpunkte (bewusst so gelassen).
+
 ### ❗ Offen (Stand 08.11.2026)
 - [ ] **Geheimakte komplett durchlesen** (`/geheimakte/`). Inhalt und Ton prüfen und jede Aussage gegen die verlinkte Quelle gegenlesen. Erst danach geht die Seite online. Auffälligkeiten direkt hier notieren.
   - Besonders prüfen: Akte 03 (Grenzwerte: 4 W/kg, Faktor 50, 0,08 W/kg – im ICNIRP-PDF selbst nicht maschinell gelesen, nur über Sekundärquellen abgeglichen), Akte 05 (Krebs/IARC), Akte 08 (Elektrosensibilität – Ton).
