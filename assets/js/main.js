@@ -1,10 +1,10 @@
 // Einstieg: Spielstand laden, Oberfläche verdrahten, Schleifen starten.
 import { Game } from './core/game.js';
 import { newState, loadState, saveState, clearState, exportState, importState } from './core/state.js';
+import * as eco from './core/economy.js';
 import { MapView } from './ui/map.js';
 import { Shop } from './ui/shop.js';
-import { Hud, Ticker, toast, dialog, setupTabs, renderAchievements, renderStats } from './ui/hud.js';
-import { MAP_DE } from './data/map-de.js';
+import { Hud, Ticker, toast, dialog, setupTabs, renderAchievements, renderStats, renderPrestige } from './ui/hud.js';
 import { fmt, fmtInt, fmtDuration } from './util/format.js';
 
 const $ = (id) => document.getElementById(id);
@@ -12,7 +12,7 @@ const TICK_MS = 100;
 const AUTOSAVE_MS = 30_000;
 
 const tooltip = $('tooltip');
-const map = new MapView($('map-frame'), tooltip);
+const map = new MapView($('map-frame'), tooltip, { tabs: $('map-tabs'), title: $('map-title') });
 const state = loadState() || newState();
 const game = new Game(state, { pointIn: (code) => map.randomPoint(code) });
 map.attach(game);
@@ -25,7 +25,12 @@ let activeTab = 'tab-anlagen';
 setupTabs((id) => { activeTab = id; renderPanels(true); });
 
 // ---------- Ereignisse → Meldungen ----------
-game.on('takeover', (st) => toast(`${st.name.toUpperCase()} ÜBERNOMMEN`, `${st.gag} +5 % FP/Sek.`));
+game.on('takeover', (r) => {
+  const pct = Math.round(r.phase.takeBonus * game.d.mods.takeMult * 100);
+  toast(`${r.name.toUpperCase()} ÜBERNOMMEN`, `${r.gag} +${pct} % FP/Sek.`);
+});
+game.on('hand', (hand) => { if (hand.length && map.view !== game.s.phase) map.setView(game.s.phase); });
+game.on('patent', (p) => { toast('PATENT ERTEILT: ' + p.name.toUpperCase(), p.desc); save(); });
 game.on('achievement', (a) => toast('ERFOLG: ' + a.name, a.desc + ' (+1 % FP/Sek.)'));
 game.on('golden', (g) => {
   if (g.id === 'fund') toast(g.title, `+${fmt(g.amount)} FP gefunden.`, 'warn');
@@ -36,24 +41,70 @@ game.on('aluhutSpawn', (a) => {
 });
 game.on('upgrade', () => renderPanels(true));
 game.on('offline', ({ seconds, gain }) => toast('WILLKOMMEN ZURÜCK', `Die BAfG hat in ${fmtDuration(seconds)} ${fmt(gain)} FP für dich gefunkt.`));
-game.on('germany', async () => {
+// Zwischensequenzen beim Phasenwechsel (DESIGN.md §4.5)
+const CUTSCENES = {
+  2: {
+    title: 'DEUTSCHLAND KONTROLLIERT',
+    body: (d, from) => [
+      `Alle ${fmtInt(from.total)} Menschen in allen 16 Bundesländern empfangen jetzt Ihre Gedanken. Die BAfG gratuliert und hat Ihren Dienstwagen auf einen Reisebus mit Dachantenne hochgestuft.`,
+      'NÄCHSTES ZIEL: EUROPA. Ihre Chemtrail-Staffeln, Rechenzentren und die HAARP-Außenstelle wirken ab sofort europaweit. Neue Anlage freigegeben: Euro-Funknetz.',
+      'Dienstlicher Tipp: Zwergstaaten wie der Vatikan oder Monaco sind mit wenigen Masten übernommen. Jedes Land bringt +2 % FP/Sek.',
+    ],
+  },
+  3: {
+    title: 'EUROPA KONTROLLIERT',
+    body: () => [
+      'Brüssel hat genehmigt. Rückwirkend. Ihr Dienstwagen ist jetzt ein Linienflugzeug mit Lavendelduft.',
+      'NÄCHSTES ZIEL: DIE WELT. 17 Weltregionen, 7,7 Mrd. Menschen. Neue Anlage freigegeben: Satelliten-Schwarm „Gedankenlink“.',
+    ],
+  },
+  4: {
+    title: 'WELTHERRSCHAFT ERREICHT',
+    body: () => [
+      'Die Welt gehört der BAfG. Ihr Dienstwagen wurde auf ein Raumschiff hochgestuft (Tankkarte liegt im Handschuhfach).',
+      'NÄCHSTES ZIEL: ORBIT & MOND. Neue Anlage freigegeben: Mond-Sendemast.',
+      'NEU: PRESTIGE. Unter „Prestige“ können Sie jetzt neu anfangen und bekommen dafür Aluhut-Tränen – dauerhaft +2 % FP/Sek. je Träne. Sie können aber auch einfach weiterfunken.',
+    ],
+  },
+  5: {
+    title: 'ORBIT & MOND KONTROLLIERT',
+    body: () => [
+      'Die Mondkälber muhen im Takt, die Marsmännchen grüßen. Ihr Raumschiff hat jetzt Warp-Antrieb.',
+      'NÄCHSTES ZIEL: DAS UNIVERSUM. Aliens haben auch Handys. Neue Anlage freigegeben: ∞G-Quantenturm.',
+    ],
+  },
+};
+game.on('phase', async ({ from, to }) => {
+  save();
+  const c = CUTSCENES[to.id];
+  if (!c) return;
+  const r = await dialog({
+    title: c.title,
+    body: c.body(game.d, from),
+    actions: [{ label: 'Prahlen', value: 'share' }, { label: `Weiter: ${to.name}`, value: 'ok', primary: true }],
+  });
+  if (r === 'share') share(from);
+});
+game.on('universe', async () => {
   save();
   const r = await dialog({
-    title: 'DEUTSCHLAND KONTROLLIERT',
+    title: 'UNIVERSUM KONTROLLIERT',
     body: [
-      `Alle ${fmtInt(game.d.controlled)} Menschen in allen 16 Bundesländern empfangen jetzt Ihre Gedanken. Die BAfG gratuliert und hat Ihren Dienstwagen auf ein Raumschiff hochgestuft.`,
-      'Phase 2 (Europa) befindet sich noch im Genehmigungsverfahren und folgt in einem späteren Update. Bis dahin: weiter funken, Upgrades sammeln, Bielefeld finden.',
+      `${fmt(game.d.controlled)} Lebewesen in allen Galaxien empfangen Ihre Gedanken. Es gibt nichts mehr zu kontrollieren. Die BAfG ist sprachlos (und das ist neu).`,
+      'Was bleibt? Ein Neustart unter „Prestige“ – mit vielen Aluhut-Tränen. Oder einfach weiterfunken und die Funkpunkte zählen.',
+      'Hinweis der Redaktion: 5G kann übrigens immer noch keine Gedanken lesen. Warum, steht in der Geheimakte.',
     ],
-    actions: [{ label: 'Neuer Einsatz', value: 'restart' }, { label: 'Prahlen', value: 'share' }, { label: 'Weiterfunken', value: 'ok', primary: true }],
+    actions: [{ label: 'Geheimakte', value: 'akte' }, { label: 'Prahlen', value: 'share' }, { label: 'Weiterfunken', value: 'ok', primary: true }],
   });
   if (r === 'share') share();
-  if (r === 'restart') confirmRestart();
+  if (r === 'akte') location.href = '/geheimakte/';
 });
+game.on('prestige', () => { save(); replaceSaveAndReload(game.s); });
 
 // ---------- Bedienung ----------
 function pulseRandom() {
-  const c = MAP_DE.cities[Math.floor(Math.random() * MAP_DE.cities.length)];
-  game.click(c.x + (Math.random() - 0.5) * 30, c.y + (Math.random() - 0.5) * 30);
+  const pt = map.randomViewPoint();
+  game.click(pt.x, pt.y);
 }
 $('pulse-btn').addEventListener('click', pulseRandom);
 document.addEventListener('keydown', (e) => {
@@ -77,11 +128,15 @@ function save(silent = true) {
   if (!silent) toast(ok ? 'GESPEICHERT' : 'SPEICHERN FEHLGESCHLAGEN', ok ? 'Akte im Browser hinterlegt.' : 'Der Browser blockiert localStorage.', ok ? '' : 'warn');
 }
 
-function shareText() {
-  return `Ich kontrolliere bereits ${fmt(game.d.controlled)} Menschen in Deutschland 📡 Wie viele schaffst du? 5gsendemast.de (Satire – 5G ist harmlos)`;
+function shareText(done) {
+  if (done) return `Ich habe ${done.name} komplett unter Funkkontrolle 📡 Schaffst du das auch? 5gsendemast.de (Satire – 5G ist harmlos)`;
+  const { phase, controlled } = game.d;
+  if (game.s.universeDone) return `Ich kontrolliere das gesamte Universum 📡 ${fmt(controlled)} Lebewesen. Und du? 5gsendemast.de (Satire – 5G ist harmlos)`;
+  const where = { 1: 'in Deutschland', 2: 'in Europa', 3: 'auf der Welt', 4: 'zwischen Erde und Mars', 5: 'im Universum' }[phase.id];
+  return `Ich kontrolliere bereits ${fmt(controlled)} ${phase.beings} ${where} 📡 Wie viele schaffst du? 5gsendemast.de (Satire – 5G ist harmlos)`;
 }
-async function share() {
-  const text = shareText();
+async function share(done) {
+  const text = shareText(done);
   try {
     if (navigator.share) { await navigator.share({ title: 'Projekt Sendemast', text, url: 'https://5gsendemast.de/' }); return; }
     await navigator.clipboard.writeText(text);
@@ -92,7 +147,7 @@ async function share() {
 }
 
 $('btn-save').addEventListener('click', () => save(false));
-$('btn-share').addEventListener('click', share);
+$('btn-share').addEventListener('click', () => share());
 $('btn-export').addEventListener('click', () => {
   save();
   const ta = document.createElement('textarea');
@@ -136,25 +191,26 @@ async function confirmRestart() {
 $('btn-reset').addEventListener('click', confirmRestart);
 
 // ---------- Panels ----------
-function renderPhases() {
-  const el = $('phases');
-  const done = game.s.germanyDone;
-  const rows = [
-    ['PHASE 1', 'Deutschland', done ? 'ERLEDIGT' : `${game.s.taken.length}/16 Länder`, done ? '' : 'active'],
-    ['PHASE 2', 'Europa', 'IN PLANUNG', done ? 'active' : 'locked'],
-    ['PHASE 3', 'Welt', 'GESPERRT', 'locked'],
-    ['PHASE 4', 'Orbit & Mond', 'GESPERRT', 'locked'],
-    ['PHASE 5', 'Universum', 'GESPERRT', 'locked'],
-  ];
-  const html = rows.map(([a, b, c, cls]) => `<div class="phase ${cls}"><span>${a}</span><span>${b}</span><span>${c}</span></div>`).join('');
-  if (el.innerHTML !== html) el.innerHTML = html;
+async function confirmPrestige() {
+  const n = eco.pendingTears(game.s);
+  const r = await dialog({
+    title: 'NEUSTART NACH WELTHERRSCHAFT?',
+    body: [
+      `Sie erhalten ${fmtInt(n)} Aluhut-Tränen (dauerhaft +${fmtInt(n * eco.TEAR_BONUS * 100)} % FP/Sek.).`,
+      'Masten, Upgrades, Funkpunkte und alle Phasen werden zurückgesetzt. Erfolge, Tränen, Patente und Statistik bleiben.',
+      '„Die Menschheit wurde per Software-Update zurückgesetzt. Bitte starten Sie Ihre Gedanken neu.“',
+    ],
+    actions: [{ label: 'Abbrechen', value: 'cancel', primary: true }, { label: 'Neustart durchführen', value: 'yes', danger: true }],
+  });
+  if (r === 'yes') game.prestige();
 }
 
 function renderPanels(force = false) {
   if (activeTab === 'tab-erfolge') renderAchievements($('achievements'), game.s);
   if (activeTab === 'tab-akte' || force) renderStats($('stats'), game);
-  if (activeTab === 'tab-prestige') renderPhases();
+  if (activeTab === 'tab-prestige' || force) renderPrestige($('prestige'), game, { onPrestige: confirmPrestige });
 }
+game.on('patent', () => renderPanels(true));
 
 // ---------- Schleifen ----------
 const offline = game.applyOffline();

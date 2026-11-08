@@ -30,6 +30,7 @@ for (const b of BUILDINGS) {
 }
 
 const fp = (n) => (s) => s.fpAll >= n;
+const phaseCtrl = (phase, n) => (s, d) => s.phase > phase || (s.phase === phase && d.controlled >= n);
 
 UPGRADES.push(
   // Klick
@@ -52,6 +53,20 @@ UPGRADES.push(
   { id: 'reach_3', name: 'Gedanken-Repeater',        short: 'R+', desc: 'Reichweite aller Anlagen +20 %.', flavor: 'Wiederholt jeden Gedanken. Wiederholt jeden Gedanken.', cost: 1e7, effect: { type: 'reach', mult: 1.2 }, unlock: (s, d) => d.controlled >= 8e6 },
   { id: 'reach_4', name: 'Aluhut-Resonanz',          short: 'R+', desc: 'Reichweite aller Anlagen +20 %.', flavor: 'Alufolie leitet hervorragend. Danke für die Zusatzantenne!', cost: 2e8, effect: { type: 'reach', mult: 1.2 }, unlock: (s, d) => d.controlled >= 2.5e7 },
   { id: 'reach_5', name: 'Quanten-Sendeleistung',    short: 'R+', desc: 'Reichweite aller Anlagen +20 %.', flavor: 'Sendet gleichzeitig überall und nirgends.', cost: 4e9, effect: { type: 'reach', mult: 1.2 }, unlock: (s, d) => d.controlled >= 5e7 },
+
+  { id: 'global_5', name: 'EU-Harmonisierung der Gedanken', short: '+15%', desc: 'Alle FP/Sek. +15 %.', flavor: 'Gedanken müssen ab sofort 0,7 mm Abstand zueinander halten.', cost: 1e13, effect: { type: 'global', mult: 1.15 }, unlock: fp(5e12) },
+  { id: 'global_6', name: 'UN-Resolution 5G/∞',         short: '+15%', desc: 'Alle FP/Sek. +15 %.', flavor: 'Einstimmig angenommen. Die Gegenstimmen wurden umgefunkt.', cost: 1e15, effect: { type: 'global', mult: 1.15 }, unlock: fp(5e14) },
+  { id: 'global_7', name: 'Interplanetare Dienstanweisung', short: '+15%', desc: 'Alle FP/Sek. +15 %.', flavor: 'Gilt auch auf dem Mond. Rückwirkend ab Urknall.', cost: 1e17, effect: { type: 'global', mult: 1.15 }, unlock: fp(5e16) },
+  { id: 'global_8', name: 'Kosmische Verwaltungsreform', short: '+15%', desc: 'Alle FP/Sek. +15 %.', flavor: 'Alle Formulare jetzt in 11 Dimensionen.', cost: 1e19, effect: { type: 'global', mult: 1.15 }, unlock: fp(5e18) },
+
+  // Reichweite in späteren Phasen (je +25 %)
+  { id: 'reach_eu_1', name: 'Roaming-Abkommen',         short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Gedanken im EU-Ausland jetzt ohne Aufpreis.', cost: 1e9, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(2, 1.5e8) },
+  { id: 'reach_eu_2', name: 'Eurovisions-Trägerwelle',  short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Zero Points für Aluhüte.', cost: 5e9, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(2, 3.5e8) },
+  { id: 'reach_w_1',  name: 'Tiefseekabel-Tuning',      short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Die Kraken haben unterschrieben.', cost: 3e10, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(3, 1.5e9) },
+  { id: 'reach_w_2',  name: 'Äquator-Verstärker',       short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Der Gürtel der Erde, jetzt mit Antenne.', cost: 1.5e11, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(3, 4e9) },
+  { id: 'reach_o_1',  name: 'Schwerelos-Sendeleistung', short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Ohne Luft kein Widerstand. Nicht mal von Aluhüten.', cost: 1e12, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(4, 3e10) },
+  { id: 'reach_u_1',  name: 'Wurmloch-Richtfunk',       short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Abkürzung durch die Raumzeit. Genehmigt vom Bauamt Bielefeld.', cost: 1.5e13, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(5, 5e12) },
+  { id: 'reach_u_2',  name: 'Urknall-Echo-Verstärker',  short: 'R+', desc: 'Reichweite aller Anlagen +25 %.', flavor: 'Das Rauschen im Radio? Waren wir. Schon immer.', cost: 6e13, effect: { type: 'reach', mult: 1.25 }, unlock: phaseCtrl(5, 1e14) },
 
   // Goldener Mast
   { id: 'golden_1', name: 'Goldene Lötstelle',     short: 'G',   desc: 'Goldene Masten erscheinen 15 % häufiger.', flavor: '24 Karat, 0 Ohm.', cost: 77777,  effect: { type: 'goldenInterval', mult: 0.85 }, unlock: (s) => s.goldenClicked >= 7 },

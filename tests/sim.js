@@ -4,14 +4,13 @@
 import { Game } from '../assets/js/core/game.js';
 import { newState } from '../assets/js/core/state.js';
 import { BUILDINGS } from '../assets/js/data/buildings.js';
-import { TOTAL_POP } from '../assets/js/data/states.js';
-import { MAP_DE } from '../assets/js/data/map-de.js';
 import * as eco from '../assets/js/core/economy.js';
 import { fmt, fmtDuration } from '../assets/js/util/format.js';
 
 const params = new URLSearchParams(location.search);
 const CLICKS_PER_SEC = Number(params.get('cps') ?? 3);
 const HOURS = Number(params.get('h') ?? 3);
+const SNAP_MIN = Number(params.get('snap') ?? 15);
 const EVENTS = params.get('ev') !== '0';
 const MANUAL = params.get('manual') !== '0';
 
@@ -58,16 +57,27 @@ function mark(key, label) {
   seen.add(key);
   milestones.push(`${fmtDuration(t / 1000).padEnd(16)} ${label}`);
 }
-g.on('takeover', (st) => mark('take_' + st.code, `Übernommen: ${st.name} (${s.taken.length}/16)`));
+const phaseLog = [];
+let phaseStart = 0;
+g.on('takeover', (r) => { if (r.phase.id === 1) mark('take_' + r.code, `Übernommen: ${r.name} (${s.taken.length}/16)`); });
+g.on('phase', ({ from, to }) => {
+  phaseLog.push(`${from.name.padEnd(14)} fertig nach ${fmtDuration(t / 1000).padEnd(16)} (Dauer ${fmtDuration((t - phaseStart) / 1000)}), FP/s ${fmt(g.d.rawCps)}, Tränen möglich: ${eco.tearsFor(s.fpAll)}`);
+  phaseStart = t;
+  mark('phase' + to.id, `>>> PHASE ${to.id}: ${to.name}`);
+});
+g.on('universe', () => {
+  phaseLog.push(`Universum       fertig nach ${fmtDuration(t / 1000).padEnd(16)} (Dauer ${fmtDuration((t - phaseStart) / 1000)}), Tränen möglich: ${eco.tearsFor(s.fpAll)}`);
+  mark('universe', '>>> UNIVERSUM KONTROLLIERT');
+});
 g.on('upgrade', (u) => { if (u.effect.type === 'reach') mark(u.id, `Upgrade: ${u.name}`); });
 g.on('bought', ({ id }) => mark('first_' + id, `Erste Anlage: ${id}`));
 
-const pctNow = () => g.d.controlled / TOTAL_POP;
+const pctNow = () => g.d.ratio;
 const jumps = [];
 function track(label, fn) {
   const before = pctNow();
   const ok = fn();
-  if (ok) jumps.push({ label, at: t, delta: pctNow() - before, from: before });
+  if (ok) jumps.push({ label: `${label} (P${s.phase})`, at: t, delta: pctNow() - before, from: before });
   return ok;
 }
 
@@ -87,18 +97,20 @@ for (t = 1000; t <= END; t += 1000) {
     const okBuy = track(best.id, () => {
       const r = best.kind === 'b' ? g.buy(best.id, 1) : g.buyUpgrade(best.id);
       while (r && s.hand.length) {
-        const code = g.weakestState();
-        g.placeFromHand(code, MAP_DE.states[code].cx, MAP_DE.states[code].cy);
+        const code = g.weakestRegion();
+        const pt = g.pointIn(code);
+        g.placeFromHand(code, pt.x, pt.y);
       }
       return r;
     });
     if (!okBuy) break;
   }
   const pct = pctNow();
-  for (const p of [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 1]) if (pct >= p - 1e-9) mark('p' + p, `Deutschland ${Math.round(p * 100)} % kontrolliert`);
-  if (t % (15 * 60 * 1000) === 0) {
-    snapshots.push(`${fmtDuration(t / 1000).padEnd(16)} FP/s ${fmt(g.d.rawCps).padEnd(12)} kontrolliert ${(pct * 100).toFixed(1).padStart(5)} %   ${JSON.stringify(s.owned)}`);
+  for (const p of [0.01, 0.1, 0.25, 0.5, 0.75, 0.9]) if (pct >= p - 1e-9) mark(`p${s.phase}_${p}`, `${g.d.phase.name} ${Math.round(p * 100)} % kontrolliert`);
+  if (t % (SNAP_MIN * 60 * 1000) === 0) {
+    snapshots.push(`${fmtDuration(t / 1000).padEnd(16)} P${s.phase} FP/s ${fmt(g.d.rawCps).padEnd(12)} ${(pct * 100).toFixed(1).padStart(5)} %   ${JSON.stringify(s.owned)}`);
   }
+  if (s.universeDone) break;
 }
 
 const top = jumps.sort((a, b) => b.delta - a.delta).slice(0, 8)
@@ -106,5 +118,5 @@ const top = jumps.sort((a, b) => b.delta - a.delta).slice(0, 8)
 
 document.getElementById('out').textContent =
   `Klicks/Sek.: ${CLICKS_PER_SEC}, Ereignisse: ${EVENTS ? 'an' : 'aus'}, Platzieren: ${MANUAL ? 'von Hand' : 'automatisch'}, Dauer: ${HOURS} h\n\n`
-  + `MEILENSTEINE\n${milestones.join('\n')}\n\nGRÖSSTE SPRÜNGE DURCH EINEN EINZELNEN KAUF\n${top.join('\n')}\n\nVERLAUF\n${snapshots.join('\n')}`;
+  + `PHASEN\n${phaseLog.join('\n')}\n\nMEILENSTEINE\n${milestones.join('\n')}\n\nGRÖSSTE SPRÜNGE DURCH EINEN EINZELNEN KAUF\n${top.join('\n')}\n\nVERLAUF\n${snapshots.join('\n')}`;
 document.title = 'SIM DONE';

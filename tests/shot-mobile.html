@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Shot mobil</title>
+<style>body{margin:0;background:#222;display:flex;gap:16px;padding:16px}iframe{border:0;background:#000}</style></head>
+<body>
+<script>
+// Wie shot.html, aber in Handy-Breite. Parameter wie seed.html.
+const q = new URLSearchParams(location.search); q.set('go', '0');
+const seed = document.createElement('iframe'); seed.style.display = 'none';
+seed.src = '/tests/seed.html?' + q.toString();
+seed.onload = () => setTimeout(() => {
+  for (const [w, h] of [[390, 844], [360, 740]]) {
+    const f = document.createElement('iframe'); f.width = w; f.height = h; f.src = '/';
+    f.onload = () => setTimeout(() => f.contentDocument.querySelector('dialog[open] .btn-primary')?.click(), 1200);
+    document.body.append(f);
+  }
+}, 800);
+document.body.append(seed);
+</script></body></html>

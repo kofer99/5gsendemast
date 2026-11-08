@@ -70,16 +70,66 @@ try {
   d.getElementById('btn-export').click(); await wait(100);
   const ta = d.querySelector('#dialog-body textarea');
   log(ta && ta.value.startsWith('BAfG1:'), 'Export erzeugt BAfG1-String');
-  d.querySelector('#dialog-actions .btn-primary').click(); await wait(100);
+  d.querySelector('#dialog-actions .btn-primary').click();
+  await until(() => !d.getElementById('dialog').open);
   // Neuer Einsatz muss wirklich löschen (Regression: alter Stand wurde beim Neuladen zurückgeschrieben)
   d.getElementById('t-akte').click(); await wait(100);
-  d.getElementById('btn-reset').click(); await wait(150);
+  d.getElementById('btn-reset').click();
+  log(await until(() => d.getElementById('dialog').open && d.querySelector('#dialog-actions .btn-danger')), `Dialog „Neuer Einsatz?“ offen (open=${d.getElementById('dialog').open}, Titel=${d.getElementById('dialog-title').textContent})`);
   const reloaded = new Promise((r) => f.addEventListener('load', r, { once: true }));
   d.querySelector('#dialog-actions .btn-danger').click();
   await reloaded; await wait(800);
   const d2 = f.contentWindow.document;
   log(d2.getElementById('dialog').open && d2.getElementById('dialog-title').textContent.includes('WILLKOMMEN'), 'Nach Neustart: Begrüßung erscheint wieder');
   log(d2.getElementById('fp').textContent === '0' && d2.querySelectorAll('.mk').length === 0, 'Nach Neustart: 0 FP, keine Masten');
+
+  // ---------- Phasenwechsel: alter Spielstand (v1) mit vollem Deutschland ----------
+  const { newState } = await import('/assets/js/core/state.js');
+  const loadGame = async (state) => {
+    // Erst die alte Seite verlassen (sie speichert beim Schließen), dann den Testspielstand setzen
+    const blank = new Promise((r) => f.addEventListener('load', r, { once: true }));
+    f.src = 'about:blank';
+    await blank;
+    const re = new Promise((r) => f.addEventListener('load', r, { once: true }));
+    localStorage.setItem('sendemast.save', JSON.stringify(state));
+    f.src = '/?t=' + Math.random();
+    await re; await wait(900);
+    return f.contentWindow.document;
+  };
+  const v1 = newState(Date.now()); v1.introSeen = true; v1.owned.haarp = 10; v1.version = 1;
+  delete v1.phase; delete v1.tears; delete v1.patents;
+  let d3 = await loadGame(v1);
+  log(await until(() => d3.getElementById('dialog-title').textContent === 'DEUTSCHLAND KONTROLLIERT'), 'Alter Spielstand: Zwischensequenz „Deutschland kontrolliert“');
+  d3.querySelector('#dialog-actions .btn-primary').click(); await wait(300);
+  log(d3.getElementById('map-title').textContent.includes('EUROPA'), 'Karte zeigt Europa');
+  log(!d3.getElementById('map-tabs').hidden && d3.querySelectorAll('#map-tabs button').length === 2, 'Kartenwahl DE/EU sichtbar');
+  log(d3.querySelectorAll('.map-layer:not(.off) .state').length === 45, `Europa: ${d3.querySelectorAll('.map-layer:not(.off) .state').length} Gebiete`);
+  d3.querySelector('#map-tabs button').click(); await wait(200);
+  log(d3.getElementById('map-title').textContent.includes('DEUTSCHLAND'), 'Kartenwahl: zurück zu Deutschland');
+  log(d3.getElementById('controlled-label').textContent === 'KONTROLLIERTE MENSCHEN', 'Zähler-Beschriftung');
+  log([...d3.querySelectorAll('.bld:not([hidden]) .bld-name')].some((n) => n.textContent === 'Euro-Funknetz' || n.textContent === '??? GESPERRT'), 'Euro-Funknetz im Shop (oder als Teaser)');
+
+  // ---------- Prestige ----------
+  const p4 = newState(Date.now()); p4.introSeen = true; p4.phase = 4; p4.phaseReached = 4; p4.fpAll = 4e9 * 49 + 1; p4.owned.mast = 20;
+  p4.achievements = ['click_1'];
+  d3 = await loadGame(p4);
+  d3.getElementById('t-prestige').click(); await wait(1200);
+  const pbtn = [...d3.querySelectorAll('#prestige .btn-danger')][0];
+  log(pbtn && !pbtn.disabled && pbtn.textContent.includes('+7'), `Prestige-Knopf: ${pbtn?.textContent}`);
+  pbtn.click();
+  log(await until(() => d3.querySelector('#dialog-actions .btn-danger')), 'Prestige-Bestätigung offen');
+  const re2 = new Promise((r) => f.addEventListener('load', r, { once: true }));
+  d3.querySelector('#dialog-actions .btn-danger').click();
+  await re2; await wait(900);
+  const s4 = JSON.parse(localStorage.getItem('sendemast.save'));
+  log(s4.phase === 1 && s4.tears === 7 && !s4.owned.mast && s4.prestiges === 1 && s4.achievements.includes('click_1'), `Nach Prestige: Phase ${s4.phase}, ${s4.tears} Tränen, Erfolge behalten`);
+  const d4 = f.contentWindow.document;
+  d4.getElementById('t-prestige').click(); await wait(1200);
+  const pat = d4.querySelector('#prestige .patent.can');
+  log(!!pat, 'Patent kaufbar');
+  pat.click(); await wait(300);
+  log(d4.querySelectorAll('#prestige .patent.owned').length === 1, 'Patent erteilt');
+  localStorage.removeItem('sendemast.save');
 } catch (e) {
   log(false, 'Ausnahme: ' + e.message);
 }

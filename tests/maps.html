@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Kartenvorschau</title>
+<style>body{background:#070b08;margin:0;display:flex;flex-wrap:wrap;gap:8px}svg{background:#0b120d;width:940px}path{fill:rgba(61,255,138,.25);stroke:#3dff8a;stroke-width:.6}path.tiny{fill:#ffb02e}text{fill:#fff;font:9px monospace}</style></head>
+<body><script type="module">
+import { MAP_EU } from '/assets/js/data/map-eu.js';
+import { MAP_WORLD } from '/assets/js/data/map-world.js';
+for (const m of [MAP_EU, MAP_WORLD]) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', m.viewBox.join(' '));
+  let h = '';
+  for (const [k, r] of Object.entries(m.regions)) h += `<path class="${r.tiny ? 'tiny' : ''}" d="${r.d}"/><text x="${r.cx}" y="${r.cy}">${k}</text>`;
+  svg.innerHTML = h;
+  document.body.append(svg);
+}
+</script></body></html>

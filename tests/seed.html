@@ -2,13 +2,16 @@
 <html lang="de">
 <head><meta charset="utf-8"><title>Seed – Testspielstand</title><link rel="stylesheet" href="/assets/css/base.css"><link rel="stylesheet" href="/assets/css/game.css"></head>
 <body>
-<p>Erzeugt einen Test-Spielstand mit Fortschritt und leitet zum Spiel weiter. Parameter: <code>?level=1|2|3</code></p>
+<p>Erzeugt einen Test-Spielstand mit Fortschritt und leitet zum Spiel weiter. Parameter: <code>?level=1|2|3</code> oder <code>?phase=2|3|4|5</code> (Spielstand mitten in dieser Phase), optional <code>&amp;go=0</code> (nicht weiterleiten)</p>
 <div style="width:583px;height:790px;position:relative"><div class="map-frame" id="f" style="height:790px"></div></div>
 <script type="module">
 import { MapView } from '/assets/js/ui/map.js';
 import { Game } from '/assets/js/core/game.js';
 import { newState, saveState } from '/assets/js/core/state.js';
-const level = Number(new URLSearchParams(location.search).get('level') || 2);
+import { PHASES } from '/assets/js/data/phases.js';
+const q = new URLSearchParams(location.search);
+const level = Number(q.get('level') || 2);
+const phase = Number(q.get('phase') || 1);
 const map = new MapView(document.getElementById('f'), document.createElement('div'));
 const s = newState(); s.introSeen = true;
 const g = new Game(s, { pointIn: (c) => map.randomPoint(c) });
@@ -21,8 +24,21 @@ s.clicks = 400 * level; s.fp = [0, 900, 2.5e5, 4e7][level]; s.fpAll = [0, 2000, 
 g.tick(); g.checkAchievements();
 const extra = new URLSearchParams(location.search).get('hand');
 if (extra) { s.fp += 1e7; g.buy(extra); } else g.buy('mast');
+if (phase > 1) {
+  // Alle Vorphasen erobert, aktuelle Phase etwa zur Hälfte
+  s.phase = phase; s.phaseReached = phase;
+  for (const p of PHASES) if (p.id < phase) for (const r of p.open) if (!s.taken.includes(r.code)) s.taken.push(r.code);
+  s.fp = 1e30; s.settings.autoPlace = true;
+  const extra = { 2: { chemtrail: 30, reptil: 20, euro: 2 }, 3: { chemtrail: 35, reptil: 25, haarp: 4, euro: 12, sat: 2 }, 4: { euro: 20, sat: 10, haarp: 10, mond: 3 }, 5: { euro: 25, sat: 18, mond: 12, quant: 3 } }[phase];
+  for (const [id, n] of Object.entries(extra)) g.buy(id, n);
+  g.buy('toaster', 3);
+  s.settings.autoPlace = false;
+  s.fp = [0, 0, 3e9, 5e10, 2e12, 3e13][phase]; s.fpAll = [0, 0, 5e9, 2e11, 4e12, 9e13][phase];
+  if (q.get('tears')) s.tears = Number(q.get('tears'));
+  g.refresh(); g.checkAchievements();
+}
 saveState(s);
-location.href = '/';
+if (q.get('go') !== '0') location.href = '/';
 </script>
 </body>
 </html>

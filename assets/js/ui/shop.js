@@ -1,12 +1,13 @@
 // Shop: Anlagen + Upgrades.
 import { BUILDINGS } from '../data/buildings.js';
 import { UPGRADE_BY_ID } from '../data/upgrades.js';
+import { PHASE_BY_ID } from '../data/phases.js';
 import * as eco from '../core/economy.js';
 import { icon } from './icons.js';
 import { fmt } from '../util/format.js';
 
 const AMOUNTS = [1, 10, 100, 'max'];
-const scopeShort = (b) => (b.scope === 'local' ? 'im Bundesland' : 'landesweit');
+const scopeShort = (b, phase) => (b.scope === 'local' ? phase.localShort : phase.wide);
 
 export class Shop {
   constructor({ list, upgrades, amounts, autoPlace, tooltip }, game) {
@@ -108,11 +109,12 @@ export class Shop {
     const total = unit * n;
     const share = d.rawCps > 0 ? (total / d.rawCps) * 100 : 0;
     const reach = b.reach * d.mods.reach;
+    const phase = d.phase;
     const scope = b.fixed
-      ? 'steht fest in Bielefeld, wirkt in ganz Deutschland'
+      ? `steht fest in Bielefeld, wirkt ${phase.wideLong}`
       : b.scope === 'local'
-        ? 'nur in dem Bundesland, in dem sie steht'
-        : 'in ganz Deutschland – füllt die Lücken aller Länder anteilig auf. Der Standort ist nur Optik.';
+        ? phase.localLong
+        : `${phase.wideLong} – füllt die Lücken aller Gebiete anteilig auf. Der Standort ist nur Optik.`;
     const amount = this.amountFor(b);
     return `<b>${b.name}</b>
       <div class="tip-row"><span>Besitz</span><span>${n}</span></div>
@@ -152,14 +154,18 @@ export class Shop {
       const visible = eco.isBuildingVisible(s, b);
       let state = visible ? 'visible' : teaserShown ? 'hidden' : 'teaser';
       if (!visible && !teaserShown) teaserShown = true;
-      if (state !== row.state) {
+      const key = state === 'teaser' ? state + s.phase : state; // Teaser-Text hängt von der Phase ab
+      if (key !== row.key) {
+        row.key = key;
         row.state = state;
         row.btn.hidden = state === 'hidden';
         row.btn.classList.toggle('locked', state === 'teaser');
         if (state === 'teaser') {
           row.iconEl.innerHTML = '?';
           row.name.textContent = '??? GESPERRT';
-          row.flavor.textContent = `Freigabe ab ${fmt(b.baseCost * 0.3)} FP insgesamt`;
+          row.flavor.textContent = b.phase && s.phase < b.phase
+            ? `Freigabe in Phase ${b.phase} (${PHASE_BY_ID[b.phase].name})`
+            : `Freigabe ab ${fmt(b.baseCost * 0.3)} FP insgesamt`;
           row.owned.textContent = '';
           row.reach.textContent = '';
           row.btn.setAttribute('aria-disabled', 'true');
@@ -176,7 +182,7 @@ export class Shop {
       row.btn.setAttribute('aria-disabled', String(!can));
       row.cost.textContent = (n > 1 ? `${n} Stück: ` : '') + fmt(cost) + ' FP';
       row.owned.textContent = s.owned[b.id] || 0;
-      row.reach.textContent = `Reichweite ${fmt(b.reach * d.mods.reach)} · ${scopeShort(b)}`;
+      row.reach.textContent = `Reichweite ${fmt(b.reach * d.mods.reach)} · ${scopeShort(b, d.phase)}`;
       row.btn.setAttribute('aria-label', `${b.name} kaufen${n > 1 ? `, ${n} Stück` : ''}: ${fmt(cost)} Funkpunkte. Besitz: ${s.owned[b.id] || 0}`);
     }
 

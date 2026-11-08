@@ -1,6 +1,6 @@
 // Spielstand: anlegen, speichern, laden, exportieren.
 export const SAVE_KEY = 'sendemast.save';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 function randomId() {
   const a = new Uint8Array(12);
@@ -27,7 +27,15 @@ export function newState(now = Date.now()) {
     manualPlaced: 0,
     upgrades: [],
     achievements: [],
-    taken: [],      // übernommene Bundesländer
+    taken: [],      // übernommene Regionen (alle Phasen)
+    phase: 1,       // aktuelle Eskalationsphase (1 Deutschland … 5 Universum)
+    phaseReached: 1,// höchste je erreichte Phase (über Prestige hinweg, für Statistik)
+    universeDone: false,
+    tears: 0,       // Aluhut-Tränen insgesamt (Bonus bleibt auch nach dem Ausgeben)
+    tearsSpent: 0,
+    patents: [],
+    prestiges: 0,
+    bestControlledAll: 0,
     bestControlled: 0,
     aluhutConverted: 0,
     goldenClicked: 0,
@@ -47,8 +55,14 @@ export function normalize(raw, now = Date.now()) {
   const base = newState(now);
   const s = { ...base, ...raw, settings: { ...base.settings, ...(raw.settings || {}) } };
   for (const key of ['owned', 'placed']) if (typeof s[key] !== 'object' || !s[key]) s[key] = {};
-  for (const key of ['hand', 'markers', 'upgrades', 'achievements', 'taken', 'buffs']) if (!Array.isArray(s[key])) s[key] = [];
-  for (const key of ['fp', 'fpRun', 'fpAll', 'clicks', 'playtime', 'lastTick']) if (!Number.isFinite(s[key])) s[key] = base[key];
+  for (const key of ['hand', 'markers', 'upgrades', 'achievements', 'taken', 'buffs', 'patents']) if (!Array.isArray(s[key])) s[key] = [];
+  for (const key of ['fp', 'fpRun', 'fpAll', 'clicks', 'playtime', 'lastTick', 'tears', 'tearsSpent', 'prestiges']) if (!Number.isFinite(s[key])) s[key] = base[key];
+  // v1 → v2: Phasen. Alte Masten liegen alle in Phase 1. Der Wechsel nach Europa passiert beim nächsten Tick.
+  if (!(s.phase >= 1 && s.phase <= 5)) s.phase = 1;
+  s.phase = Math.floor(s.phase);
+  if (!(s.phaseReached >= s.phase)) s.phaseReached = s.phase;
+  for (const m of s.markers) if (!m.p) m.p = 1;
+  if (!(s.bestControlledAll >= s.bestControlled)) s.bestControlledAll = s.bestControlled || 0;
   s.version = SAVE_VERSION;
   return s;
 }

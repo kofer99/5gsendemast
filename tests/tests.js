@@ -6,6 +6,7 @@ import { BUILDING_BY_ID } from '../assets/js/data/buildings.js';
 import { STATES, TOTAL_POP } from '../assets/js/data/states.js';
 import { UPGRADES } from '../assets/js/data/upgrades.js';
 import { MAP_DE } from '../assets/js/data/map-de.js';
+import { PHASES, PHASE_BY_ID } from '../assets/js/data/phases.js';
 
 const results = [];
 function test(name, fn) {
@@ -162,6 +163,83 @@ test('Export/Import Rundreise (mit Umlauten)', () => {
 test('normalize repariert kaputte Felder', () => {
   const s = normalize({ fp: 'kaputt', owned: null, settings: { autoPlace: true } });
   eq(s.fp, 0); ok(typeof s.owned === 'object'); eq(s.settings.autoPlace, true); eq(s.settings.buyAmount, 1);
+});
+
+// ---------- Phasen ----------
+test('Regionen: Codes eindeutig, Karten vollständig, Einwohner passen', () => {
+  const seen = new Set();
+  for (const p of PHASES) {
+    for (const r of p.regions) {
+      ok(!seen.has(r.code), 'doppelter Code ' + r.code);
+      seen.add(r.code);
+      ok(p.map.shapes[r.code]?.d?.length > 20, `Form fehlt: ${p.name}/${r.code}`);
+      ok(r.pop > 0, 'Einwohner ' + r.code);
+      if (!r.inherited) ok(r.gag, 'Gag fehlt: ' + r.code);
+    }
+    eq(p.regions.filter((r) => r.inherited).length, p.id === 1 ? 0 : 1, 'eine geerbte Region in ' + p.name);
+    if (p.id > 1) near(p.regions.find((r) => r.inherited).pop, PHASE_BY_ID[p.id - 1].total);
+  }
+  near(PHASE_BY_ID[1].total, TOTAL_POP);
+});
+test('Spätere Anlagen erst in ihrer Phase', () => {
+  const s = newState(); s.fpAll = 1e20;
+  eq(eco.isBuildingVisible(s, BUILDING_BY_ID.euro), false);
+  s.phase = 2;
+  eq(eco.isBuildingVisible(s, BUILDING_BY_ID.euro), true);
+  eq(eco.isBuildingVisible(s, BUILDING_BY_ID.sat), false);
+});
+test('Phasenwechsel: Deutschland → Europa', () => {
+  const c = clock();
+  const s = newState(c.now()); s.owned.haarp = 10;                // 150 Mio. national → Deutschland voll
+  const g = new Game(s, { now: c.now, random: seeded() });
+  let ev = null; g.on('phase', (e) => { ev = e; });
+  c.advance(100); g.tick();
+  eq(s.phase, 2); eq(ev?.to.id, 2); eq(s.taken.length, 16);
+  eq(g.d.control.DEU, 1);
+  // 150 Mio. Reichweite füllen jetzt die europäischen Lücken
+  near(g.d.controlled, TOTAL_POP + 150e6, 1e-6);
+  eq(g.placeFromHand('BY', 0, 0), false, 'Phase-1-Land nicht mehr bebaubar');
+  s.hand.push('mast');
+  eq(g.placeFromHand('DEU', 0, 0), false, 'geerbte Region nicht bebaubar');
+  ok(g.placeFromHand('VAT', 0, 0), 'Vatikan bebaubar');
+  c.advance(100); g.tick();
+  ok(s.taken.includes('VAT'), 'Vatikan mit einem Mast übernommen');
+});
+test('Übernahme-Bonus hängt von der Phase ab', () => {
+  const s = newState(); s.taken = ['SL', 'VAT'];
+  near(eco.takeoverBonus(s), 0.05 + 0.02);
+});
+test('Prestige: erst nach der Welt, setzt zurück, behält Tränen', () => {
+  const c = clock();
+  const s = newState(c.now());
+  s.phase = 3; s.fpAll = eco.fpForTears(12) + 1; s.owned.mast = 50; s.achievements = ['click_1']; s.upgrades = ['mast_t1'];
+  const g = new Game(s, { now: c.now, random: seeded() });
+  eq(g.canPrestige(), false, 'Phase 3 reicht nicht');
+  s.phase = 4;
+  ok(g.canPrestige(), 'Phase 4 reicht');
+  eq(g.prestige(), 12);
+  eq(s.tears, 12); eq(s.phase, 1); eq(s.owned.mast, undefined); eq(s.upgrades.length, 0);
+  eq(s.achievements[0], 'click_1'); eq(s.prestiges, 1); ok(s.fpAll > 0);
+  eq(eco.pendingTears(s), 0);
+  near(eco.bonusMult(s), 1 + 0.01 + 12 * 0.02);
+});
+test('Patente kaufen und Startpaket', () => {
+  const c = clock();
+  const s = newState(c.now()); s.tears = 3;
+  const g = new Game(s, { now: c.now, random: seeded() });
+  ok(g.buyPatent('start')); ok(g.buyPatent('gold'));
+  eq(g.buyPatent('night'), false, 'zu teuer');
+  eq(s.tearsSpent, 3);
+  near(g.d.mods.goldenInterval, 0.9);
+  near(eco.bonusMult(s), 1 + 3 * 0.02, 1e-9, 'ausgegebene Tränen behalten Bonus');
+  s.phase = 4; s.fpAll = eco.fpForTears(5);
+  g.prestige();
+  eq(s.owned.mast, 10); eq(s.owned.tanne, 5);
+  eq(Object.values(s.placed.mast).reduce((a, b) => a + b, 0), 10, 'Startmasten platziert');
+});
+test('Alter Spielstand (v1) wird migriert', () => {
+  const s = normalize({ version: 1, fp: 5, taken: ['SL'], germanyDone: false, markers: [{ b: 'mast', s: 'SL', x: 1, y: 2 }] });
+  eq(s.phase, 1); eq(s.markers[0].p, 1); eq(s.tears, 0); ok(Array.isArray(s.patents));
 });
 
 // ---------- Ausgabe ----------

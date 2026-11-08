@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Shot</title></head>
+<body style="margin:0;background:#000">
+<p style="color:#fff">Lädt einen Seed-Spielstand und zeigt das Spiel im iframe (für Screenshots). Parameter wie seed.html, plus <code>tab=</code> (anlagen|prestige|akte|erfolge).</p>
+<iframe id="f" style="width:1400px;height:900px;border:0"></iframe>
+<script>
+const q = new URLSearchParams(location.search);
+q.set('go', '0');
+const seed = document.createElement('iframe');
+seed.style.display = 'none';
+seed.src = '/tests/seed.html?' + q.toString();
+seed.onload = () => setTimeout(() => {
+  const f = document.getElementById('f');
+  f.src = '/';
+  f.onload = () => setTimeout(() => {
+    const doc = f.contentDocument;
+    const err = window.__errors || [];
+    const tab = q.get('tab');
+    if (tab) doc.getElementById('t-' + tab)?.click();
+    doc.querySelector('dialog[open] .btn-primary')?.click();
+    document.title = 'READY';
+  }, 1500);
+}, 800);
+document.body.append(seed);
+</script></body></html>

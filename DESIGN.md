@@ -9,15 +9,20 @@
 
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
-### ❗ Wichtig für 08.11.2026
+### ❗ Offen (Stand 08.11.2026)
 - [ ] **Geheimakte komplett durchlesen** (`/geheimakte/`). Inhalt und Ton prüfen und jede Aussage gegen die verlinkte Quelle gegenlesen. Erst danach geht die Seite online. Auffälligkeiten direkt hier notieren.
   - Besonders prüfen: Akte 03 (Grenzwerte: 4 W/kg, Faktor 50, 0,08 W/kg – im ICNIRP-PDF selbst nicht maschinell gelesen, nur über Sekundärquellen abgeglichen), Akte 05 (Krebs/IARC), Akte 08 (Elektrosensibilität – Ton).
   - Zwei Links waren beim Test nicht erreichbar: Quelle [10] (ARPANSA, Zeitüberschreitung) und der BfS-Dokumentenserver (DORIS, Serverfehler 503 – daher über nbn-resolving.org verlinkt). Im Browser nachprüfen.
 - [ ] Spiel nach dem neuen Balancing einmal komplett durchspielen (OPTIONEN → „Neuer Einsatz“). Fühlt sich der Weg zu 100 % gut an?
 - [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
+- [ ] **Phasen 2–5 anspielen:** `/tests/seed.html?phase=2` (bzw. 3, 4, 5) legt einen Spielstand mitten in der Phase an. Achtung: überschreibt den eigenen Spielstand – vorher exportieren! Prüfen: Gags der Länder (§4.5, `data/phases.js`) im Ton okay? Zwergstaaten auf der Europakarte gut anklickbar?
+- [ ] Einwohnerzahlen Europa/Welt stammen aus Natural Earth (POP_EST, Stand 2019, Welt ≈ 7,68 Mrd.). Vor dem Release ggf. aktualisieren (`tools/build_world.py`).
+- [ ] Zweiter Durchlauf nach Prestige ist noch nicht simuliert (wie viel schneller geht es mit Tränen und Patenten?).
 
-### Wo wir stehen geblieben sind (07.11.2026)
-- **Fertig:** Spielkern mit Karte, 8 Anlagen, Upgrades, Erfolgen, Aluhutträgern, Goldenem Mast, News-Ticker, Speichern/Export/Import, Offline-Fortschritt (M1–M3 Basis). Balancing überarbeitet (§4.3). Geheimakte mit 11 Akten und 19 Quellen (§6).
+### Wo wir stehen geblieben sind (08.11.2026)
+- **Neu am 08.11.:** M4 ist fertig. Es gibt 5 Phasen mit eigener Karte (Europa 45 Länder, Welt 17 Regionen, Orbit & Mond, Universum), 4 neue Anlagen, Zwischensequenzen und einen Kartenwechsel per Tab. Prestige gibt Aluhut-Tränen und Himmlische Patente (§4.5, §4.9). Dazu kommen 23 neue Erfolge (jetzt 63), Upgrades und ca. 30 News. Alte Spielstände (v1) werden migriert: Wer Deutschland schon erobert hat, landet direkt in Europa.
+- **Behobener Fehler:** Dialoge hingen manchmal, weil das `close`-Ereignis zu spät kam. Jetzt gibt es eine Warteschlange, und die Knöpfe schließen den Dialog selbst.
+- **Fertig (07.11.):** Spielkern mit Karte, 8 Anlagen, Upgrades, Erfolgen, Aluhutträgern, Goldenem Mast, News-Ticker, Speichern/Export/Import, Offline-Fortschritt (M1–M3 Basis). Balancing überarbeitet (§4.3). Geheimakte mit 11 Akten und 19 Quellen (§6).
 - **Behobene Fehler der letzten Sitzung:** „Neuer Einsatz“/Import wurde vom Autospeichern überschrieben; Leertaste löste fokussierten Kaufen-Knopf aus; stille Teilkäufe bei ×10/×100.
 - **Platzhalter:** Portal, Bestenliste, Impressum, Datenschutz (Impressum/Datenschutz: eigene Daten eintragen!).
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README).
@@ -27,7 +32,7 @@
 1. Mitarbeiterportal der BAfG (§7)
 2. Bestenliste mit Cloudflare Pages Functions + D1 (§5)
 3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)
-4. Phasen 2–5 und Prestige (M4)
+4. Rest von M3: Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades
 
 ---
 
@@ -113,10 +118,12 @@ Die Kosten steigen pro Kauf: `Preis = Basispreis × 1,15^Anzahl`. Werte sind Sta
 | 6 | Chemtrail-Staffel | 1,4 Mio. | 1.400 | „Jetzt mit Lavendelduft.“ | Karte DE |
 | 7 | Reptiloiden-Rechenzentrum | 20 Mio. | 7.800 | „Klimaanlage auf 38 °C.“ | Karte DE |
 | 8 | HAARP-Außenstelle Bielefeld | 330 Mio. | 44.000 | „Existiert nicht. Wie Bielefeld.“ | Karte DE (fester Ort) |
-| 9 | Euro-Funknetz | 5,1 Mrd. | 260.000 | „Brüssel hat's genehmigt.“ | Karte Europa |
-| 10 | Satelliten-Schwarm „Gedankenlink“ | 75 Mrd. | 1,6 Mio. | „Jetzt auch mit Funkloch-Garantie.“ | Karte Welt |
-| 11 | Mond-Sendemast | 1 Bio. | 10 Mio. | „Erklärt die Gezeiten.“ | Karte Orbit |
-| 12 | ∞G-Quantenturm | 14 Bio. | 65 Mio. | „Sendet, bevor du denkst.“ | Karte Universum |
+| 9 | Euro-Funknetz | 1,2 Mrd. | 300.000 | „Brüssel hat's genehmigt.“ | ab Phase 2 |
+| 10 | Satelliten-Schwarm „Gedankenlink“ | 30 Mrd. | 4 Mio. | „Jetzt auch mit Funkloch-Garantie.“ | ab Phase 3 |
+| 11 | Mond-Sendemast | 500 Mrd. | 50 Mio. | „Erklärt die Gezeiten.“ | ab Phase 4 |
+| 12 | ∞G-Quantenturm | 8 Bio. | 600 Mio. | „Sendet, bevor du denkst.“ | ab Phase 5 |
+
+Die Anlagen 9–12 waren ursprünglich deutlich teurer (5,1 Mrd. bis 14 Bio.). Damit dauerte allein die Welt über 5 Stunden. Sie wurden am 08.11.2026 per Simulation angepasst.
 
 - Eine Anlage wird erst sichtbar, wenn insgesamt 30 % ihres Basispreises verdient wurden. Davor erscheint sie als „??? Gesperrt“. Der Kleine Funkmast ist immer sichtbar.
 - Kaufmenge ist umschaltbar: ×1, ×10, ×100, Max.
@@ -133,6 +140,12 @@ Die Kosten steigen pro Kauf: `Preis = Basispreis × 1,15^Anzahl`. Werte sind Sta
 | Chemtrail | 700.000 | landesweit |
 | Reptiloiden | 2 Mio. | landesweit |
 | HAARP | 15 Mio. | landesweit (steht fest in Bielefeld) |
+| Euro-Funknetz | 25 Mio. | gebietsweit |
+| Satelliten-Schwarm | 160 Mio. | gebietsweit |
+| Mond-Sendemast | 1,5 Mrd. | gebietsweit |
+| ∞G-Quantenturm | 15 Bio. | gebietsweit |
+
+„Landesweit“ heißt seit M4 **gebietsweit**: Die Anlagen wirken immer auf das ganze Gebiet der aktuellen Phase (europaweit, weltweit …). Lokale Anlagen wirken nur in der Region der aktuellen Phase, in der sie stehen. Die Masten in Deutschland bleiben stehen, zählen in Europa aber nicht mehr.
 
 Dazu kommen 5 Reichweiten-Upgrades mit je **+20 %**, insgesamt ×2,49. Vorher waren es drei Upgrades mit ×2, das führte zu Sprüngen von 30 % auf 60 %.
 
@@ -183,15 +196,35 @@ Landesweite Anlagen füllen also die Lücken proportional auf, ohne dass Reichwe
 
 ### 4.5 Eskalationsphasen
 
-| Phase | Karte | Bevölkerungsziel | Freischaltung |
-|---|---|---|---|
-| 1 | Deutschland | 84,6 Mio. | Start |
-| 2 | Europa | ≈ 745 Mio. | 100 % Deutschland |
-| 3 | Welt | ≈ 8,1 Mrd. | 100 % Europa |
-| 4 | Orbit & Mond | „Astronauten + Mondkälber“ | 100 % Welt |
-| 5 | Universum | ∞ (Aliens haben auch Handys) | Mond-Sendemast ×1 |
+**Status:** ✅ umgesetzt (`data/phases.js`, Karten `map-eu.js`/`map-world.js` aus `tools/build_world.py`, `map-space.js` von Hand gezeichnet).
 
-Ein Kartenwechsel per Tab zeigt jeweils nur die aktuelle Ebene. Beim Phasenwechsel läuft eine kurze Zwischensequenz („Die BAfG gratuliert. Ihr Dienstwagen wurde auf Raumschiff hochgestuft.“).
+| Phase | Karte | Regionen | Bevölkerung | Übernahme-Bonus | Freischaltung |
+|---|---|---|---|---|---|
+| 1 | Deutschland | 16 Bundesländer | 84,6 Mio. | +5 % je Land | Start |
+| 2 | Europa | 44 Länder + Deutschland | ≈ 748 Mio. | +2 % je Land | 100 % Deutschland |
+| 3 | Welt | 16 Weltregionen + Europa | ≈ 7,68 Mrd. | +5 % je Region | 100 % Europa |
+| 4 | Orbit & Mond | ISS, Satellitengürtel, geostationärer Orbit, Mond (Vorder-/Rückseite), Mars + Erde | ≈ 103 Mrd. „Lebewesen“ | +10 % je Zone | 100 % Welt |
+| 5 | Universum | 8 Galaxien, Rand des Universums + Sonnensystem | ≈ 1,5 Brd. | +10 % je Galaxie | 100 % Orbit & Mond |
+
+- **Geerbte Region:** Auf jeder Karte erscheint das bereits eroberte Gebiet als *eine* Region (Deutschland in Europa, Europa in der Welt …). Es zählt immer zu 100 % und ist nicht bebaubar.
+- **Phase 5** wird jetzt mit 100 % Orbit freigeschaltet statt mit „Mond-Sendemast ×1“. So endet jede Phase gleich.
+- **Zwergstaaten** (Vatikan, Monaco, San Marino, Liechtenstein, Andorra, Malta) sind auf der Europakarte anklickbare Punkte. Der Vatikan (825 Menschen) ist mit einem Funkmast übernommen. Erfolg „Zwergenaufstand“.
+- Kleine Gebiete werden zusammengefasst: Åland → Finnland, Färöer → Dänemark, Jersey/Guernsey/Isle of Man → Vereinigtes Königreich. Die Türkei, Zypern und der Kaukasus liegen laut Natural Earth in Asien und kommen deshalb erst in Phase 3.
+- **Kartenwechsel:** Über der Karte gibt es Tabs (DE · EU · WELT · ORBIT · ALL) für alle erreichten Phasen. Gebaut wird nur auf der aktuellen Karte. Kauft man eine Anlage, während eine alte Karte angezeigt wird, springt die Ansicht zurück.
+- **Zwischensequenz** bei jedem Phasenwechsel (Dienstwagen → Reisebus → Linienflugzeug → Raumschiff → Warp-Antrieb) mit „Prahlen“-Knopf. Nach dem Universum folgt ein Abschlussdialog mit einem Hinweis auf die Geheimakte.
+- Ab Phase 4 heißt der Zähler „Kontrollierte Lebewesen“. Ab 1 Bio. wird er abgekürzt („45,1 Bio.“), sonst sprengt er die Kopfzeile.
+
+**Simulation** (`tests/sim.html?cps=3&h=16`, aktiv, Stand 08.11.2026):
+
+| Phase fertig | aktiv (3 Klicks/s, von Hand) | gemütlich (1 Klick/s, Auto-Platzieren) |
+|---|---|---|
+| Deutschland | 1 Std. 37 Min. | 2 Std. 7 Min. |
+| Europa | 3 Std. 47 Min. | 4 Std. 13 Min. |
+| Welt (Prestige möglich, ca. 10 Tränen) | 5 Std. 8 Min. | 6 Std. 26 Min. |
+| Orbit & Mond | 6 Std. 56 Min. | 8 Std. 25 Min. |
+| Universum (ca. 300 Tränen) | 9 Std. 22 Min. | 11 Std. 9 Min. |
+
+In späteren Phasen springt die Kontrolle pro Kauf um bis zu 10–19 Prozentpunkte. Das ist gewollt, weil es dort weniger, aber größere Anschaffungen gibt.
 
 ### 4.6 Upgrades
 - Pro Anlage: ×2-Upgrades bei 1 / 5 / 25 / 50 / 100 / 150 / 200 Stück (Cookie-Clicker-Muster). Beispiele: „5G+“, „5G Ultra“, „5G Ultra Max Pro“, „5,5G“, „Aluhut-Durchdringung“.
@@ -218,10 +251,14 @@ Ein goldener Mast erscheint alle 2–5 min an einer zufälligen Stelle und bleib
 | Funkloch *(selten, negativ)* | FP/s ×0,5 | 30 s |
 
 ### 4.9 Prestige: „Neustart nach Weltherrschaft“
-- Verfügbar ab Phase 3 (Welt 100 %).
-- Der Spieler gibt alles auf und bekommt dafür **Aluhut-Tränen**: `floor(sqrt(Gesamt-FP_jemals / 1e12))`, abzüglich der bereits erhaltenen Tränen.
-- Jede Träne bringt dauerhaft +2 % FP/s.
-- Ein Prestige-Shop mit „Himmlischen Patenten“ bietet z. B. „Masten starten mit 10 Stück“ und „Goldene Masten 10 % häufiger“.
+
+**Status:** ✅ umgesetzt (Tab „Prestige“, `data/patents.js`, `Game.prestige()`).
+- Verfügbar, sobald im aktuellen Durchlauf die Welt erobert ist (Phase ≥ 4) und mindestens eine neue Träne fällig wäre.
+- **Aluhut-Tränen** insgesamt: `floor(sqrt(Gesamt-FP_jemals / 4e9))`. Ein Neustart bringt die Differenz zu den schon erhaltenen Tränen. Laut Simulation sind das bei der Welt ca. 10, beim Universum ca. 300.
+- Jede Träne bringt dauerhaft +2 % FP/s. **Ausgegebene Tränen behalten ihren Bonus** (wie bei Cookie Clicker): Patente kosten nur die Entscheidung.
+- **Bleibt erhalten:** Tränen, Patente, Erfolge, Gesamt-FP, Statistik (Klicks, Aluhüte, Goldene Masten, Spielzeit), Einstellungen. **Wird zurückgesetzt:** FP, Anlagen, Masten, Upgrades, übernommene Gebiete, Phase.
+- Nach dem Neustart wird die Seite neu geladen (einfacher und robuster als alle Karten im Betrieb zurückzubauen).
+- **Himmlische Patente** (Kosten in Tränen): Startpaket Funkmast (1) · Goldene Antenne (2) · Nachtschicht-Zulage, offline 75 % (3) · Dauer-Impuls, 1 Impuls/s (5) · Aluhut-Gewerkschaft ×3 (5) · Erfolgsprämie +2 % je Erfolg (10) · Express-Genehmigung, Übernahme-Boni ×2 (15) · Weitsicht-Erlass, Reichweite +50 % (20) · Beamten-Startgeld 1 Mio. FP (30) · Ewige Frequenz (60) · Impuls-Automat Mk II (100) · Diplomatischer Pass, 1 Mrd. FP Startgeld (250). Startgeld zählt nicht als verdient, sonst gäbe es Tränen aus dem Nichts.
 - Flavor: „Die Menschheit wurde per Software-Update zurückgesetzt.“
 
 ### 4.10 News-Ticker
@@ -423,7 +460,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
 - Deutschland zu 100 % nach ca. 1–2 h aktivem Spiel
 - Erster Prestige nach ca. 1–2 Tagen (inklusive Idle-Zeit)
 
-**Performance:** Startseite unter 300 KB (ohne Fonts), Lighthouse ≥ 90.
+**Performance:** Startseite unter 300 KB übertragen (ohne Fonts), Lighthouse ≥ 90. Stand 08.11.2026: ca. 365 KB ungepackt bzw. ca. 130 KB mit gzip (Cloudflare komprimiert automatisch). Die Karten machen ca. 190 KB davon aus. Falls nötig, könnten Europa- und Weltkarte erst beim Phasenwechsel nachgeladen werden (`import()`).
 
 ---
 
@@ -447,7 +484,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
 | M1 ✅ | Spielkern | Klicken, Anlagen 1–8, Speichern, Zahlenformat, Ticker (statische Karte) |
 | M2 ✅ | Karte | Bundesländer-SVG, Masten platzieren, Kontrolle, Übernahme-Effekte |
 | M3 ✅ (Basis) | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Offen: Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades, mehr News |
-| M4 | Eskalation | Phasen 2–5, Prestige |
+| M4 ✅ | Eskalation | Phasen 2–5 mit eigenen Karten, Prestige mit Tränen und Patenten (08.11.2026) |
 | M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). Offen: Portal, Impressum/Datenschutz ausfüllen |
 | M6 | Online | Bestenliste (Functions + D1), Teilen, OG-Bild |
 | M7 | Launch | Hosting, Domain, Balancing-Feinschliff, Mobile-Test |

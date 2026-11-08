@@ -1,6 +1,9 @@
 // News-Ticker. when(s, d) optional – Meldung erscheint nur, wenn true.
 // fact: true → echte Info, verlinkt auf die Geheimakte.
-const ctrl = (n) => (s, d) => d.controlled >= n;
+// ctrl: nur in Phase 1 (Deutschland). Spätere Phasen haben eigene Meldungen über `phase`.
+const ctrl = (n) => (s, d) => s.phase === 1 && d.controlled >= n;
+const phase = (p, n = 0) => (s, d) => s.phase === p && d.controlled >= n;
+const from = (p) => (s) => s.phase >= p;
 const has = (id, n = 1) => (s) => (s.owned[id] || 0) >= n;
 
 export const NEWS = [
@@ -41,6 +44,41 @@ export const NEWS = [
   { text: 'Nachbarschaftsstreit um Gartenzwerge beigelegt. Beide Seiten „wissen nicht, warum“.', when: ctrl(5e7) },
   { text: 'Telegram-Gruppen schrumpfen. Mitglieder schreiben: „Kein Bock mehr, geh lieber raus.“', when: ctrl(6e7) },
   { text: 'Letzte funkfreie Zone Deutschlands entdeckt: der Keller von Detlef (57).', when: ctrl(8e7) },
+
+  // Phase 2: Europa
+  { text: 'Brüssel prüft Funkkontrolle. Prüfung dauert voraussichtlich bis 2061.', when: phase(2) },
+  { text: 'Neue EU-Norm: Gedanken müssen künftig mit USB-C empfangen werden.', when: phase(2) },
+  { text: 'Österreich lehnt Funkkontrolle ab. Schmäh-Filter blockiert Signal zu 40 %.', when: phase(2) },
+  { text: 'Schweiz bleibt neutral. Auch gegenüber Funkwellen. Vor allem gegenüber Funkwellen.', when: phase(2) },
+  { text: 'Französische Masten streiken. Forderung: 35-Stunden-Woche für Funkwellen.', when: phase(2) },
+  { text: 'Britische Masten senden ab sofort auf der linken Frequenzseite.', when: phase(2) },
+  { text: 'Italienische Masten senden nur mit Handgesten. Reichweite trotzdem hervorragend.', when: phase(2) },
+  { text: 'Vatikan prüft, ob Gedankenfunk als Wunder anerkannt werden kann.', when: phase(2) },
+  { text: 'Eurovision Song Contest: Alle Länder vergeben 12 Punkte an die BAfG.', when: phase(2, 4e8) },
+  { text: 'Skandinavische Masten jetzt mit Möbelhaus-Bauanleitung. Ein Sechskantschlüssel fehlt.', when: phase(2) },
+  // Phase 3: Welt
+  { text: 'UN-Vollversammlung stimmt einstimmig zu. Niemand weiß, wofür.', when: phase(3) },
+  { text: 'Pinguine in der Antarktis beantragen Funkanschluss. Antrag liegt in Bielefeld.', when: phase(3) },
+  { text: 'Amazonas-Papageien wiederholen jetzt BAfG-Pressemitteilungen.', when: phase(3) },
+  { text: 'Kängurus hüpfen im Takt der Trägerfrequenz. Biologen sprechen von Zufall.', when: phase(3) },
+  { text: 'Kreuzfahrtschiff meldet: Auf offener See endlich keine Telegram-Gruppen mehr.', when: phase(3) },
+  { text: 'Neuer Weltrekord: 7 Mrd. Menschen denken gleichzeitig an Pizza.', when: phase(3, 5e9) },
+  // Phase 4: Orbit & Mond
+  { text: 'Mondkälber muhen erstmals in Stereo.', when: phase(4) },
+  { text: 'ISS-Crew bittet um Funkpause. Die BAfG sendet stattdessen Fahrstuhlmusik.', when: phase(4) },
+  { text: 'Satellit verliebt sich in Wettersatellit. Prognose: wolkig mit Schmetterlingen.', when: phase(4) },
+  { text: 'Marsrover findet Spuren von Aluhüten. NASA-ähnliche Behörde: „Bitte keine Fragen.“', when: phase(4) },
+  { text: 'Mond-Sendemast erklärt endlich die Gezeiten. Ozeanograph:innen sind beleidigt.', when: has('mond') },
+  // Phase 5: Universum
+  { text: 'Aliens beschweren sich über Roaming-Gebühren in der Milchstraße.', when: phase(5) },
+  { text: 'Andromeda antwortet auf die Funkanfrage. Die Antwort kommt in 2,5 Mio. Jahren.', when: phase(5) },
+  { text: 'Schwarzes Loch verschluckt Funksignal. Signal meldet sich vom anderen Ende.', when: phase(5) },
+  { text: 'Intergalaktischer Aluhut-Kongress tagt. Thema: „Ist die BAfG real?“ Ergebnis: Ja.', when: phase(5) },
+  { text: 'Bielefeld-Nebel entdeckt. Astronom:innen sind sich einig: Gibt es nicht.', when: phase(5) },
+  { text: 'Quantenturm sendet Antwort, bevor jemand fragt. Die Frage war: „Warum?“', when: has('quant') },
+  // Prestige
+  { text: 'Menschheit per Software-Update zurückgesetzt. Changelog: „Fehlerbehebungen und Leistungsverbesserungen“.', when: (s) => s.prestiges >= 1 },
+  { text: 'Erinnerungen an die Weltherrschaft? Alles nur ein Traum. Die Aluhut-Tränen sind aber echt.', when: (s) => s.prestiges >= 1 },
 
   // Aluhut & Events
   { text: 'Aluhutträger verlangt Beweise. Bekommt Beweise. Verlangt neue Beweise.', when: (s) => s.aluhutConverted >= 1 },

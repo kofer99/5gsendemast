@@ -2,7 +2,9 @@
 import { NEWS } from '../data/news.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { BUILDING_BY_ID } from '../data/buildings.js';
-import { TOTAL_POP } from '../data/states.js';
+import { PHASES } from '../data/phases.js';
+import { PATENTS } from '../data/patents.js';
+import * as eco from '../core/economy.js';
 import { fmt, fmtInt, fmtPct, fmtDuration } from '../util/format.js';
 import { icon } from './icons.js';
 
@@ -16,6 +18,7 @@ export class Hud {
     this.els = {
       controlled: $('controlled'), fp: $('fp'), cps: $('cps'), perClick: $('perclick'),
       covFill: $('coverage-fill'), covPct: $('coverage-pct'), hand: $('hand-info'), buffs: $('buffs'),
+      label: $('controlled-label'),
     };
     this.handKey = null;
     this.lastTitle = 0;
@@ -24,11 +27,13 @@ export class Hud {
   update(now) {
     const { s, d } = this.game;
     const e = this.els;
-    e.controlled.textContent = fmtInt(d.controlled);
+    e.controlled.textContent = d.controlled < 1e12 ? fmtInt(d.controlled) : fmt(d.controlled); // sonst sprengt die Zahl die Kopfzeile
     e.fp.textContent = fmt(s.fp);
     e.cps.textContent = fmt(d.cps, { decimals: true });
     e.perClick.textContent = fmt(d.perClick, { decimals: true });
-    const ratio = d.controlled / TOTAL_POP;
+    const ratio = d.ratio;
+    const label = `KONTROLLIERTE ${d.phase.beings.toUpperCase()}`;
+    if (e.label && e.label.textContent !== label) e.label.textContent = label;
     e.covFill.style.width = Math.min(100, ratio * 100) + '%';
     e.covPct.textContent = fmtPct(ratio);
     this.updateHand();
@@ -41,7 +46,7 @@ export class Hud {
 
   updateHand() {
     const s = this.game.s;
-    const key = s.hand.join(',') + '|' + s.settings.autoPlace;
+    const key = s.hand.join(',') + '|' + s.settings.autoPlace + '|' + s.phase;
     if (key === this.handKey) return;
     this.handKey = key;
     const el = this.els.hand;
@@ -54,7 +59,7 @@ export class Hud {
       line.className = 'hand-active';
       const national = s.hand.some((id) => BUILDING_BY_ID[id].scope === 'national');
       line.textContent = `IN DER HAND: ${txt} → AUF DIE KARTE KLICKEN (+ EINWEIHUNGSBONUS)`
-        + (national ? ' · LANDESWEITE ANLAGEN WIRKEN ÜBERALL, DER ORT IST NUR OPTIK' : '');
+        + (national ? ` · ${this.game.phase.wideAdj.toUpperCase()} ANLAGEN WIRKEN ÜBERALL, DER ORT IST NUR OPTIK` : '');
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = 'ALLE AUTOMATISCH PLATZIEREN';
@@ -143,7 +148,15 @@ export function toast(title, text = '', kind = '') {
  * @param {{title:string, body:(string|Node)[], actions:{label:string,value:string,primary?:boolean,danger?:boolean}[]}} opts
  *   body: Strings werden als Absätze (Text, kein HTML) eingefügt, Nodes direkt.
  */
-export function dialog({ title, body = [], actions = [{ label: 'OK', value: 'ok', primary: true }] }) {
+let dialogQueue = Promise.resolve();
+/** Dialoge laufen nacheinander – ein zweiter Aufruf wartet, bis der erste geschlossen ist. */
+export function dialog(opts) {
+  const run = dialogQueue.then(() => showDialog(opts));
+  dialogQueue = run.catch(() => {});
+  return run;
+}
+
+function showDialog({ title, body = [], actions = [{ label: 'OK', value: 'ok', primary: true }] }) {
   const dlg = $('dialog');
   $('dialog-title').textContent = title;
   const bodyEl = $('dialog-body');
@@ -157,17 +170,31 @@ export function dialog({ title, body = [], actions = [{ label: 'OK', value: 'ok'
   }
   const act = $('dialog-actions');
   act.innerHTML = '';
-  for (const a of actions) {
-    const b = document.createElement('button');
-    b.className = 'btn' + (a.primary ? ' btn-primary' : '') + (a.danger ? ' btn-danger' : '');
-    if (a.primary) b.style.fontSize = '24px';
-    b.value = a.value;
-    b.textContent = a.label;
-    act.append(b);
-  }
   return new Promise((resolve) => {
-    dlg.addEventListener('close', () => resolve(dlg.returnValue || 'cancel'), { once: true });
+    let done = false;
+    const finish = (value) => {
+      if (done) return;
+      done = true;
+      dlg.removeEventListener('close', onClose);
+      if (dlg.open) dlg.close(value);
+      resolve(value);
+    };
+    // Knöpfe schließen den Dialog selbst (synchron). Das `close`-Ereignis kommt asynchron und
+    // nicht in jedem Browser zuverlässig – es dient nur noch als Rückfall für die Esc-Taste.
+    const onClose = () => finish(dlg.returnValue || 'cancel');
+    for (const a of actions) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn' + (a.primary ? ' btn-primary' : '') + (a.danger ? ' btn-danger' : '');
+      if (a.primary) b.style.fontSize = '24px';
+      b.value = a.value;
+      b.textContent = a.label;
+      b.addEventListener('click', () => finish(a.value));
+      act.append(b);
+    }
+    dlg.addEventListener('close', onClose);
     dlg.returnValue = '';
+    if (dlg.open) dlg.close();
     dlg.showModal();
     act.querySelector('.btn-primary, .btn')?.focus();
   });
@@ -224,11 +251,15 @@ export function renderAchievements(el, s) {
 export function renderStats(el, game) {
   const { s, d } = game;
   const totalOwned = Object.values(s.owned).reduce((a, b) => a + b, 0);
+  const phase = d.phase;
+  const takenHere = phase.open.filter((r) => s.taken.includes(r.code)).length;
   const rows = [
     ['Spielzeit', fmtDuration(s.playtime)],
-    ['Kontrollierte Menschen', fmtInt(d.controlled)],
-    ['Bestwert', fmtInt(s.bestControlled)],
-    ['Bundesländer übernommen', `${s.taken.length}/16`],
+    ['Phase', `${phase.id}/5 · ${phase.name}`],
+    [`Kontrollierte ${phase.beings}`, fmtInt(d.controlled)],
+    ['Bestwert (dieser Einsatz)', fmtInt(s.bestControlled)],
+    ['Bestwert (alle Einsätze)', fmtInt(s.bestControlledAll)],
+    [`Gebiete übernommen (${phase.name})`, `${takenHere}/${phase.open.length}`],
     ['Funkpunkte (aktuell)', fmt(s.fp)],
     ['Funkpunkte (insgesamt)', fmt(s.fpAll)],
     ['FP/Sek. (ohne Effekte)', fmt(d.rawCps, { decimals: true })],
@@ -239,6 +270,102 @@ export function renderStats(el, game) {
     ['Aluhutträger überzeugt', fmtInt(s.aluhutConverted)],
     ['Goldene Masten', fmtInt(s.goldenClicked)],
     ['Erfolge', `${s.achievements.length}/${ACHIEVEMENTS.length}`],
+    ['Aluhut-Tränen', `${fmtInt(s.tears)} (+${fmtInt(s.tears * eco.TEAR_BONUS * 100)} % FP/Sek.)`],
+    ['Neustarts', fmtInt(s.prestiges)],
   ];
   el.innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+}
+
+// ---------- Phasen & Prestige ----------
+/**
+ * @param {HTMLElement} el
+ * @param {import('../core/game.js').Game} game
+ * @param {{onPrestige:()=>void}} actions
+ */
+export function renderPrestige(el, game, { onPrestige }) {
+  const { s } = game;
+  const pending = eco.pendingTears(s);
+  const free = s.tears - s.tearsSpent;
+  const can = game.canPrestige();
+  // Nur neu aufbauen, wenn sich etwas Sichtbares ändert (sonst verliert man den Tastaturfokus).
+  const key = [s.phase, s.universeDone, s.taken.length, pending, s.tears, s.tearsSpent, s.patents.join(), can].join('|');
+  if (el.dataset.key === key) return;
+  el.dataset.key = key;
+  el.innerHTML = '';
+
+  const label = (text) => {
+    const d = document.createElement('div');
+    d.className = 'section-label';
+    d.textContent = text;
+    return d;
+  };
+  const para = (text, cls = 'dim small') => {
+    const p = document.createElement('p');
+    p.className = cls;
+    p.textContent = text;
+    return p;
+  };
+
+  el.append(label('EINSATZPHASEN'));
+  const list = document.createElement('div');
+  list.className = 'phases';
+  for (const p of PHASES) {
+    const row = document.createElement('div');
+    let status;
+    let cls;
+    if (p.id < s.phase || (p.id === s.phase && s.universeDone)) { status = 'ERLEDIGT'; cls = 'done'; }
+    else if (p.id === s.phase) { status = `${p.open.filter((r) => s.taken.includes(r.code)).length}/${p.open.length} Gebiete`; cls = 'active'; }
+    else { status = 'GESPERRT'; cls = 'locked'; }
+    row.className = 'phase ' + cls;
+    for (const t of [`PHASE ${p.id}`, p.name, status]) {
+      const span = document.createElement('span');
+      span.textContent = t;
+      row.append(span);
+    }
+    list.append(row);
+  }
+  el.append(list);
+
+  el.append(label('NEUSTART NACH WELTHERRSCHAFT'));
+  const box = document.createElement('div');
+  box.className = 'prestige-box';
+  const big = document.createElement('div');
+  big.className = 'tears';
+  big.innerHTML = `<b>${fmtInt(s.tears)}</b> ALUHUT-TRÄNEN <span class="dim">· +${fmtInt(s.tears * eco.TEAR_BONUS * 100)} % FP/SEK. DAUERHAFT</span>`;
+  box.append(big);
+  if (s.phase <= 3) {
+    box.append(para('ZUGANG VERWEIGERT. Freigabe nach Erreichen der Weltherrschaft (Ende von Phase 3). Dann: Neustart gegen Aluhut-Tränen – dauerhaft +2 % FP/Sek. je Träne.'));
+  } else {
+    box.append(para(`Ein Neustart bringt jetzt ${fmtInt(pending)} ${pending === 1 ? 'Träne' : 'Tränen'}. Nächste Träne bei ${fmt(eco.fpForTears(s.tears + pending + 1))} FP insgesamt (bisher ${fmt(s.fpAll)}).`));
+    box.append(para('Alles wird zurückgesetzt: Masten, Upgrades, Funkpunkte, Phasen. Es bleiben: Tränen, Patente, Erfolge und Statistik. „Die Menschheit wurde per Software-Update zurückgesetzt.“'));
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-danger';
+    btn.textContent = can ? `Neustart: +${fmtInt(pending)} Tränen` : 'Neustart (noch keine neue Träne)';
+    btn.disabled = !can;
+    btn.addEventListener('click', onPrestige);
+    box.append(btn);
+  }
+  el.append(box);
+
+  if (s.tears > 0 || s.prestiges > 0) {
+    el.append(label(`HIMMLISCHE PATENTE · ${fmtInt(free)} TRÄNEN FREI`));
+    el.append(para('Ausgegebene Tränen behalten ihren +2-%-Bonus. Patente gelten für immer.'));
+    const grid = document.createElement('div');
+    grid.className = 'patents';
+    for (const p of PATENTS) {
+      const owned = s.patents.includes(p.id);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'patent' + (owned ? ' owned' : free >= p.cost ? ' can' : '');
+      b.disabled = owned || free < p.cost;
+      b.innerHTML = '<b></b><span></span><em></em>';
+      b.querySelector('b').textContent = p.name;
+      b.querySelector('span').textContent = p.desc;
+      b.querySelector('em').textContent = owned ? 'ERTEILT' : `${p.cost} ${p.cost === 1 ? 'Träne' : 'Tränen'}`;
+      b.addEventListener('click', () => game.buyPatent(p.id));
+      grid.append(b);
+    }
+    el.append(grid);
+  }
 }

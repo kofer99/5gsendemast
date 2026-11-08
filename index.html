@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Projekt Sendemast – 5gsendemast.de</title>
-<meta name="description" content="Satire-Idle-Game: Stelle 5G-Sendemasten auf und „kontrolliere“ Deutschland. Keine Sorge – 5G ist harmlos. Die Geheimakte erklärt, warum.">
+<meta name="description" content="Satire-Idle-Game: Stelle 5G-Sendemasten auf und „kontrolliere“ Deutschland, Europa, die Welt und das Universum. Keine Sorge – 5G ist harmlos. Die Geheimakte erklärt, warum.">
 <meta name="theme-color" content="#070b08">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Projekt Sendemast – Kontrolliere Deutschland mit 5G">
@@ -28,7 +28,7 @@
     </a>
     <div class="counter">
       <div class="counter-main">
-        <span class="counter-label">KONTROLLIERTE MENSCHEN</span>
+        <span class="counter-label" id="controlled-label">KONTROLLIERTE MENSCHEN</span>
         <output id="controlled" class="counter-value">0</output>
       </div>
       <div class="counter-side">
@@ -48,6 +48,7 @@
     <section class="map-panel" aria-labelledby="map-title">
       <div class="panel-head">
         <h1 id="map-title">&gt; LAGEKARTE DEUTSCHLAND</h1>
+        <div id="map-tabs" class="map-tabs" role="group" aria-label="Karte wählen" hidden></div>
         <div class="coverage">
           <span class="dim">ABDECKUNG</span>
           <span class="bar" aria-hidden="true"><span id="coverage-fill"></span></span>
@@ -103,11 +104,7 @@
       </div>
 
       <div class="tabpanel" id="tab-prestige" role="tabpanel" aria-labelledby="t-prestige" hidden>
-        <div class="panel-pad">
-          <div class="section-label">EINSATZPHASEN</div>
-          <div id="phases"></div>
-          <p class="dim" style="margin:0;font-size:12.5px">PRESTIGE: ZUGANG VERWEIGERT. Freigabe nach Erreichen der Weltherrschaft (Phase 3). Dann: Neustart gegen „Aluhut-Tränen“ – dauerhaft +2 % FP/Sek. je Träne.</p>
-        </div>
+        <div class="panel-pad" id="prestige"></div>
       </div>
     </aside>
   </main>
