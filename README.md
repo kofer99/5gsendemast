@@ -28,6 +28,7 @@ python -m http.server 8765
 | http://localhost:8765/tests/seed.html?phase=2\|3\|4\|5 | Test-Spielstand mitten in Phase 2–5 (optional `&tears=40`) |
 | http://localhost:8765/tests/shot.html?phase=3&tab=prestige | Seed laden und Spiel in 1400 px zeigen (für Screenshots), `spawn=demo,trupp` erzeugt Gegenspieler |
 | http://localhost:8765/tests/shot-mobile.html?phase=3 | dasselbe in Handy-Breite |
+| http://localhost:8765/tests/music.html | Hintergrundmusik: Pegelprüfung und ganzen Song je Intensitätsstufe anhören |
 | http://localhost:8765/tests/maps.html | Vorschau der Europa- und Weltkarte |
 | http://localhost:8765/tests/mobile.html | Handy-Vorschau (390 px / 360 px) |
 

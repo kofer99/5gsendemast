@@ -52,6 +52,7 @@
 - **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
 - **Impressum und Datenschutz:** ausgefüllt am 09.11.2026 (Datenschutz auf Basis von Datenschutz-Generator.de, angepasst). Bei Änderungen an Bestenliste, Browser-Speicher oder Hosting mitpflegen.
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
+- **Neu am 09.11. (fünfter Teil): Hintergrundmusik** (§4.15): selbst erzeugter Synthwave-Song, 2 Minuten, wird mit jeder Phase intensiver, standardmäßig aus.
 - **Live:** https://5gsendemast.de seit 09.11.2026 (Pages-Projekt `sendemast`). Jeder Push auf `main` geht sofort live.
 - **Code auf GitHub:** https://github.com/kofer99/5gsendemast (privat, Branch `main`, seit 09.11.2026). D1-Datenbank `sendemast-db` angelegt (ID in `wrangler.toml`), Tabelle `scores` per Konsole erstellt. Noch kein Pages-Projekt, also noch nicht live.
 
@@ -300,6 +301,16 @@ Ein goldener Mast erscheint alle 5–10 min an einer zufälligen Stelle und blei
 4. Die Zwischensequenz nach der Welt sagt das jetzt ehrlich: „Nach dem Universum sind es fast zehnmal so viele.“
 
 **Falls frühe Neustarts sich lohnen sollen (nicht umgesetzt):** Tränen je erreichtem Checkpoint vergeben statt aus den Gesamt-FP, z. B. Welt 3, Orbit 6, Universum 12 Tränen **pro Durchlauf**. Dann lohnen sich schnelle Welt-Schleifen, sobald ein Durchlauf schnell genug ist. Nachteil: Man braucht eine Obergrenze oder abnehmende Erträge, sonst lässt sich endlos farmen.
+
+### 4.15 Hintergrundmusik
+
+**Status:** ✅ umgesetzt am 09.11.2026 (`assets/js/audio/synthwave.js`).
+- **Selbst erzeugter 80er-Synthwave** mit der Web Audio API: keine Audiodateien, keine fremden Samples, daher keine Lizenzfragen und kein externer Abruf (Datenschutz unverändert). Die Datei ist ca. 15 KB groß.
+- **Song:** 96 BPM, A-Moll, Teile A B A C D B à 8 Takte = 48 Takte, 2 Minuten, dann von vorn. Jeder Teil hat eigene Akkorde, Bass-, Arpeggio- und Drum-Muster. C ist ein Breakdown (Drums setzen aus, Aufbau mit Snare-Wirbel). Snare-Fills vor jedem Teilwechsel.
+- **Instrumente:** Pads (verstimmte Sägezähne, atmender Tiefpass), Bass (Säge + Sub), Arpeggio (Rechteck mit punktiertem Achtel-Echo), Kick, Snare mit Hall, Hi-Hats, Crash, Lead (Säge mit Vibrato). Hall aus vier Rückkopplungs-Echos (kein ConvolverNode).
+- **Intensität folgt der Phase:** 1 Pads, Bass, leise Drums · 2 + Snare, Fills · 3 + Arpeggio, Crash · 4 + volle Kick, 16tel-Hats, hellerer Klang · 5 + Lead-Melodien in A, B und D.
+- **Bedienung:** standardmäßig **aus**. Knopf „♪ MUSIK“ in der Kopfzeile, Lautstärkeregler unter Optionen → Audio (Standard 50 %). Beides wird im Spielstand gemerkt (`settings.music`, `settings.musicVolume`). War die Musik an, startet sie nach dem Neuladen mit der ersten Interaktion (Autoplay-Regeln der Browser). Im Hintergrund-Tab pausiert sie.
+- **Test und Vorschau:** `tests/music.html` rendert den Song offline, prüft Pegel (keine Übersteuerung, kein Teil still) und bietet je Stufe den ganzen Song zum Anhören.
 
 ---
 

@@ -45,6 +45,7 @@
       </div>
     </div>
     <nav class="topnav" aria-label="Hauptnavigation">
+      <button class="btn music-btn" type="button" id="music-btn" aria-pressed="false" title="Synthwave-Hintergrundmusik an/aus">♪ MUSIK: AUS</button>
       <a class="btn" href="/geheimakte/">[ GEHEIMAKTE ]</a>
       <a class="btn" href="/bestenliste/">[ BESTENLISTE ]</a>
       <a class="btn" href="/portal/">[ PORTAL ]</a>
@@ -106,6 +107,12 @@
             <button class="btn" type="button" id="btn-share">Prahlen</button>
           </div>
           <p class="dim" style="margin:0;font-size:12px">Automatisches Speichern alle 30 Sekunden – nur in deinem Browser (localStorage). Keine Cookies, kein Tracking.</p>
+          <div class="section-label">AUDIO</div>
+          <div class="audio-row">
+            <button class="btn" type="button" id="music-toggle" aria-pressed="false">Musik einschalten</button>
+            <label class="vol">Lautstärke <input type="range" id="music-vol" min="0" max="100" step="5" value="50"> <output id="music-vol-out">50 %</output></label>
+          </div>
+          <p class="dim" style="margin:0;font-size:12px">Synthwave, live im Browser erzeugt. Wird mit jeder Eskalationsphase intensiver. Pausiert, wenn der Tab im Hintergrund ist.</p>
           <div class="btn-row"><button class="btn btn-danger" type="button" id="btn-reset">Neuer Einsatz (Spielstand löschen)</button></div>
         </div>
       </div>

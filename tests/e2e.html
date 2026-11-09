@@ -64,6 +64,15 @@ try {
   await wait(200);
   rows[0].click(); await wait(200);
   log(d.querySelectorAll('.mk').length === 2 && !$('#hand-info').textContent.includes('IN DER HAND'), 'Auto-Platzieren setzt sofort');
+  // Musik: standardmäßig aus, Knopf schaltet um, Wahl wird gespeichert
+  log($('#music-btn').getAttribute('aria-pressed') === 'false' && $('#music-btn').textContent.includes('AUS'), 'Musik standardmäßig aus');
+  $('#music-btn').click();
+  log(await until(() => $('#music-btn').getAttribute('aria-pressed') === 'true'), `Musik an: ${$('#music-btn').textContent}`);
+  log(await until(() => save().settings?.music === true), 'Musik-Einstellung gespeichert');
+  const vol = $('#music-vol'); vol.value = '30'; vol.dispatchEvent(new w.Event('input', { bubbles: true })); vol.dispatchEvent(new w.Event('change', { bubbles: true }));
+  log(await until(() => Math.abs((save().settings?.musicVolume ?? 0) - 0.3) < 1e-9) && $('#music-vol-out').textContent === '30 %', 'Lautstärke 30 % gespeichert');
+  $('#music-btn').click();
+  log(await until(() => $('#music-btn').getAttribute('aria-pressed') === 'false' && save().settings?.music === false), 'Musik wieder aus');
   // Ticker
   log($('#ticker-text').textContent.length > 10, 'Ticker hat Text');
   // Export/Import

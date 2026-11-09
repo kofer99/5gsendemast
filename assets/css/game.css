@@ -264,6 +264,16 @@ body.game { height: 100dvh; overflow: hidden; }
 .dialog textarea { width: 100%; min-height: 120px; resize: vertical; background: var(--bg); color: var(--green); border: 1px solid var(--line); font: 12px/1.4 var(--font-mono); padding: 8px; word-break: break-all; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
 
+/* ---------- Musik ---------- */
+.music-btn { font-size: 12px; letter-spacing: 1px; }
+.music-btn[aria-pressed="true"] { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 10px rgba(255, 176, 46, 0.35); }
+.music-btn[aria-pressed="true"]:hover { color: var(--amber); }
+.audio-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+.audio-row #music-toggle[aria-pressed="true"] { border-color: var(--amber); color: var(--amber); }
+.vol { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 1px; color: var(--green-dim); }
+.vol input { accent-color: var(--green); width: 140px; }
+.vol output { min-width: 40px; color: var(--green); }
+
 /* ---------- Mobil ---------- */
 @media (max-width: 960px) {
   body.game { height: auto; overflow: auto; }

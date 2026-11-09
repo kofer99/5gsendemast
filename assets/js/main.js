@@ -7,6 +7,7 @@ import { Shop } from './ui/shop.js';
 import { Hud, Ticker, toast, dialog, setupTabs, renderAchievements, renderStats, renderPrestige } from './ui/hud.js';
 import { fmt, fmtInt, fmtDuration } from './util/format.js';
 import { autoSubmitter } from './leaderboard-client.js';
+import { Synthwave } from './audio/synthwave.js';
 
 const $ = (id) => document.getElementById(id);
 const TICK_MS = 100;
@@ -81,6 +82,51 @@ const CUTSCENES = {
     ],
   },
 };
+// ---------- Musik (DESIGN.md §4.15): standardmäßig aus, Wahl wird im Spielstand gemerkt ----------
+const music = new Synthwave({ volume: state.settings.musicVolume, intensity: state.phase });
+function renderMusicUi() {
+  const on = !!state.settings.music;
+  $('music-btn').textContent = on ? '♪ MUSIK: AN' : '♪ MUSIK: AUS';
+  $('music-btn').setAttribute('aria-pressed', String(on));
+  $('music-toggle').textContent = on ? 'Musik ausschalten' : 'Musik einschalten';
+  $('music-toggle').setAttribute('aria-pressed', String(on));
+  const pct = Math.round(state.settings.musicVolume * 100);
+  $('music-vol').value = String(pct);
+  $('music-vol-out').textContent = `${pct} %`;
+}
+async function setMusic(on) {
+  state.settings.music = on;
+  if (on) {
+    const ok = await music.start();
+    if (!ok) { state.settings.music = false; toast('KEIN TON', 'Dieser Browser kann keine Musik abspielen.', 'warn'); }
+  } else {
+    music.stop();
+  }
+  renderMusicUi();
+  save();
+}
+$('music-btn').addEventListener('click', () => setMusic(!state.settings.music));
+$('music-toggle').addEventListener('click', () => setMusic(!state.settings.music));
+$('music-vol').addEventListener('input', (e) => {
+  state.settings.musicVolume = Number(e.target.value) / 100;
+  music.setVolume(state.settings.musicVolume);
+  renderMusicUi();
+});
+$('music-vol').addEventListener('change', () => save());
+game.on('phase', ({ to }) => music.setIntensity(to.id));
+game.on('prestige', () => music.setIntensity(1));
+// War die Musik beim letzten Mal an, startet sie mit der ersten Interaktion (Browser erlauben Ton erst danach).
+if (state.settings.music) {
+  const resume = () => {
+    removeEventListener('pointerdown', resume, true);
+    removeEventListener('keydown', resume, true);
+    if (state.settings.music) music.start();
+  };
+  addEventListener('pointerdown', resume, true);
+  addEventListener('keydown', resume, true);
+}
+renderMusicUi();
+
 // ---------- Bestenliste: nur wer sich auf /bestenliste/ eingetragen hat, meldet automatisch ----------
 let rankToast = false;
 const reportScore = autoSubmitter(() => game.s, {

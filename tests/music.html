@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>Musik – Projekt Sendemast</title>
+<style>body{background:#070b08;color:#3dff8a;font:13px/1.6 monospace;padding:16px}.fail{color:#ff6b5c}audio{display:block;margin:4px 0 14px;width:min(640px,100%)}button{font:inherit;background:none;color:#3dff8a;border:1px solid #1f3a26;padding:6px 12px;cursor:pointer;margin:4px 6px 4px 0}button:hover{border-color:#3dff8a}button:disabled{opacity:.5}</style></head>
+<body>
+<h1>Synthwave-Generator: Vorschau &amp; Pegel</h1>
+<p>Song: Teile <span id="song"></span> = <span id="len"></span>, danach von vorn. Stufe = Eskalationsphase.</p>
+<h2>Ganzen Song anhören</h2>
+<p>Rendert den kompletten Song in der gewählten Stufe (dauert ein paar Sekunden).</p>
+<div id="buttons"></div>
+<div id="songs"></div>
+<h2>Pegelprüfung</h2>
+<pre id="out">rendert …</pre>
+<script type="module">
+import { Synthwave, MUSIC } from '/assets/js/audio/synthwave.js';
+const fmtTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')} Min.`;
+document.getElementById('song').textContent = MUSIC.SONG.join(' ');
+document.getElementById('len').textContent = `${MUSIC.BARS} Takte, ${fmtTime(MUSIC.SECONDS)}`;
+const out = [];
+const log = (ok, msg) => out.push(ok ? `✔ ${msg}` : `<span class="fail">✘ ${msg}</span>`);
+// Unter Edge --headless mit --virtual-time-budget wird die Uhr vorgespult, während der Audio-Thread rechnet.
+// Kurze Timer halten die Seite beschäftigt, bis das Rendern wirklich fertig ist.
+const settle = async (p) => { let done = null; p.then((v) => { done = { v }; }, (e) => { done = { e }; }); while (!done) await new Promise((r) => setTimeout(r, 5)); if (done.e) throw done.e; return done.v; };
+const stats = (buf) => {
+  let peak = 0, sum = 0, n = 0;
+  for (let c = 0; c < buf.numberOfChannels; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; sum += d[i] * d[i]; n++; }
+  }
+  return { peak, rms: Math.sqrt(sum / n) };
+};
+const db = (x) => (20 * Math.log10(Math.max(x, 1e-9))).toFixed(1);
+function wav(buf) {
+  const ch = buf.numberOfChannels, len = buf.length, rate = buf.sampleRate;
+  const dv = new DataView(new ArrayBuffer(44 + len * ch * 2));
+  const w = (o, s) => [...s].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); dv.setUint32(4, 36 + len * ch * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, ch, true); dv.setUint32(24, rate, true);
+  dv.setUint32(28, rate * ch * 2, true); dv.setUint16(32, ch * 2, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, len * ch * 2, true);
+  let o = 44;
+  for (let i = 0; i < len; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, buf.getChannelData(c)[i])); dv.setInt16(o, v * 32767, true); o += 2; }
+  return new Blob([dv], { type: 'audio/wav' });
+}
+
+// Knöpfe: ganzer Song je Stufe
+for (let lvl = 1; lvl <= 5; lvl++) {
+  const b = document.createElement('button');
+  b.textContent = `Stufe ${lvl}`;
+  b.addEventListener('click', async () => {
+    b.disabled = true; b.textContent = `Stufe ${lvl} – rendert …`;
+    const buf = await Synthwave.renderOffline({ bars: MUSIC.BARS, intensity: lvl, sampleRate: 32000, volume: 0.8 });
+    const a = document.createElement('audio'); a.controls = true; a.src = URL.createObjectURL(wav(buf));
+    const h = document.createElement('div'); h.textContent = `Ganzer Song, Stufe ${lvl} (${fmtTime(buf.duration)})`;
+    document.getElementById('songs').append(h, a);
+    b.textContent = `Stufe ${lvl} ✓`;
+  });
+  document.getElementById('buttons').append(b);
+}
+
+async function main() {
+  try {
+    // Schnell: je Stufe 8 Takte aus Teil B (Galopp-Bass, Fill, Crash)
+    let lastRms = 0;
+    for (let lvl = 1; lvl <= 5; lvl++) {
+      const buf = await settle(Synthwave.renderOffline({ bars: 8, startBar: 8, intensity: lvl, sampleRate: 22050, volume: 1 }));
+      const { peak, rms } = stats(buf);
+      log(peak < 1, `Stufe ${lvl}: Spitze ${db(peak)} dBFS (keine Übersteuerung)`);
+      log(rms > 0.02, `Stufe ${lvl}: Lautheit ${db(rms)} dB RMS (hörbar)`);
+      if (lvl > 1) log(rms >= lastRms * 0.9, `Stufe ${lvl}: mindestens so voll wie Stufe ${lvl - 1}`);
+      lastRms = rms;
+    }
+    // Gründlich: ganzer Song in der dichtesten Stufe, Teil für Teil
+    const full = await settle(Synthwave.renderOffline({ bars: MUSIC.BARS, intensity: 5, sampleRate: 22050, volume: 1 }));
+    const { peak } = stats(full);
+    log(peak < 1, `Ganzer Song, Stufe 5: Spitze ${db(peak)} dBFS über ${fmtTime(full.duration)}`);
+    const secLen = full.sampleRate * 8 * 16 * MUSIC.STEP;
+    MUSIC.SONG.forEach((name, i) => {
+      const d = full.getChannelData(0).subarray(Math.floor(i * secLen), Math.floor((i + 1) * secLen));
+      let sum = 0; for (const v of d) sum += v * v;
+      const rms = Math.sqrt(sum / d.length);
+      log(rms > 0.01, `Teil ${i + 1} (${name}): ${db(rms)} dB RMS`);
+    });
+  } catch (e) {
+    log(false, 'Ausnahme: ' + e.message);
+  }
+  const failed = out.filter((x) => x.includes('fail')).length;
+  document.getElementById('out').innerHTML = out.join('\n') + `\n\n${out.length - failed}/${out.length} bestanden`;
+  document.title = 'MUSIC DONE';
+}
+main();
+</script>
+</body>
+</html>

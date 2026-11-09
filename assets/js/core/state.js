@@ -47,7 +47,7 @@ export function newState(now = Date.now()) {
     buffs: [],      // { id, until, mult?, clickMult? }
     germanyDone: false,
     introSeen: false,
-    settings: { autoPlace: false, buyAmount: 1 },
+    settings: { autoPlace: false, buyAmount: 1, music: false, musicVolume: 0.5 },
     nickname: '',
     test: false,    // von einer Testseite erzeugt (tests/seed.html, e2e) → nie in die Bestenliste
   };
