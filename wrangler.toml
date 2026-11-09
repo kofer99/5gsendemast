@@ -6,7 +6,7 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "sendemast-db"
-database_id = "BITTE-NACH-DEM-ANLEGEN-EINTRAGEN"   # wrangler d1 create sendemast-db
+database_id = "457a9e47-b0ac-480d-a30b-d07c81f4a698"
 migrations_dir = "migrations"
 
 # Secret (nicht hier eintragen!): wrangler pages secret put IP_SALT

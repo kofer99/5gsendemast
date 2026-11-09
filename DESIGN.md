@@ -50,7 +50,7 @@
 - **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
 - **Platzhalter:** Impressum, Datenschutz (eigene Daten eintragen!).
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
-- **Code auf GitHub:** https://github.com/kofer99/5gsendemast (privat, Branch `main`, seit 09.11.2026). Noch kein Hosting.
+- **Code auf GitHub:** https://github.com/kofer99/5gsendemast (privat, Branch `main`, seit 09.11.2026). D1-Datenbank `sendemast-db` angelegt (ID in `wrangler.toml`), Tabelle `scores` per Konsole erstellt. Noch kein Pages-Projekt, also noch nicht live.
 
 ### Nächste Schritte (Reihenfolge offen)
 3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)

@@ -75,6 +75,6 @@ Falls doch schon vorher:
 ## Was Claude von dir braucht
 
 - [x] GitHub-Repo-Adresse: https://github.com/kofer99/5gsendemast (gepusht am 09.11.2026)
-- [ ] D1 Database ID
+- [x] D1 Database ID: `457a9e47-b0ac-480d-a30b-d07c81f4a698` (in `wrangler.toml`, Tabelle `scores` angelegt am 09.11.2026)
 
 Weitere Details: `DESIGN.md` §5 (Bestenliste) und §11 (Hosting & Deployment).
