@@ -33,7 +33,7 @@ Kosten: 0 € (abgesehen von der Domain). Pages, Functions und D1 sind im kosten
 
 ## 4. Domain vorbereiten – Nameserver noch NICHT umstellen
 
-> ✅ 09.11.2026: Zone in Cloudflare angelegt, DNS-Einträge mit CheckDomain abgeglichen. Nameserver noch nicht umgestellt.
+> ✅ 09.11.2026: Zone in Cloudflare angelegt, DNS-Einträge abgeglichen und **Nameserver bereits auf Cloudflare umgestellt**. E-Mail über die Domain wird nicht gebraucht, die MX-Einträge sind daher egal. DNSSEC war nicht aktiv (gut so).
 
 1. Cloudflare → **Add a site / Domain hinzufügen** → `5gsendemast.de`, kostenloser Tarif.
 2. Cloudflare liest die vorhandenen DNS-Einträge ein. **Mit CheckDomain vergleichen**, besonders:
@@ -69,8 +69,8 @@ Falls doch schon vorher:
 2. Pages-Projekt anlegen (Schritt 5) bzw. Produktions-Branch auf `main` umstellen und Access-Schutz entfernen.
 3. Unter `<name>.pages.dev` testen: Spiel, Bestenliste (Eintragen, Austragen), Portal, Geheimakte.
 4. In Pages → **Custom domains**: `5gsendemast.de` und `www.5gsendemast.de` hinzufügen, Weiterleitung www → Hauptdomain.
-5. **Erst jetzt** bei CheckDomain die beiden Cloudflare-Nameserver eintragen. Vorher nochmal prüfen, dass alle MX-/TXT-Einträge in Cloudflare stehen.
-6. Warten, bis Cloudflare die Domain als aktiv meldet (Minuten bis 24 h). Dann „Always Use HTTPS“ aktivieren und E-Mail testen (senden und empfangen).
+5. ~~Nameserver bei CheckDomain umstellen~~ (bereits am 09.11.2026 erledigt). Die alten Einträge für `@` und `www` (CheckDomain-Parkseite, `88.99.101.251`) werden beim Verbinden der Custom Domain ersetzt.
+6. Prüfen, dass `https://5gsendemast.de` die Seite zeigt. Dann „Always Use HTTPS“ aktivieren.
 
 ---
 

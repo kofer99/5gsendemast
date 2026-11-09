@@ -10,7 +10,7 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 1. **Online gehen (§11, M7)**, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Du legst zuerst Konten und Datenbank an (noch nicht live) und schickst Repo-Adresse und D1-ID. GitHub-Repo, Cloudflare Pages, D1-Datenbank, Secret `IP_SALT`, Domain-Umzug inkl. E-Mail-Einträge. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
+> 1. **Online gehen (§11, M7)**, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Erledigt (09.11.2026): GitHub-Repo, D1-Datenbank, Domain in Cloudflare, **Nameserver auf Cloudflare umgestellt**. Offen: Pages-Projekt, Secret `IP_SALT`, Custom Domain. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
 > 2. Vorher von dir: Impressum und Datenschutz ausfüllen (eigene Daten). Was in die Datenschutzerklärung muss, steht unter „Offen“.
 > 3. Nach dem Online-Gang: Spiel komplett durchspielen, Bestenliste und Prestige echt testen.
 
@@ -53,7 +53,7 @@
 - **Code auf GitHub:** https://github.com/kofer99/5gsendemast (privat, Branch `main`, seit 09.11.2026). D1-Datenbank `sendemast-db` angelegt (ID in `wrangler.toml`), Tabelle `scores` per Konsole erstellt. Noch kein Pages-Projekt, also noch nicht live.
 
 ### Nächste Schritte (Reihenfolge offen)
-3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)
+3. Cloudflare Pages anlegen und Custom Domain verbinden (§11, M7). Repo, D1 und DNS sind fertig.
 
 ---
 
@@ -486,7 +486,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status
 4. **Domain:** `5gsendemast.de` in Cloudflare als Zone hinzufügen und **die Nameserver bei CheckDomain** auf die beiden Cloudflare-Nameserver umstellen
 5. In Pages die Custom Domains `5gsendemast.de` und `www.5gsendemast.de` hinzufügen, mit Weiterleitung von www auf die Hauptdomain
 6. HTTPS (automatisch) prüfen und „Always Use HTTPS“ aktivieren
-7. Vorhandene DNS-Einträge (z. B. E-Mail/MX bei CheckDomain) **vor** dem Nameserver-Wechsel in Cloudflare übernehmen
+7. ~~Vorhandene DNS-Einträge vor dem Nameserver-Wechsel übernehmen~~: Nameserver am 09.11.2026 auf Cloudflare umgestellt. E-Mail über die Domain wird **nicht** gebraucht.
 
 ---
 
@@ -511,4 +511,4 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status
 - [ ] Endgültiger Spielname („Projekt Sendemast“?)
 - [x] Score-Basis der Bestenliste: **kontrollierte Menschen** (höchster je erreichter Wert, über Prestige hinweg kumuliert)
 - [x] Repository: **öffentlich**
-- [x] E-Mail läuft über die Domain bei CheckDomain → MX/TXT-Einträge beim DNS-Umzug (M7) unbedingt übernehmen
+- [x] E-Mail über die Domain wird nicht gebraucht (entschieden 09.11.2026). MX-Einträge können in Cloudflare gelöscht werden.
