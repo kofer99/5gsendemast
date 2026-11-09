@@ -83,7 +83,13 @@ const CUTSCENES = {
   },
 };
 // ---------- Musik (DESIGN.md §4.15): standardmäßig aus, Wahl wird im Spielstand gemerkt ----------
-const music = new Synthwave({ volume: state.settings.musicVolume, intensity: state.phase });
+const music = new Synthwave({
+  volume: state.settings.musicVolume,
+  intensity: state.phase,
+  onSong: (song) => { $('music-title').textContent = `»${song.title}«`; },
+});
+$('music-title').textContent = `»${music.song.title}«`;
+$('music-next').addEventListener('click', () => music.next());
 function renderMusicUi() {
   const on = !!state.settings.music;
   $('music-btn').textContent = on ? '♪ MUSIK: AN' : '♪ MUSIK: AUS';

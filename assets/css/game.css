@@ -273,6 +273,9 @@ body.game { height: 100dvh; overflow: hidden; }
 .vol { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 1px; color: var(--green-dim); }
 .vol input { accent-color: var(--green); width: 140px; }
 .vol output { min-width: 40px; color: var(--green); }
+.now-playing { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px; letter-spacing: 1px; margin-bottom: 6px; }
+.now-playing #music-title { color: var(--amber); }
+.now-playing .btn { min-height: 34px; padding: 4px 10px; }
 
 /* ---------- Mobil ---------- */
 @media (max-width: 960px) {

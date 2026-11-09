@@ -2,21 +2,21 @@
 // Keine Audiodateien, keine fremden Samples – die Musik entsteht aus Oszillatoren und Rauschen
 // und gehört damit vollständig zum Projekt (keine Lizenzfragen). DESIGN.md §4.15.
 //
-// Aufbau: 96 BPM, A-Moll, ein Song aus 6 Teilen à 8 Takten (A B A C D B = 48 Takte, ca. 2 Min.),
-// danach von vorn. Jeder Teil hat eigene Akkorde, Bass-, Arpeggio- und Drum-Muster; C ist ein Breakdown.
+// Playlist aus 6 Stücken (ca. 12 Min.), danach von vorn. Jedes Stück hat eigenes Tempo, eigene Tonart,
+// eigene Teile (Akkorde, Bass-, Arpeggio- und Drum-Muster) und eigene Klangfarben.
 // Intensität 1–5 folgt der Eskalationsphase:
-// 1 Pads, Bass, leise Kick und Hi-Hats · 2 + Snare mit Hall, Fills · 3 + Arpeggio mit Echo, Crash
-// 4 + volle Kick, 16tel-Hats, offener Filter · 5 + Lead-Melodien.
+// 1 Pads, Bass, leise Drums · 2 + Snare mit Hall, Fills · 3 + Arpeggio mit Echo, Crash
+// 4 + volle Drums, hellerer Klang · 5 + Lead-Melodien.
 
-const BPM = 96;
-const STEP = 60 / BPM / 4;          // Sechzehntel in Sekunden
 const STEPS_PER_BAR = 16;
+const BARS_PER_SECTION = 8;
 const LOOKAHEAD = 0.15;             // so weit im Voraus wird geplant (s)
 const TICK_MS = 25;
 
 const midiHz = (m) => 440 * 2 ** ((m - 69) / 12);
 
-// Akkorde: Pad-Voicing (eng geführt), Bass-Grundton, Arpeggio-Töne
+// Akkorde im A-Moll-Rahmen; jedes Stück transponiert sie in seine Tonart.
+// pad: eng geführtes Voicing · bass: Grundton · arp: vier Arpeggio-Töne
 const CHORDS = {
   Am: { pad: [57, 60, 64], bass: 33, arp: [69, 72, 76, 81] },
   F:  { pad: [57, 60, 65], bass: 29, arp: [65, 69, 72, 77] },
@@ -25,6 +25,7 @@ const CHORDS = {
   Em: { pad: [55, 59, 64], bass: 28, arp: [64, 67, 71, 76] },
   E:  { pad: [56, 59, 64], bass: 28, arp: [64, 68, 71, 76] },
   Dm: { pad: [57, 62, 65], bass: 26, arp: [62, 65, 69, 74] },
+  Bb: { pad: [58, 62, 65], bass: 34, arp: [65, 70, 74, 77] },
 };
 
 // Arpeggio-Reihenfolgen (Index in chord.arp)
@@ -34,50 +35,7 @@ const ARPS = {
   pulse:  [0, 3, 1, 3, 2, 3, 1, 3, 0, 3, 1, 3, 2, 3, 1, 3],
 };
 
-// Lead-Melodien je Teil: [Takt, Schritt, MIDI-Ton, Länge in Schritten]
-const LEAD_A = [
-  [0, 0, 76, 6], [0, 6, 74, 2], [0, 8, 72, 8],
-  [1, 0, 72, 4], [1, 4, 74, 4], [1, 8, 76, 8],
-  [2, 0, 79, 6], [2, 6, 76, 2], [2, 8, 74, 8],
-  [3, 0, 74, 4], [3, 4, 76, 4], [3, 8, 71, 8],
-  [4, 0, 76, 6], [4, 6, 74, 2], [4, 8, 72, 8],
-  [5, 0, 72, 4], [5, 4, 74, 4], [5, 8, 77, 8],
-  [6, 0, 79, 8], [6, 8, 81, 8],
-  [7, 0, 79, 4], [7, 4, 76, 12],
-];
-const LEAD_B = [
-  [0, 0, 72, 4], [0, 4, 74, 4], [0, 8, 76, 8],
-  [1, 0, 74, 4], [1, 4, 76, 4], [1, 8, 79, 8],
-  [2, 0, 81, 12], [2, 12, 79, 4],
-  [3, 0, 76, 16],
-  [4, 0, 72, 4], [4, 4, 74, 4], [4, 8, 77, 8],
-  [5, 0, 79, 8], [5, 8, 77, 4], [5, 12, 76, 4],
-  [6, 0, 76, 8], [6, 8, 79, 8],
-  [7, 0, 80, 16],
-];
-const LEAD_D = [
-  [0, 0, 79, 6], [0, 6, 76, 2], [0, 8, 72, 8],
-  [1, 0, 74, 6], [1, 6, 71, 2], [1, 8, 67, 8],
-  [2, 0, 72, 4], [2, 4, 76, 4], [2, 8, 81, 8],
-  [3, 0, 77, 8], [3, 8, 76, 4], [3, 12, 74, 4],
-  [4, 0, 79, 6], [4, 6, 76, 2], [4, 8, 72, 8],
-  [5, 0, 74, 6], [5, 6, 79, 2], [5, 8, 83, 8],
-  [6, 0, 81, 8], [6, 8, 77, 8],
-  [7, 0, 76, 8], [7, 8, 80, 8],
-];
-
-// Song-Teile. bass: eighth (Achtel mit Oktave) · gallop (16tel-Galopp) · long (lange Töne) · sync (synkopiert)
-// drums: full · break (Breakdown: erst nur Hi-Hats, dann Aufbau mit Snare-Wirbel)
-const SECTIONS = {
-  A: { chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'Em'], arp: 'updown', bass: 'eighth', drums: 'full', lead: LEAD_A },
-  B: { chords: ['F', 'G', 'Am', 'Am', 'F', 'G', 'C', 'E'], arp: 'climb', bass: 'gallop', drums: 'full', lead: LEAD_B },
-  C: { chords: ['Dm', 'Am', 'F', 'G', 'Dm', 'Am', 'F', 'E'], arp: 'pulse', bass: 'long', drums: 'break', lead: null },
-  D: { chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'E'], arp: 'updown', bass: 'sync', drums: 'full', lead: LEAD_D },
-};
-const SONG = ['A', 'B', 'A', 'C', 'D', 'B'];
-const BARS_PER_SECTION = 8;
-const SONG_STEPS = SONG.length * BARS_PER_SECTION * STEPS_PER_BAR;
-
+// Bass-Muster: liefern je Sechzehntel { oct, len, vel } oder null
 const BASS = {
   eighth: (s, lvl) => (s % 2 === 0 ? { oct: lvl >= 2 && s % 4 === 2, len: 1.8, vel: s % 4 === 0 ? 1 : 0.8 } : null),
   gallop: (s) => ([0, 2, 3].includes(s % 4) ? { oct: s % 8 === 3, len: s % 4 === 0 ? 1.8 : 0.9, vel: s % 4 === 0 ? 1 : 0.7 } : null),
@@ -85,12 +43,149 @@ const BASS = {
   sync:   (s) => ([0, 3, 6, 8, 10, 11, 14].includes(s) ? { oct: s === 6 || s === 14, len: 1.6, vel: s === 0 || s === 8 ? 1 : 0.75 } : null),
 };
 
+// Handgeschriebene Melodien für Stück 1: [Takt, Schritt, MIDI-Ton, Länge in Schritten]
+const LEAD_A = [
+  [0, 0, 76, 6], [0, 6, 74, 2], [0, 8, 72, 8], [1, 0, 72, 4], [1, 4, 74, 4], [1, 8, 76, 8],
+  [2, 0, 79, 6], [2, 6, 76, 2], [2, 8, 74, 8], [3, 0, 74, 4], [3, 4, 76, 4], [3, 8, 71, 8],
+  [4, 0, 76, 6], [4, 6, 74, 2], [4, 8, 72, 8], [5, 0, 72, 4], [5, 4, 74, 4], [5, 8, 77, 8],
+  [6, 0, 79, 8], [6, 8, 81, 8], [7, 0, 79, 4], [7, 4, 76, 12],
+];
+const LEAD_B = [
+  [0, 0, 72, 4], [0, 4, 74, 4], [0, 8, 76, 8], [1, 0, 74, 4], [1, 4, 76, 4], [1, 8, 79, 8],
+  [2, 0, 81, 12], [2, 12, 79, 4], [3, 0, 76, 16], [4, 0, 72, 4], [4, 4, 74, 4], [4, 8, 77, 8],
+  [5, 0, 79, 8], [5, 8, 77, 4], [5, 12, 76, 4], [6, 0, 76, 8], [6, 8, 79, 8], [7, 0, 80, 16],
+];
+const LEAD_D = [
+  [0, 0, 79, 6], [0, 6, 76, 2], [0, 8, 72, 8], [1, 0, 74, 6], [1, 6, 71, 2], [1, 8, 67, 8],
+  [2, 0, 72, 4], [2, 4, 76, 4], [2, 8, 81, 8], [3, 0, 77, 8], [3, 8, 76, 4], [3, 12, 74, 4],
+  [4, 0, 79, 6], [4, 6, 76, 2], [4, 8, 72, 8], [5, 0, 74, 6], [5, 6, 79, 2], [5, 8, 83, 8],
+  [6, 0, 81, 8], [6, 8, 77, 8], [7, 0, 76, 8], [7, 8, 80, 8],
+];
+
+/**
+ * Melodie nach festen Regeln aus den Akkorden (gleicher seed = gleiche Melodie):
+ * Taktanfang auf einem Akkordton, dazwischen kleine Schritte auf der Tonleiter, am Ende ein langer Ton.
+ */
+function makeLead(chords, seed) {
+  const rnd = mulberry32(seed);
+  const RHYTHMS = [
+    [[0, 6], [6, 2], [8, 8]], [[0, 4], [4, 4], [8, 8]], [[0, 8], [8, 8]],
+    [[0, 12], [12, 4]], [[0, 4], [4, 4], [8, 4], [12, 4]], [[0, 6], [6, 6], [12, 4]],
+  ];
+  const SCALE = [69, 71, 72, 74, 76, 77, 79, 81, 83, 84];  // A-Moll, eine gute Oktave
+  const near = (list, target) => list.reduce((a, b) => (Math.abs(b - target) < Math.abs(a - target) ? b : a));
+  const out = [];
+  let prev = 76;
+  chords.forEach((name, bar) => {
+    const tones = CHORDS[name].arp.flatMap((m) => [m - 12, m, m + 12]).filter((m) => m >= 67 && m <= 86);
+    const last = bar === chords.length - 1;
+    const rhythm = last ? [[0, 16]] : RHYTHMS[Math.floor(rnd() * RHYTHMS.length)];
+    rhythm.forEach(([st, len], i) => {
+      let m;
+      if (i === 0) {
+        const opts = tones.filter((t) => Math.abs(t - prev) <= 5);
+        m = opts.length ? opts[Math.floor(rnd() * opts.length)] : near(tones, prev);
+      } else {
+        const idx = SCALE.indexOf(near(SCALE, prev));
+        const stepBy = [-2, -1, -1, 1, 1, 2][Math.floor(rnd() * 6)];
+        m = SCALE[Math.max(0, Math.min(SCALE.length - 1, idx + stepBy))];
+      }
+      if (m > 81 && rnd() < 0.6) m -= 12; // nicht zu lange oben bleiben
+      out.push([bar, st, m, len]);
+      prev = m;
+    });
+  });
+  return out;
+}
+
+// ---------- Playlist ----------
+// sound: arpWave/arpRate (1 = 16tel, 2 = 8tel)/arpBright · delaySteps (Echo in Sechzehnteln) · padBright · leadWave
+// drums je Teil: full · drive (durchgehende Kick) · half (Halftime) · sparse · break (Breakdown)
+const S = (chords, arp, bass, drums, lead = null) => ({ chords, arp, bass, drums, lead });
+export const SONGS = [
+  {
+    title: 'Gedankenfunk', bpm: 96, transpose: 0,
+    sound: { arpWave: 'square', arpRate: 1, arpBright: 1, delaySteps: 3, padBright: 1, leadWave: 'sawtooth' },
+    sections: {
+      A: S(['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'Em'], 'updown', 'eighth', 'full', LEAD_A),
+      B: S(['F', 'G', 'Am', 'Am', 'F', 'G', 'C', 'E'], 'climb', 'gallop', 'full', LEAD_B),
+      C: S(['Dm', 'Am', 'F', 'G', 'Dm', 'Am', 'F', 'E'], 'pulse', 'long', 'break'),
+      D: S(['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'E'], 'updown', 'sync', 'full', LEAD_D),
+    },
+    order: ['A', 'B', 'A', 'C', 'D', 'B'],
+  },
+  {
+    title: 'Nachtschicht in Bielefeld', bpm: 86, transpose: 5,
+    sound: { arpWave: 'triangle', arpRate: 2, arpBright: 0.8, delaySteps: 4, padBright: 0.85, leadWave: 'square' },
+    sections: {
+      A: S(['Am', 'Am', 'F', 'F', 'C', 'C', 'G', 'G'], 'updown', 'long', 'half', 'gen:21'),
+      B: S(['F', 'G', 'Am', 'Am', 'F', 'G', 'Em', 'Em'], 'climb', 'eighth', 'half', 'gen:22'),
+      C: S(['Dm', 'Dm', 'Am', 'Am', 'F', 'F', 'E', 'E'], 'pulse', 'long', 'break'),
+    },
+    order: ['A', 'B', 'A', 'C', 'B', 'A'],
+  },
+  {
+    title: 'Autobahn nach Brüssel', bpm: 112, transpose: -5,
+    sound: { arpWave: 'sawtooth', arpRate: 1, arpBright: 1.2, delaySteps: 3, padBright: 1.1, leadWave: 'sawtooth' },
+    sections: {
+      A: S(['Am', 'G', 'F', 'G', 'Am', 'G', 'F', 'E'], 'pulse', 'gallop', 'drive', 'gen:31'),
+      B: S(['F', 'C', 'G', 'Am', 'F', 'C', 'G', 'G'], 'updown', 'gallop', 'drive', 'gen:32'),
+      C: S(['Am', 'Am', 'F', 'F', 'G', 'G', 'E', 'E'], 'climb', 'long', 'break'),
+      D: S(['F', 'G', 'Am', 'C', 'F', 'G', 'E', 'E'], 'climb', 'sync', 'drive', 'gen:33'),
+    },
+    order: ['A', 'B', 'A', 'C', 'D', 'B', 'A'],
+  },
+  {
+    title: 'Chemtrail-Sonnenuntergang', bpm: 100, transpose: 3,
+    sound: { arpWave: 'square', arpRate: 1, arpBright: 1.1, delaySteps: 3, padBright: 1.2, leadWave: 'triangle' },
+    sections: {
+      A: S(['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'F'], 'updown', 'eighth', 'full', 'gen:41'),
+      B: S(['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G'], 'climb', 'gallop', 'full', 'gen:42'),
+      C: S(['F', 'F', 'C', 'C', 'Dm', 'Dm', 'G', 'G'], 'pulse', 'long', 'break'),
+    },
+    order: ['A', 'B', 'A', 'C', 'A', 'B'],
+  },
+  {
+    title: 'Mondbasis Alpha', bpm: 80, transpose: -3,
+    sound: { arpWave: 'triangle', arpRate: 2, arpBright: 0.9, delaySteps: 6, padBright: 0.9, leadWave: 'triangle' },
+    sections: {
+      A: S(['Am', 'F', 'Am', 'F', 'Dm', 'Am', 'E', 'E'], 'updown', 'long', 'sparse'),
+      B: S(['F', 'G', 'Am', 'Em', 'F', 'G', 'Am', 'Am'], 'climb', 'eighth', 'half', 'gen:51'),
+      C: S(['Dm', 'Am', 'Bb', 'Bb', 'Dm', 'Am', 'E', 'E'], 'pulse', 'long', 'break'),
+    },
+    order: ['A', 'B', 'C', 'B', 'A'],
+  },
+  {
+    title: 'Kosmische Verwaltungsreform', bpm: 118, transpose: 2,
+    sound: { arpWave: 'sawtooth', arpRate: 1, arpBright: 1.3, delaySteps: 3, padBright: 1.15, leadWave: 'sawtooth' },
+    sections: {
+      A: S(['Am', 'F', 'C', 'G', 'Am', 'F', 'Bb', 'E'], 'climb', 'gallop', 'drive', 'gen:61'),
+      B: S(['Dm', 'Am', 'Bb', 'F', 'Dm', 'Am', 'E', 'E'], 'updown', 'sync', 'full', 'gen:62'),
+      C: S(['F', 'F', 'G', 'G', 'Am', 'Am', 'E', 'E'], 'pulse', 'long', 'break'),
+      D: S(['F', 'G', 'Am', 'F', 'F', 'G', 'E', 'E'], 'pulse', 'gallop', 'drive', 'gen:63'),
+    },
+    order: ['A', 'B', 'A', 'C', 'D', 'B', 'A'],
+  },
+];
+// Abgeleitete Werte: generierte Melodien, Länge in Schritten und Sekunden
+for (const song of SONGS) {
+  for (const sec of Object.values(song.sections)) {
+    if (typeof sec.lead === 'string') sec.lead = makeLead(sec.chords, Number(sec.lead.slice(4)));
+  }
+  song.step = 60 / song.bpm / 4;
+  song.bars = song.order.length * BARS_PER_SECTION;
+  song.steps = song.bars * STEPS_PER_BAR;
+  song.seconds = song.steps * song.step;
+}
+
 export class Synthwave {
-  constructor({ volume = 0.5, intensity = 1 } = {}) {
+  constructor({ volume = 0.5, intensity = 1, onSong = null } = {}) {
     this.volume = clamp01(volume);
     this.intensity = clampInt(intensity, 1, 5);
+    this.onSong = onSong;  // wird mit dem Song-Objekt aufgerufen, sobald ein neues Stück beginnt
     this.ctx = null;
     this.timer = null;
+    this.songIdx = Math.floor(Math.random() * SONGS.length); // zufälliger Einstieg in die Playlist
     this.step = 0;
     this.nextTime = 0;
     this.wanted = false;   // soll laufen (unabhängig davon, ob der Tab gerade sichtbar ist)
@@ -98,6 +193,7 @@ export class Synthwave {
   }
 
   get playing() { return this.wanted; }
+  get song() { return SONGS[this.songIdx]; }
 
   /** Muss beim ersten Mal aus einer Nutzeraktion heraus aufgerufen werden (Autoplay-Regeln der Browser). */
   async start() {
@@ -116,8 +212,8 @@ export class Synthwave {
     this.master.gain.setValueAtTime(this.master.gain.value, t);
     this.master.gain.linearRampToValueAtTime(this.targetGain(), t + 1.5);
     if (!this.timer) {
-      this.step = 0;
       this.nextTime = t + 0.05;
+      this.applySong(this.nextTime);
       this.timer = setInterval(() => this.schedule(), TICK_MS);
     }
     return true;
@@ -133,6 +229,18 @@ export class Synthwave {
     clearInterval(this.timer);
     this.timer = null;
     setTimeout(() => { if (!this.wanted) this.ctx.suspend().catch(() => {}); }, 500);
+  }
+
+  /** Zum nächsten Stück springen (Knopf „Nächster Titel“). */
+  next() {
+    this.songIdx = (this.songIdx + 1) % SONGS.length;
+    this.step = 0;
+    if (this.ctx && this.timer) {
+      this.nextTime = Math.max(this.nextTime, this.ctx.currentTime + 0.05);
+      this.applySong(this.nextTime);
+    } else {
+      this.onSong?.(this.song);
+    }
   }
 
   setVolume(v) {
@@ -194,9 +302,9 @@ export class Synthwave {
       damp.connect(pan).connect(revOut);
     });
 
-    // Echo im punktierten Achtel – das typische Synthwave-Arpeggio
+    // Echo (Länge je Stück, meist punktierte Achtel) – das typische Synthwave-Arpeggio
     this.delay = ctx.createDelay(2);
-    this.delay.delayTime.value = STEP * 3;
+    this.delay.delayTime.value = this.song.step * this.song.sound.delaySteps;
     const fb = ctx.createGain(); fb.gain.value = 0.38;
     const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 2800;
     this.delay.connect(tone).connect(fb).connect(this.delay);
@@ -220,58 +328,112 @@ export class Synthwave {
     this.noise = noiseBuffer(ctx);
   }
 
-  padCutoff() { return [0, 900, 1100, 1400, 1900, 2300][this.intensity]; }
+  padCutoff() { return [0, 900, 1100, 1400, 1900, 2300][this.intensity] * (this.song?.sound.padBright || 1); }
+
+  /** Stellt Echo-Länge und Pad-Filter auf das aktuelle Stück ein. */
+  applySong(t) {
+    const song = this.song;
+    if (this.delay) this.delay.delayTime.setValueAtTime(song.step * song.sound.delaySteps, t);
+    if (this.pad) this.pad.filter.frequency.setTargetAtTime(this.padCutoff(), t, 1);
+    this.onSong?.(song);
+  }
 
   schedule() {
     const ctx = this.ctx;
     while (this.nextTime < ctx.currentTime + LOOKAHEAD) {
-      this.playStep(this.step, this.nextTime);
-      this.nextTime += STEP;
-      this.step = (this.step + 1) % SONG_STEPS;
+      const song = this.song;
+      this.playStep(song, this.step, this.nextTime);
+      this.nextTime += song.step;
+      this.step++;
+      if (this.step >= song.steps) {           // Stück zu Ende → nächstes aus der Playlist
+        this.step = 0;
+        this.songIdx = (this.songIdx + 1) % SONGS.length;
+        this.nextTime += song.step * 4;        // kurze Atempause (ein Viertel)
+        this.applySong(this.nextTime);
+      }
     }
   }
 
-  /** Spielt alles, was auf einen Sechzehntel-Schritt fällt (step = Position im ganzen Song). */
-  playStep(step, t) {
+  /** Spielt alles, was auf einen Sechzehntel-Schritt eines Stücks fällt. */
+  playStep(song, step, t) {
     const lvl = this.intensity;
-    const songBar = Math.floor(step / STEPS_PER_BAR) % (SONG.length * BARS_PER_SECTION);
-    const sec = SECTIONS[SONG[Math.floor(songBar / BARS_PER_SECTION)]];
+    const st = song.step;
+    const tr = song.transpose;
+    const snd = song.sound;
+    const songBar = Math.floor(step / STEPS_PER_BAR) % song.bars;
+    const sec = song.sections[song.order[Math.floor(songBar / BARS_PER_SECTION)]];
     const bar = songBar % BARS_PER_SECTION;   // Takt innerhalb des Teils
     const s = step % STEPS_PER_BAR;
     const chord = CHORDS[sec.chords[bar]];
-    const brk = sec.drums === 'break';
+    const style = sec.drums;
+    const brk = style === 'break';
     const lastBar = bar === BARS_PER_SECTION - 1;
 
     // Pads: einmal pro Takt, weich überblendet
-    if (s === 0) for (const m of chord.pad) this.padNote(m, t, STEP * STEPS_PER_BAR);
+    if (s === 0) for (const m of chord.pad) this.padNote(m + tr, t, st * STEPS_PER_BAR);
 
-    // Bass nach Muster des Teils
+    // Bass nach Muster des Teils (nie tiefer als E1)
     const b = BASS[sec.bass](s, lvl);
-    if (b) this.bassNote(chord.bass + (b.oct ? 12 : 0), t, STEP * b.len, b.vel);
+    if (b) {
+      let m = chord.bass + tr + (b.oct ? 12 : 0);
+      while (m < 28) m += 12;
+      this.bassNote(m, t, st * b.len, b.vel);
+    }
 
     // Arpeggio ab Stufe 3 (im Breakdown schon ab Stufe 1, dort trägt es den Teil)
-    if (lvl >= 3 || brk) this.arpNote(chord.arp[ARPS[sec.arp][s]], t, STEP * 0.9, (s % 4 === 0 ? 1 : 0.75) * (brk && lvl < 3 ? 0.7 : 1));
+    if ((lvl >= 3 || brk) && s % snd.arpRate === 0) {
+      const m = chord.arp[ARPS[sec.arp][(s / snd.arpRate + bar * 16 / snd.arpRate) % 16]] + tr;
+      this.arpNote(m, t, st * 0.9 * snd.arpRate, (s % 4 === 0 ? 1 : 0.75) * (brk && lvl < 3 ? 0.7 : 1), snd);
+    }
 
     // Crash zu Beginn jedes Teils (außer Breakdown)
     if (lvl >= 3 && bar === 0 && s === 0 && !brk) this.crash(t);
 
     // Drums
-    if (brk) {
+    this.drums(style, lvl, bar, s, lastBar, t);
+
+    // Lead-Melodie ab Stufe 5
+    if (lvl >= 5 && sec.lead) {
+      for (const [lb, ls, m, len] of sec.lead) if (lb === bar && ls === s) this.leadNote(m + tr, t, st * len, snd.leadWave);
+    }
+  }
+
+  drums(style, lvl, bar, s, lastBar, t) {
+    if (style === 'break') {
       // Breakdown: Takt 1–4 nur Hi-Hats, 5–7 halbe Kick, Takt 8 Snare-Wirbel als Aufbau
       if (s % 4 === 2) this.hat(t, 0.7, false);
       if (bar >= 4 && bar < 7 && (s === 0 || s === 8)) this.kick(t, 0.6);
       if (lastBar && lvl >= 2 && (s % 4 === 0 || s >= 8)) this.snare(t, 0.35 + 0.65 * (s / 15));
       return;
     }
+    if (style === 'sparse') {
+      if (s === 0 && lvl >= 2) this.kick(t, 0.6);
+      if (s % 4 === 0) this.hat(t, 0.6, false);
+      if (lvl >= 4 && s === 8) this.snare(t, 0.4);
+      return;
+    }
+    if (style === 'half') {
+      if (s === 0 || (lvl >= 4 && s === 10)) this.kick(t, lvl >= 4 ? 0.95 : 0.75);
+      if (lvl >= 2 && s === 8) this.snare(t, 1);
+      if (s % 2 === 0) this.hat(t, s % 4 === 2 ? 0.9 : 0.5, false);
+      if (lvl >= 2 && lastBar && s >= 13) this.snare(t, 0.5);
+      return;
+    }
+    if (style === 'drive') {
+      if (s % 4 === 0 && (lvl >= 2 || s % 8 === 0)) this.kick(t, lvl >= 4 ? 1 : 0.8);
+      if (lvl >= 2 && (s === 4 || s === 12)) this.snare(t, 1);
+      if (lvl >= 3 && s % 4 === 2) this.hat(t, 0.8, true);
+      else if (lvl >= 4 || s % 2 === 0) this.hat(t, s % 4 === 2 ? 1 : 0.45, false);
+      if (lvl >= 2 && lastBar && s >= 12) this.snare(t, 0.4 + 0.15 * (s - 12));
+      return;
+    }
+    // full
     const fullKick = lvl >= 4;
     if (s === 0 || s === 8 || (fullKick && (s === 4 || s === 12))) this.kick(t, fullKick ? 1 : 0.7);
     if (lvl >= 2 && (s === 4 || s === 12)) this.snare(t, 1);
     if (lvl >= 2 && lastBar && s >= 13) this.snare(t, 0.55);          // kleiner Fill vor dem nächsten Teil
     if (lvl >= 4 ? true : s % 4 === 2) this.hat(t, s % 4 === 2 ? 1 : 0.5, false);
     if (lvl >= 4 && s === 14) this.hat(t, 0.8, true);
-
-    // Lead-Melodie ab Stufe 5
-    if (lvl >= 5 && sec.lead) for (const [lb, st, m, len] of sec.lead) if (lb === bar && st === s) this.leadNote(m, t, STEP * len);
   }
 
   padNote(midi, t, dur) {
@@ -303,27 +465,28 @@ export class Synthwave {
     o.start(t); sub.start(t); o.stop(t + dur + 0.1); sub.stop(t + dur + 0.1);
   }
 
-  arpNote(midi, t, dur, vel) {
+  arpNote(midi, t, dur, vel, snd) {
     const ctx = this.ctx;
-    const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = midiHz(midi);
-    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1800 + 400 * this.intensity; f.Q.value = 3;
+    const o = ctx.createOscillator(); o.type = snd.arpWave; o.frequency.value = midiHz(midi);
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = (1800 + 400 * this.intensity) * snd.arpBright; f.Q.value = 3;
     const g = ctx.createGain();
-    env(g.gain, t, 0.003, dur, 0.035 * vel, 0.06);
+    const loud = snd.arpWave === 'triangle' ? 1.8 : snd.arpWave === 'sawtooth' ? 0.8 : 1; // Dreieck ist leiser, Säge lauter
+    env(g.gain, t, 0.003, dur, 0.035 * vel * loud, 0.06);
     o.connect(f).connect(g);
     g.connect(this.dry); g.connect(this.delay);
     o.start(t); o.stop(t + dur + 0.1);
   }
 
-  leadNote(midi, t, dur) {
+  leadNote(midi, t, dur, wave = 'sawtooth') {
     const ctx = this.ctx;
     const g = ctx.createGain();
-    env(g.gain, t, 0.04, dur, 0.05, 0.4);
+    env(g.gain, t, 0.04, dur, wave === 'triangle' ? 0.08 : 0.05, 0.4);
     const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2600; f.Q.value = 1;
     const vib = ctx.createOscillator(); vib.frequency.value = 5.2;
     const vibAmt = ctx.createGain(); vibAmt.gain.setValueAtTime(0, t); vibAmt.gain.linearRampToValueAtTime(12, t + 0.4);
     vib.connect(vibAmt);
     for (const det of [-6, 6]) {
-      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = midiHz(midi); o.detune.value = det;
+      const o = ctx.createOscillator(); o.type = wave; o.frequency.value = midiHz(midi); o.detune.value = det;
       vibAmt.connect(o.detune);
       o.connect(f); o.start(t); o.stop(t + dur + 0.5);
     }
@@ -397,20 +560,27 @@ export class Synthwave {
     n.start(t, Math.random() * 0.5, len + 0.02);
   }
 
-  /** Rendert einige Takte offline (für Tests und Vorschau). Gibt einen AudioBuffer zurück. */
-  static async renderOffline({ bars = 4, startBar = 0, intensity = 5, sampleRate = 22050, volume = 1 } = {}) {
-    const seconds = bars * STEPS_PER_BAR * STEP + 2;
+  /** Rendert ein Stück (oder einen Ausschnitt) offline – für Tests und Vorschau. Gibt einen AudioBuffer zurück. */
+  static async renderOffline({ song = 0, bars = null, startBar = 0, intensity = 5, sampleRate = 22050, volume = 1 } = {}) {
+    const def = SONGS[song];
+    const n = bars ?? def.bars;
+    const seconds = n * STEPS_PER_BAR * def.step + 2;
     const ctx = new OfflineAudioContext(2, Math.ceil(seconds * sampleRate), sampleRate);
     const sw = new Synthwave({ volume, intensity });
+    sw.songIdx = song;
     sw.build(ctx, ctx.destination);
     sw.master.gain.value = sw.targetGain();
     const first = startBar * STEPS_PER_BAR;
-    for (let i = 0; i < bars * STEPS_PER_BAR; i++) sw.playStep((first + i) % SONG_STEPS, 0.05 + i * STEP);
+    for (let i = 0; i < n * STEPS_PER_BAR; i++) sw.playStep(def, (first + i) % def.steps, 0.05 + i * def.step);
     return ctx.startRendering();
   }
 }
 
-export const MUSIC = { BPM, STEP, STEPS_PER_BAR, SONG, SECTIONS, BARS: SONG.length * BARS_PER_SECTION, SECONDS: SONG_STEPS * STEP };
+export const MUSIC = {
+  STEPS_PER_BAR, BARS_PER_SECTION,
+  SONGS: SONGS.map((s) => ({ title: s.title, bpm: s.bpm, bars: s.bars, seconds: s.seconds, order: s.order, step: s.step })),
+  SECONDS: SONGS.reduce((a, s) => a + s.seconds, 0),
+};
 
 function env(param, t, attack, hold, peak, release) {
   param.setValueAtTime(0, t);
@@ -424,6 +594,16 @@ function noiseBuffer(ctx) {
   const d = buf.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   return buf;
+}
+
+/** Kleiner, deterministischer Zufallsgenerator (für die Melodien). */
+function mulberry32(a) {
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 function clamp01(x) { return Math.min(1, Math.max(0, Number(x) || 0)); }

@@ -52,6 +52,7 @@
 - **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
 - **Impressum und Datenschutz:** ausgefüllt am 09.11.2026 (Datenschutz auf Basis von Datenschutz-Generator.de, angepasst). Bei Änderungen an Bestenliste, Browser-Speicher oder Hosting mitpflegen.
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
+- **Neu am 09.11. (siebter Teil): Musik-Playlist** mit 6 Stücken (ca. 12 Min.), Anzeige des Titels und „Nächster Titel“ (§4.15).
 - **Neu am 09.11. (sechster Teil): 8 neue Anlagen** (§4.3), je zwei für Europa, Welt, Orbit & Mond und Universum, mit Icons, Erfolgen und News. Tränen-Teiler angepasst.
 - **Neu am 09.11. (fünfter Teil): Hintergrundmusik** (§4.15): selbst erzeugter Synthwave-Song, 2 Minuten, wird mit jeder Phase intensiver, standardmäßig aus.
 - **Live:** https://5gsendemast.de seit 09.11.2026 (Pages-Projekt `sendemast`). Jeder Push auf `main` geht sofort live.
@@ -326,12 +327,16 @@ Ein goldener Mast erscheint alle 5–10 min an einer zufälligen Stelle und blei
 ### 4.15 Hintergrundmusik
 
 **Status:** ✅ umgesetzt am 09.11.2026 (`assets/js/audio/synthwave.js`).
-- **Selbst erzeugter 80er-Synthwave** mit der Web Audio API: keine Audiodateien, keine fremden Samples, daher keine Lizenzfragen und kein externer Abruf (Datenschutz unverändert). Die Datei ist ca. 19 KB groß (ungepackt).
-- **Song:** 96 BPM, A-Moll, Teile A B A C D B à 8 Takte = 48 Takte, 2 Minuten, dann von vorn. Jeder Teil hat eigene Akkorde, Bass-, Arpeggio- und Drum-Muster. C ist ein Breakdown (Drums setzen aus, Aufbau mit Snare-Wirbel). Snare-Fills vor jedem Teilwechsel.
+- **Selbst erzeugter 80er-Synthwave** mit der Web Audio API: keine Audiodateien, keine fremden Samples, daher keine Lizenzfragen und kein externer Abruf (Datenschutz unverändert). Die Datei ist ca. 27 KB groß (ungepackt).
+- **Playlist (seit 09.11.2026):** 6 Stücke, zusammen ca. 12 Min., Start bei einem zufälligen Stück, danach der Reihe nach mit kurzer Pause:
+  1. Gedankenfunk (96 BPM, A-Moll, 2:00) · 2. Nachtschicht in Bielefeld (86, D-Moll, Halftime, 2:14) · 3. Autobahn nach Brüssel (112, E-Moll, treibend, 2:00) · 4. Chemtrail-Sonnenuntergang (100, hell, 1:55) · 5. Mondbasis Alpha (80, Fis-Moll, spärlich, 2:00) · 6. Kosmische Verwaltungsreform (118, H-Moll, 1:54).
+  - Jedes Stück besteht aus Teilen à 8 Takten mit eigenen Akkorden, Bass-, Arpeggio- und Drum-Mustern (Stile: full, drive, half, sparse, break), dazu eigene Klangfarben (Arpeggio-Welle, Echo-Länge, Helligkeit). Breakdowns setzen die Drums aus und bauen mit Snare-Wirbel auf.
+  - Melodien: Stück 1 von Hand, Stücke 2–6 regelbasiert aus den Akkordtönen erzeugt (`makeLead`, fester Seed, also immer gleich).
+  - Neues Stück: Eintrag in `SONGS` (`assets/js/audio/synthwave.js`), Tonart über `transpose`, Melodie über `'gen:<seed>'` oder eine Notenliste.
 - **Instrumente:** Pads (verstimmte Sägezähne, atmender Tiefpass), Bass (Säge + Sub), Arpeggio (Rechteck mit punktiertem Achtel-Echo), Kick, Snare mit Hall, Hi-Hats, Crash, Lead (Säge mit Vibrato). Hall aus vier Rückkopplungs-Echos (kein ConvolverNode).
 - **Intensität folgt der Phase:** 1 Pads, Bass, leise Drums · 2 + Snare, Fills · 3 + Arpeggio, Crash · 4 + volle Kick, 16tel-Hats, hellerer Klang · 5 + Lead-Melodien in A, B und D.
-- **Bedienung:** standardmäßig **aus**. Knopf „♪ MUSIK“ in der Kopfzeile, Lautstärkeregler unter Optionen → Audio (Standard 50 %). Beides wird im Spielstand gemerkt (`settings.music`, `settings.musicVolume`). War die Musik an, startet sie nach dem Neuladen mit der ersten Interaktion (Autoplay-Regeln der Browser). Im Hintergrund-Tab pausiert sie.
-- **Test und Vorschau:** `tests/music.html` rendert den Song offline, prüft Pegel (keine Übersteuerung, kein Teil still) und bietet je Stufe den ganzen Song zum Anhören.
+- **Bedienung:** standardmäßig **aus**. Knopf „♪ MUSIK“ in der Kopfzeile. Unter Optionen → Audio: Lautstärkeregler (Standard 50 %), aktueller Titel und „Nächster Titel“. Beides wird im Spielstand gemerkt (`settings.music`, `settings.musicVolume`). War die Musik an, startet sie nach dem Neuladen mit der ersten Interaktion (Autoplay-Regeln der Browser). Im Hintergrund-Tab pausiert sie.
+- **Test und Vorschau:** `tests/music.html` rendert alle Stücke offline (Stufe 5 und 1), prüft Pegel (keine Übersteuerung, kein Teil still; dauert einige Minuten) und bietet jedes Stück in wählbarer Stufe zum Anhören.
 
 ---
 
