@@ -254,6 +254,20 @@ test('Portal: Kalenderwoche', () => {
   eq(portal.isoWeek(new Date(2026, 0, 1)), 1);
   eq(portal.isoWeek(new Date(2027, 0, 1)), 53);
 });
+atest('Musik: europäische Stücke erst ab Phase 2', async () => {
+  const { SONGS, playlistFor, Synthwave } = await import('../assets/js/audio/synthwave.js');
+  const eu = SONGS.filter((x) => x.from === 2).map((x) => x.country).sort();
+  eq(eu.join(','), 'Finnland,Frankreich,Italien,Polen');
+  eq(playlistFor(1).length, 6); eq(playlistFor(2).length, 10); eq(playlistFor(5).length, 10);
+  ok(playlistFor(1).every((i) => SONGS[i].from === 1), 'Phase 1 nur die ersten sechs');
+  for (let k = 0; k < 20; k++) { const m = new Synthwave({ intensity: 1 }); ok(SONGS[m.songIdx].from === 1, 'Start in Phase 1 nie europäisch'); }
+  const m = new Synthwave({ intensity: 1 }); const seen = new Set();
+  for (let k = 0; k < 12; k++) { m.next(); seen.add(m.songIdx); }
+  eq(seen.size, 6, 'Phase 1: Playlist durchläuft genau sechs Stücke');
+  m.setIntensity(2); for (let k = 0; k < 12; k++) { m.next(); seen.add(m.songIdx); }
+  eq(seen.size, 10, 'ab Phase 2 alle zehn');
+  ok(SONGS.every((x) => x.seconds > 90), 'kein Stück kürzer als 1,5 Min.');
+});
 test('Goldener Mast wirkt', () => {
   const c = clock();
   const s = newState(c.now()); s.owned.tanne = 10;

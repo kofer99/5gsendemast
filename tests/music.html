@@ -15,7 +15,7 @@
 import { Synthwave, MUSIC } from '/assets/js/audio/synthwave.js';
 const fmtTime = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
 document.getElementById('total').textContent = `${MUSIC.SONGS.length} Stücke, zusammen ${fmtTime(MUSIC.SECONDS)} Min.: `
-  + MUSIC.SONGS.map((s, i) => `${i + 1}. ${s.title} (${s.bpm} BPM, ${fmtTime(s.seconds)})`).join(' · ');
+  + MUSIC.SONGS.map((s, i) => `${i + 1}. ${s.title} (${s.bpm} BPM${s.spb === 12 ? ', 3/4' : ''}, ${fmtTime(s.seconds)}${s.from > 1 ? ', ab Phase ' + s.from : ''})`).join(' · ');
 const out = [];
 const log = (ok, msg) => out.push(ok ? `✔ ${msg}` : `<span class="fail">✘ ${msg}</span>`);
 // Unter Edge --headless mit --virtual-time-budget wird die Uhr vorgespult, während der Audio-Thread rechnet.
@@ -38,7 +38,7 @@ function wav(buf) {
 
 MUSIC.SONGS.forEach((s, i) => {
   const b = document.createElement('button');
-  b.textContent = `${i + 1}. ${s.title}`;
+  b.textContent = `${i + 1}. ${s.title}${s.country ? ' (' + s.country + ')' : ''}`;
   b.addEventListener('click', async () => {
     const lvl = Number(document.getElementById('lvl').value);
     const label = b.textContent;
@@ -54,12 +54,14 @@ MUSIC.SONGS.forEach((s, i) => {
 
 async function main() {
   try {
-    for (let i = 0; i < MUSIC.SONGS.length; i++) {
+    const only = new URLSearchParams(location.search).get('songs'); // z. B. ?songs=7,8,9,10 (1-basiert)
+    const pick = only ? only.split(',').map((x) => Number(x) - 1) : MUSIC.SONGS.map((_, i) => i);
+    for (const i of pick) {
       const s = MUSIC.SONGS[i];
       for (const lvl of [5, 1]) {
         const buf = await settle(Synthwave.renderOffline({ song: i, intensity: lvl, sampleRate: 16000, volume: 1 }));
         const peak = peakOf(buf);
-        const secLen = buf.sampleRate * MUSIC.BARS_PER_SECTION * MUSIC.STEPS_PER_BAR * s.step;
+        const secLen = buf.sampleRate * MUSIC.BARS_PER_SECTION * s.spb * s.step;
         const parts = s.order.map((name, k) => rmsOf(buf.getChannelData(0).subarray(Math.floor(k * secLen), Math.floor((k + 1) * secLen))));
         const quiet = Math.min(...parts);
         log(peak < 1 && quiet > 0.01, `${i + 1}. ${s.title}, Stufe ${lvl}: Spitze ${db(peak)} dBFS, leisester Teil ${db(quiet)} dB RMS (${s.order.join(' ')})`);
