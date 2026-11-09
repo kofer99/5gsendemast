@@ -33,6 +33,8 @@ Kosten: 0 € (abgesehen von der Domain). Pages, Functions und D1 sind im kosten
 
 ## 4. Domain vorbereiten – Nameserver noch NICHT umstellen
 
+> ✅ 09.11.2026: Zone in Cloudflare angelegt, DNS-Einträge mit CheckDomain abgeglichen. Nameserver noch nicht umgestellt.
+
 1. Cloudflare → **Add a site / Domain hinzufügen** → `5gsendemast.de`, kostenloser Tarif.
 2. Cloudflare liest die vorhandenen DNS-Einträge ein. **Mit CheckDomain vergleichen**, besonders:
    - **MX-Einträge** (E-Mail-Empfang)
