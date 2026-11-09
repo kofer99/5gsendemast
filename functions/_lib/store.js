@@ -19,6 +19,7 @@ export const SQL = {
   rankOf: `SELECT COUNT(*) + 1 AS r FROM scores
     WHERE updated_at >= ?1 AND (score > ?2 OR (score = ?2 AND fp_all > ?3) OR (score = ?2 AND fp_all = ?3 AND created_at < ?4))`,
   remove: 'DELETE FROM scores WHERE run_id = ?1',
+  purgeIp: `UPDATE scores SET ip_hash = '' WHERE updated_at < ?1 AND ip_hash != ''`,
   count: 'SELECT COUNT(*) AS n FROM scores WHERE updated_at >= ?1',
 };
 
@@ -44,6 +45,7 @@ export function d1Store(db) {
     async rank(e, since) { return (await one(SQL.rankOf, since, e.score, e.fpAll, e.createdAt))?.r ?? null; },
     async count(since) { return (await one(SQL.count, since))?.n ?? 0; },
     async remove(runId) { await db.prepare(SQL.remove).bind(runId).run(); },
+    async purgeIpHashes(before) { await db.prepare(SQL.purgeIp).bind(before).run(); },
   };
 }
 
@@ -75,5 +77,6 @@ export function memoryStore() {
     async rank(e, since) { return sorted(since).findIndex((r) => r.runId === e.runId) + 1 || null; },
     async count(since) { return sorted(since).length; },
     async remove(runId) { rows.delete(runId); },
+    async purgeIpHashes(before) { for (const r of rows.values()) if (r.updatedAt < before) r.ipHash = ''; },
   };
 }

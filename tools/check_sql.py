@@ -27,7 +27,7 @@ def main():
     for f in sorted((ROOT / 'migrations').glob('*.sql')):
         db.executescript(f.read_text(encoding='utf-8'))
     sql = load_sql()
-    expected = {'byRun', 'byName', 'lastByIp', 'newByIp', 'upsert', 'top', 'rankOf', 'remove', 'count'}
+    expected = {'byRun', 'byName', 'lastByIp', 'newByIp', 'upsert', 'top', 'rankOf', 'remove', 'count', 'purgeIp'}
     assert expected <= set(sql), f'SQL fehlt: {expected - set(sql)}'
 
     def upsert(run, name, score, fp, phase, play, ip, now):
@@ -65,6 +65,15 @@ def main():
         raise AssertionError('doppelter Name wurde angenommen')
     except sqlite3.IntegrityError:
         pass
+
+    # IP-Prüfsummen älter als ein Stichtag leeren; leere Werte zählen nicht fürs Rate-Limit
+    db.execute(sql['purgeIp'], (1350,))
+    hashes = {x['run_id']: x['ip_hash'] for x in db.execute('SELECT run_id, ip_hash FROM scores')}
+    assert hashes == {a: '', b: '', c: ''}, hashes
+    assert db.execute(sql['lastByIp'], ('ip1',)).fetchone()['t'] is None
+    upsert(a, 'Anna2', 1, 1, 1, 1, 'ip4', 5000)
+    db.execute(sql['purgeIp'], (1350,))
+    assert db.execute(sql['byRun'], (a,)).fetchone()['ip_hash'] == 'ip4', 'neuer Hash bleibt'
 
     db.execute(sql['remove'], (b,))
     assert db.execute(sql['byRun'], (b,)).fetchone() is None

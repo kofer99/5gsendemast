@@ -87,5 +87,6 @@ export function entryFromState(s, name) {
 
 export const RATE_LIMIT_SEC = 60;       // höchstens eine Meldung pro Minute je IP-Prüfsumme
 export const NEW_ENTRIES_PER_DAY = 5;   // höchstens 5 neue Einträge pro Tag je IP-Prüfsumme
+export const IP_HASH_TTL = 86400;       // IP-Prüfsummen werden nach 24 h gelöscht (DATENSCHUTZ-NOTIZEN.md)
 export const TOP_N = 100;
 export const WEEK_SEC = 7 * 86400;

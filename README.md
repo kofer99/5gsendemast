@@ -31,6 +31,14 @@ python -m http.server 8765
 | http://localhost:8765/tests/maps.html | Vorschau der Europa- und Weltkarte |
 | http://localhost:8765/tests/mobile.html | Handy-Vorschau (390 px / 360 px) |
 
+## Vorschaubild (Open Graph)
+
+`assets/img/og.png` (1200 × 630) wird aus der Vorlage `tools/og.html` erzeugt. Nach Änderungen bei laufendem Server neu aufnehmen:
+
+```bash
+msedge --headless=new --hide-scrollbars --user-data-dir=<leerer Ordner> --window-size=1200,630 --screenshot=assets/img/og.png http://localhost:8765/tools/og.html
+```
+
 ## Struktur
 
 ```

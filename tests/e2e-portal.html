@@ -26,7 +26,7 @@ try {
   // 1) Ohne Spielstand
   localStorage.removeItem('sendemast.save');
   sessionStorage.removeItem('sendemast.portal.session');
-  localStorage.removeItem('sendemast.portal.seen');
+  sessionStorage.removeItem('sendemast.portal.seen');
   let d = await load('/portal/?t=1');
   log(!d.getElementById('login').hidden && d.getElementById('app').hidden, 'Login-Seite sichtbar');
   log(!d.querySelector('form') && ![...d.querySelectorAll('input')].some((i) => i.name), 'Kein <form>, keine name-Attribute');

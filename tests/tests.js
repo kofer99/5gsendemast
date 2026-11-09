@@ -437,6 +437,25 @@ atest('Bestenliste-API: Missbrauchsschutz', async () => {
   ok(/^[0-9a-f]{32}$/.test(h1) && h1 !== h2, 'Prüfsumme 32 Hex-Zeichen, täglich anders');
   ok(![...store.rows.values()].some((x) => x.ipHash.includes('7.7')), 'keine IP gespeichert');
 });
+test('Bestenliste: IP wird vor dem Hashen gekürzt', () => {
+  eq(api.anonymizeIp('203.0.113.77'), '203.0.113.0');
+  eq(api.anonymizeIp('2001:db8:85a3:8d3:1319:8a2e:370:7348'), '2001:db8:85a3::');
+  eq(api.anonymizeIp('2001:db8::1'), '2001:db8:0::');
+  eq(api.anonymizeIp('2001:DB8:abcd:12::'), '2001:db8:abcd::');
+  eq(api.anonymizeIp(''), ''); eq(api.anonymizeIp('kaputt'), ''); eq(api.anonymizeIp('::1'), '0:0:0::');
+});
+atest('Bestenliste-API: gleiches Netz = gleiche Prüfsumme, nach 24 h gelöscht', async () => {
+  eq(await api.ipHash('203.0.113.5', 's', 1000), await api.ipHash('203.0.113.200', 's', 1000), 'gleiches /24');
+  ok(await api.ipHash('203.0.113.5', 's', 1000) !== await api.ipHash('203.0.114.5', 's', 1000), 'anderes Netz');
+  const store = memoryStore();
+  await api.postScore({ request: post(entry()), store, salt: 's', now: 1000 });
+  ok(store.rows.get('a'.repeat(24)).ipHash !== '', 'frisch: Prüfsumme da');
+  await api.postScore({ request: post(entry({ name: 'Bert', runId: 'b'.repeat(24) }), '9.9.9.9'), store, salt: 's', now: 1000 + 86400 + 1 });
+  eq(store.rows.get('a'.repeat(24)).ipHash, '', 'nach 24 h gelöscht');
+  ok(store.rows.get('b'.repeat(24)).ipHash !== '', 'neuer Eintrag behält seine');
+  const r = await api.postScore({ request: post(entry({ score: 6e7 })), store, salt: 's', now: 1000 + 86400 + 100 });
+  eq(r.status, 200, 'gelöschte Prüfsumme blockiert nichts');
+});
 atest('Bestenliste-API: Austragen', async () => {
   const store = memoryStore();
   await api.postScore({ request: post(entry()), store, salt: 's', now: 1000 });

@@ -38,6 +38,7 @@ tr.mine td.rank { color: var(--amber); }
 .field input { font: inherit; font-size: 15px; letter-spacing: 0.5px; text-transform: none; min-height: 44px; padding: 8px 12px; color: var(--green); background: var(--bg); border: 1px solid var(--line); }
 .field input:focus { border-color: var(--green); outline: none; box-shadow: var(--glow); }
 .btn-go { width: 100%; border-color: var(--green); }
+.hint-name { margin: -2px 0 10px; }
 .me-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .me-msg { min-height: 1.4em; font-size: 13px; color: var(--amber) !important; margin: 10px 0 0; }
 .me-msg.ok { color: var(--green) !important; }

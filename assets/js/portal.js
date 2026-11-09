@@ -8,7 +8,7 @@ import { fmt, fmtInt, fmtDuration } from './util/format.js';
 
 const $ = (id) => document.getElementById(id);
 const SESSION_KEY = 'sendemast.portal.session'; // nur „angemeldet: ja“, keine Eingaben
-const SEEN_KEY = 'sendemast.portal.seen';       // gelesene Rundschreiben (für die Markierung „neu“)
+const SEEN_KEY = 'sendemast.portal.seen';       // gelesene Rundschreiben (Markierung „neu“), nur für die Sitzung
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const store = {
@@ -99,7 +99,7 @@ $('who-nr').textContent = 'Personalnr. ' + staffNumber(s);
 
 // ---------- Rundschreiben ----------
 function seenList() {
-  try { return JSON.parse(store.get('localStorage', SEEN_KEY) || '[]'); } catch { return []; }
+  try { return JSON.parse(store.get('sessionStorage', SEEN_KEY) || '[]'); } catch { return []; }
 }
 const seenAtLoad = new Set(seenList());
 function renderCirculars() {
@@ -127,7 +127,7 @@ function renderCirculars() {
 }
 function markSeen() {
   const open = CIRCULARS.filter((c) => isOpen(c, s)).map((c) => c.nr);
-  store.set('localStorage', SEEN_KEY, JSON.stringify([...new Set([...seenList(), ...open])]));
+  store.set('sessionStorage', SEEN_KEY, JSON.stringify([...new Set([...seenList(), ...open])]));
   $('badge-circ').textContent = '';
 }
 

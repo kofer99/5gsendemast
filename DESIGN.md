@@ -11,14 +11,14 @@
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
 > 1. **Online gehen (§11, M7)**, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Erledigt (09.11.2026): GitHub-Repo, D1-Datenbank, Domain in Cloudflare, **Nameserver auf Cloudflare umgestellt**. Offen: Pages-Projekt, Secret `IP_SALT`, Custom Domain. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
-> 2. Vorher von dir: Impressum und Datenschutz ausfüllen (eigene Daten). Was in die Datenschutzerklärung muss, steht unter „Offen“.
+> 2. Vorher von dir: Impressum und Datenschutz ausfüllen (eigene Daten). Was in die Datenschutzerklärung muss, steht in DATENSCHUTZ-NOTIZEN.md §5. Sonst ist alles für den Live-Gang bereit.
 > 3. Nach dem Online-Gang: Spiel komplett durchspielen, Bestenliste und Prestige echt testen.
 
 ### ❗ Offen (Stand 09.11.2026)
 - [x] ~~Prestige-Balancing entscheiden~~: Kubikwurzel, +8 % je Träne, Patente billiger (09.11.2026, §4.9)
 - [ ] Prestige im Spiel einmal durchspielen: Fühlen sich 5 Tränen nach der Welt bzw. 47 nach dem Universum gut an? (nach dem Online-Gang)
 - [ ] Portal-Texte gegenlesen: 14 Rundschreiben, 8 Stellen, Kantinenplan, Organigramm, 8 Dienstgrade (`data/portal.js`).
-- [ ] **Datenschutz:** Bestandsaufnahme, offene Maßnahmen und Checkliste für die Erklärung stehen in [`DATENSCHUTZ-NOTIZEN.md`](DATENSCHUTZ-NOTIZEN.md). Vier kleine Änderungen sind noch offen (z. B. `ip_hash` nach 24 h löschen).
+- [ ] **Datenschutz:** Bestandsaufnahme, offene Maßnahmen und Checkliste für die Erklärung stehen in [`DATENSCHUTZ-NOTIZEN.md`](DATENSCHUTZ-NOTIZEN.md). Die vier Maßnahmen (IP kürzen, `ip_hash` nach 24 h löschen, Namenshinweis, Portal nur Sitzung) sind seit 09.11.2026 umgesetzt. Offen ist nur noch der Text der Erklärung.
 - [x] ~~M3-Texte gegenlesen~~ („Das Spiel passt so“, 09.11.2026)
 - [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
 - [ ] Einwohnerzahlen Europa/Welt stammen aus Natural Earth (POP_EST, Stand 2019, Welt ≈ 7,68 Mrd.). Vor dem Release ggf. aktualisieren (`tools/build_world.py`).
@@ -26,6 +26,7 @@
 - [x] ~~Zweiten Durchlauf nach Prestige simulieren~~ (`tests/sim-prestige.html`, 09.11.2026)
 
 ### Wo wir stehen geblieben sind (09.11.2026)
+- **Neu am 09.11. (vierter Teil):** Datenschutz-Maßnahmen umgesetzt (siehe DATENSCHUTZ-NOTIZEN.md §4). Vorschaubild für Messenger: `assets/img/og.png`, eingebunden in Spiel, Geheimakte, Portal und Bestenliste.
 - **Neu am 09.11. (dritter Teil): Bestenliste fertig** (§5). Pages Functions `functions/api/leaderboard.js` und `functions/api/score.js`, Logik in `functions/_lib/`, D1-Schema in `migrations/0001_init.sql`, `wrangler.toml`. Seite `/bestenliste/` mit Eintragen, Rang, „Diese Woche/Ewig“ und Austragen. Das Spiel meldet automatisch, sobald man eingetragen ist. Getestet ohne Cloudflare: Logik im Browser mit In-Memory-Speicher (`tests/index.html`, `tests/e2e-board.html` mit `?mock=1`), SQL mit `python tools/check_sql.py` gegen SQLite. **Noch nie gegen echtes D1 gelaufen.**
 - **Neu am 09.11. (zweiter Teil): Mitarbeiterportal fertig** (§7). Fake-Login, Rundschreiben (teils über Erfolge freigeschaltet), Personalakte mit Laufbahn, Beförderungsurkunde als PNG, Stellenbörse, Kantinenplan, Organigramm. Tests: `tests/e2e-portal.html`, Screenshots: `tests/shot-portal.html?tab=urkunde`.
 - **Neu am 09.11.: M3 ist komplett.**
@@ -327,7 +328,7 @@ Fehler: `400` (`error: name` oder `invalid`, mit deutschem `reason`), `409` Name
 Ein reines Browser-Spiel lässt sich nie vollständig gegen Cheats absichern. Das ist bewusst akzeptiert.
 - **Plausibilität:** Der Wert darf nicht größer sein als alle Einwohner der gemeldeten Phase und nicht kleiner als die der Vorphase. Mindest-Spielzeit je Phase: Europa 20 Min., Welt 40 Min., Orbit 60 Min., Universum-Phase 75 Min., ganzes Universum 90 Min. (etwa ein Drittel des schnellsten simulierten Durchlaufs). Gesamt-FP höchstens 1e22.
 - **Rate-Limit:** höchstens 1 Meldung pro Minute und höchstens 5 neue Einträge pro Tag je `ip_hash`.
-- **`ip_hash`** = SHA-256(IP + Tagesdatum + Secret `IP_SALT`), auf 128 Bit gekürzt. Die IP wird nie gespeichert, und über Tage hinweg lassen sich Einträge nicht verknüpfen.
+- **`ip_hash`** = SHA-256(gekürzte IP + Tagesdatum + Secret `IP_SALT`), auf 128 Bit gekürzt. Gekürzt wird auf das Netz (IPv4 drei Blöcke, IPv6 48 Bit). Nach 24 h wird der Wert gelöscht (bei jeder Meldung). Die IP wird nie gespeichert.
 - **Namensfilter:** kurze Sperrliste (Beleidigungen, NS-Begriffe), auch mit Ziffern statt Buchstaben („N4zi“). Dazu reservierte Namen wie „Admin“ oder „BAfG“. URLs sind durch den Zeichensatz ausgeschlossen.
 - Admins können Einträge per `wrangler d1 execute sendemast-db --remote --command "DELETE FROM scores WHERE name_key = '…'"` löschen.
 
@@ -500,7 +501,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status
 | M3 ✅ | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Seit 09.11.2026 auch Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades |
 | M4 ✅ | Eskalation | Phasen 2–5 mit eigenen Karten, Prestige mit Tränen und Patenten (08.11.2026) |
 | M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). ✅ Mitarbeiterportal (09.11.2026). Offen: Impressum/Datenschutz ausfüllen |
-| M6 (teilweise) | Online | ✅ Bestenliste (Functions + D1, 09.11.2026, noch nicht online getestet), ✅ Teilen (Prahlen-Knopf, Urkunde). Offen: OG-Bild |
+| M6 ✅ | Online | Bestenliste (Functions + D1, 09.11.2026, noch nicht online getestet), Teilen (Prahlen-Knopf, Urkunde), Vorschaubild `assets/img/og.png` (Vorlage `tools/og.html`) |
 | M7 | Launch | Hosting, Domain, Balancing-Feinschliff, Mobile-Test |
 
 ---
