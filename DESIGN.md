@@ -10,34 +10,48 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 1. Du: Geheimakte gegen die Quellen prüfen und Phasen 2–5 per `/tests/seed.html?phase=N` anspielen (Spielstand vorher exportieren). Rückmeldungen hier unter „Offen“ notieren.
-> 2. Danach entscheiden, welcher der „Nächsten Schritte“ unten als Erstes kommt. Vorschlag: zuerst den Rest von M3 (Aluhut-Demo, Wünschelruten-Trupp, Synergie-Upgrades), weil das Spiel dann inhaltlich rund ist, danach Portal und Bestenliste.
-> 3. Kleinere offene Technikpunkte: zweiten Durchlauf nach Prestige simulieren (`tests/sim.js` erweitern); einzelne Käufe verschieben in späten Phasen die Kontrolle um bis zu 10–19 Prozentpunkte (bewusst so gelassen).
+> 1. **Prestige, zweiter Schritt?** Seit 09.11. gilt die Kubikwurzel (§4.9). Ein früher Neustart lohnt sich aber weiterhin nicht. Falls das gewollt ist: Tränen je Checkpoint statt aus den Gesamt-FP (Option in §4.9).
+> 2. Du: M3-Neuerungen anspielen (`/tests/shot.html?level=3&spawn=demo,trupp` zeigt Demo und Trupp sofort). Ton der neuen Texte prüfen (Upgrades in `data/upgrades.js`, News in `data/news.js`).
+> 3. Danach: Portal (§7) oder Bestenliste (§5).
 
-### ❗ Offen (Stand 08.11.2026)
-- [ ] **Geheimakte komplett durchlesen** (`/geheimakte/`). Inhalt und Ton prüfen und jede Aussage gegen die verlinkte Quelle gegenlesen. Erst danach geht die Seite online. Auffälligkeiten direkt hier notieren.
-  - Besonders prüfen: Akte 03 (Grenzwerte: 4 W/kg, Faktor 50, 0,08 W/kg – im ICNIRP-PDF selbst nicht maschinell gelesen, nur über Sekundärquellen abgeglichen), Akte 05 (Krebs/IARC), Akte 08 (Elektrosensibilität – Ton).
-  - Zwei Links waren beim Test nicht erreichbar: Quelle [10] (ARPANSA, Zeitüberschreitung) und der BfS-Dokumentenserver (DORIS, Serverfehler 503 – daher über nbn-resolving.org verlinkt). Im Browser nachprüfen.
-- [ ] Spiel nach dem neuen Balancing einmal komplett durchspielen (OPTIONEN → „Neuer Einsatz“). Fühlt sich der Weg zu 100 % gut an?
+### ❗ Offen (Stand 09.11.2026)
+- [x] ~~Prestige-Balancing entscheiden~~: Kubikwurzel, +8 % je Träne, Patente billiger (09.11.2026, §4.9)
+- [ ] Prestige im Spiel einmal durchspielen: Fühlen sich 5 Tränen nach der Welt bzw. 47 nach dem Universum gut an?
+- [ ] Neue Texte gegenlesen: 8 Synergie-Upgrades, 16 Bundesland-Upgrades, 6 Erfolge, 8 News (Demo, Trupp, Synergien).
 - [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
-- [ ] **Phasen 2–5 anspielen:** `/tests/seed.html?phase=2` (bzw. 3, 4, 5) legt einen Spielstand mitten in der Phase an. Achtung: überschreibt den eigenen Spielstand – vorher exportieren! Prüfen: Gags der Länder (§4.5, `data/phases.js`) im Ton okay? Zwergstaaten auf der Europakarte gut anklickbar?
 - [ ] Einwohnerzahlen Europa/Welt stammen aus Natural Earth (POP_EST, Stand 2019, Welt ≈ 7,68 Mrd.). Vor dem Release ggf. aktualisieren (`tools/build_world.py`).
-- [ ] Zweiter Durchlauf nach Prestige ist noch nicht simuliert (wie viel schneller geht es mit Tränen und Patenten?).
+- [x] ~~Geheimakte prüfen~~, ~~Phasen 2–5 anspielen~~ (erledigt 09.11.2026)
+- [x] ~~Zweiten Durchlauf nach Prestige simulieren~~ (`tests/sim-prestige.html`, 09.11.2026)
 
-### Wo wir stehen geblieben sind (08.11.2026)
-- **Neu am 08.11.:** M4 ist fertig. Es gibt 5 Phasen mit eigener Karte (Europa 45 Länder, Welt 17 Regionen, Orbit & Mond, Universum), 4 neue Anlagen, Zwischensequenzen und einen Kartenwechsel per Tab. Prestige gibt Aluhut-Tränen und Himmlische Patente (§4.5, §4.9). Dazu kommen 23 neue Erfolge (jetzt 63), Upgrades und ca. 30 News. Alte Spielstände (v1) werden migriert: Wer Deutschland schon erobert hat, landet direkt in Europa.
-- **Behobener Fehler:** Dialoge hingen manchmal, weil das `close`-Ereignis zu spät kam. Jetzt gibt es eine Warteschlange, und die Knöpfe schließen den Dialog selbst.
-- **Fertig (07.11.):** Spielkern mit Karte, 8 Anlagen, Upgrades, Erfolgen, Aluhutträgern, Goldenem Mast, News-Ticker, Speichern/Export/Import, Offline-Fortschritt (M1–M3 Basis). Balancing überarbeitet (§4.3). Geheimakte mit 11 Akten und 19 Quellen (§6).
-- **Behobene Fehler der letzten Sitzung:** „Neuer Einsatz“/Import wurde vom Autospeichern überschrieben; Leertaste löste fokussierten Kaufen-Knopf aus; stille Teilkäufe bei ×10/×100.
+### Wo wir stehen geblieben sind (09.11.2026)
+- **Neu am 09.11.: M3 ist komplett.**
+  - **Aluhut-Demo:** fünf Figuren in einer Region, jede kostet 10 % Signal. Wer alle überzeugt, bekommt eine Prämie (§4.7).
+  - **Wünschelruten-Trupp:** braucht drei Klicks und zieht alle 8 s in eine andere Region weiter.
+  - **8 Synergie-Upgrades**, z. B. „Weihnachtsgottesdienst“: Kirchturm +1 % je Tanne.
+  - **16 Bundesland-Upgrades:** je +1,5 % FP/s nach der Übernahme des Landes.
+  - Dazu 6 neue Erfolge (jetzt 69) und 8 News.
+- **Fehler in der alten Simulation behoben:** `tests/sim.js` hat Goldene Masten und Aluhüte per `queueMicrotask` angeklickt. Die Klicks liefen erst nach dem Ende der Simulation, die simulierten Spieler haben also **nie** auf Ereignisse reagiert. Mit echten Klicks war das Universum in 1 Std. 18 Min. erobert statt in 9 Std.
+- **Ereignisse neu abgestimmt** (Werte als Konstanten oben in `core/game.js`):
+  - Aluhut-Belohnung 6 s statt 30 s Produktion, Aluhut-Upgrades ×1,5 statt ×2.
+  - Influencer ×4 statt ×10 (10 % statt 15 % Wahrscheinlichkeit).
+  - Goldener Mast alle 5–10 Min. statt alle 2–5 Min.
+  - Frequenzrausch ×4 für 44 s statt ×7 für 77 s.
+  - Klickwahn ×77 statt ×777.
+- **Zwei Exploits behoben:**
+  - Klickwahn vervielfachte auch den Einweihungsbonus und die Aluhut-Prämien. Jetzt zählt dort der Impuls ohne Klickwahn.
+  - Der Einweihungsbonus (5 s Produktion) lohnte sich mit billigen Funkmasten endlos. Er ist jetzt auf den halben Kaufpreis begrenzt.
+- **Fehler behoben:** Nach einem Prestige gab es beim zweiten Universum keinen Abschlussdialog, weil `universeDone` den Neustart überlebt. Neu ist `universeRun` (gilt je Durchlauf).
+- **Prestige umgestellt (Option a):** Tränen = Kubikwurzel statt Quadratwurzel, +8 % statt +2 % je Träne, Patente kosten 1–40 statt 1–250 Tränen. Die Texte im Spiel lesen den Bonus jetzt aus `TEAR_BONUS`.
+- **Simulation:** Der Kern liegt jetzt in `tests/simcore.js`, die Ausgabe zeigt zusätzlich, woher die FP kommen. Neu ist `tests/sim-prestige.html` (mehrere Durchläufe, Neustart an Checkpoints).
+- **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
 - **Platzhalter:** Portal, Bestenliste, Impressum, Datenschutz (Impressum/Datenschutz: eigene Daten eintragen!).
-- **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README).
+- **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
 - **Noch nicht online:** kein GitHub-Remote, kein Hosting. Repo ist lokal unter `D:\FunProjectDomain`.
 
 ### Nächste Schritte (Reihenfolge offen)
 1. Mitarbeiterportal der BAfG (§7)
 2. Bestenliste mit Cloudflare Pages Functions + D1 (§5)
 3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)
-4. Rest von M3: Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades
 
 ---
 
@@ -156,17 +170,7 @@ Dazu kommen 5 Reichweiten-Upgrades mit je **+20 %**, insgesamt ×2,49. Vorher wa
 
 **Regel:** Kein einzelner Kauf soll mehr als ca. 4 Prozentpunkte bringen. Ausnahme: späte Reichweiten-Upgrades (max. ca. 7) und HAARP als bewusstes Highlight.
 
-Simulation (`tests/sim.html`: 3 Klicks/s, Goldene Masten und Aluhüte sofort angeklickt, Masten von Hand mit Einweihungsbonus):
-
-| Zeit | Kontrolle |
-|---|---|
-| 15 Min. | 1 % |
-| 30 Min. | 13 % |
-| 45 Min. | 24 % |
-| 60 Min. | 47 % |
-| 1 Std. 38 Min. | 100 % |
-
-Größter Einzelsprung: +7 Prozentpunkte (Reichweiten-Upgrade 3), Chemtrail-Staffel +1,4.
+Simulation: aktuelle Zeiten siehe §4.5. Die älteren Zahlen in diesem Abschnitt stammen aus der fehlerhaften Simulation, die nie auf Ereignisse reagiert hat (siehe §0).
 
 ### 4.4 Die Karte & „Masten platzieren“
 
@@ -179,7 +183,7 @@ Größter Einzelsprung: +7 Prozentpunkte (Reichweiten-Upgrade 3), Chemtrail-Staf
 - Gegen Klick-Ermüdung gibt es den Schalter **„Auto-Platzieren“**. Er setzt neue Masten automatisch ins schwächste Bundesland. Bei Käufen ×10 und mehr ist er immer aktiv.
 - Jede Anlage hat eine Reichweite *R* (Mast 1, Tanne 3, Kirchturm 20 … in „Bürger-Einheiten“, zum Balancing).
 
-**Einweihungsbonus:** Wer einen Mast von Hand platziert, bekommt `max(5 s Produktion, 3 Impulse)` FP. Das belohnt aktives Spielen. Wer gezielt kleine Länder wie Bremen oder das Saarland füllt, übernimmt außerdem früher das erste Bundesland. Auto-Platzieren verteilt dagegen gleichmäßig.
+**Einweihungsbonus:** Wer einen Mast von Hand platziert, bekommt `max(3 Impulse, min(5 s Produktion, halber Kaufpreis))` FP. Die Grenze beim halben Kaufpreis gilt seit dem 09.11.2026. Vorher konnte man in späten Phasen endlos billige Funkmasten kaufen und einweihen. Das belohnt aktives Spielen. Wer gezielt kleine Länder wie Bremen oder das Saarland füllt, übernimmt außerdem früher das erste Bundesland. Auto-Platzieren verteilt dagegen gleichmäßig.
 
 **Kontrolle pro Bundesland:**
 ```
@@ -219,80 +223,78 @@ Landesweite Anlagen füllen also die Lücken proportional auf, ohne dass Reichwe
 - **Zwischensequenz** bei jedem Phasenwechsel (Dienstwagen → Reisebus → Linienflugzeug → Raumschiff → Warp-Antrieb) mit „Prahlen“-Knopf. Nach dem Universum folgt ein Abschlussdialog mit einem Hinweis auf die Geheimakte.
 - Ab Phase 4 heißt der Zähler „Kontrollierte Lebewesen“. Ab 1 Bio. wird er abgekürzt („45,1 Bio.“), sonst sprengt er die Kopfzeile.
 
-**Simulation** (`tests/sim.html?cps=3&h=16`, aktiv, Stand 08.11.2026):
+**Simulation** (`tests/sim.html?h=16`, Stand 09.11.2026, mit M3). „Ereignisse an“ heißt: Jeder Goldene Mast und jeder Aluhut wird nach 2 s angeklickt. Das ist die Obergrenze, echte Spieler verpassen einige.
 
-| Phase fertig | aktiv (3 Klicks/s, von Hand) | gemütlich (1 Klick/s, Auto-Platzieren) |
-|---|---|---|
-| Deutschland | 1 Std. 37 Min. | 2 Std. 7 Min. |
-| Europa | 3 Std. 47 Min. | 4 Std. 13 Min. |
-| Welt (Prestige möglich, ca. 10 Tränen) | 5 Std. 8 Min. | 6 Std. 26 Min. |
-| Orbit & Mond | 6 Std. 56 Min. | 8 Std. 25 Min. |
-| Universum (ca. 300 Tränen) | 9 Std. 22 Min. | 11 Std. 9 Min. |
+| Phase fertig | 3 Klicks/s, von Hand, Ereignisse an | 3 Klicks/s, von Hand, Ereignisse aus | 1 Klick/s, Auto-Platzieren, Ereignisse aus |
+|---|---|---|---|
+| Deutschland | 1 Std. 5 Min. | 1 Std. 30 Min. | 1 Std. 50 Min. |
+| Europa | 2 Std. 4 Min. | 2 Std. 58 Min. | 3 Std. 28 Min. |
+| Welt (Prestige möglich, ca. 12 Tränen) | 2 Std. 49 Min. | 4 Std. 10 Min. | 4 Std. 47 Min. |
+| Orbit & Mond | 3 Std. 26 Min. | 5 Std. 17 Min. | 6 Std. 3 Min. |
+| Universum (ca. 350 Tränen) | 4 Std. 17 Min. | 6 Std. 46 Min. | 7 Std. 39 Min. |
+
+Herkunft der FP bei „Ereignisse an“: Aluhüte ca. 7 %, Demos ca. 7 %, Influencer ca. 6 %, Trupps ca. 3 %, Einweihung ca. 5 %, Impulse ca. 7 %, der Rest kommt aus den Anlagen. Aktives Spielen ist damit etwa 1,6× schneller.
 
 In späteren Phasen springt die Kontrolle pro Kauf um bis zu 10–19 Prozentpunkte. Das ist gewollt, weil es dort weniger, aber größere Anschaffungen gibt.
 
 ### 4.6 Upgrades
 - Pro Anlage: ×2-Upgrades bei 1 / 5 / 25 / 50 / 100 / 150 / 200 Stück (Cookie-Clicker-Muster). Beispiele: „5G+“, „5G Ultra“, „5G Ultra Max Pro“, „5,5G“, „Aluhut-Durchdringung“.
 - Klick-Upgrades: „Doppelklick-Erlass“, „Dienstfinger aus Titan“.
-- Synergien, z. B. „Kirchturm × Tanne: Weihnachtsgottesdienst-Bonus“.
-- Bundesland-Upgrades nach der Übernahme.
+- **Synergien** ✅ (8 Stück, `data/upgrades.js` → `SYNERGIES`): Anlage A bekommt +x % je Stück von Anlage B. Beispiele: „Weihnachtsgottesdienst“ (Kirchturm +1 % je Tanne), „Warmhalteplatte für Reptiloiden“ (Reptiloiden +1 % je Toaster), „Mondsüchtige Satelliten“ (Mond +1,5 % je Satelliten-Schwarm). Sie werden frei, sobald man von beiden Anlagen genug besitzt. Die erste Fassung mit doppelten Werten machte das Spiel ohne Ereignisse fast doppelt so schnell und wurde deshalb halbiert.
+- **Bundesland-Upgrades** ✅ (16 Stück, `LAND`): Nach der Übernahme eines Bundeslands gibt es ein Upgrade mit +1,5 % FP/s und Lokalkolorit („Maibaum-Antennen“, „Kehrwoche für Funkwellen“, „Stadtmusikanten-Verstärker“). Preis: 20 FP je Einwohner. Die gebietsweiten Anlagen füllen alle Länder gleichmäßig auf, deshalb fallen die meisten Länder erst am Ende von Phase 1. Die Upgrades sind daher vor allem ein Startschub für Europa. Wer kleine Länder gezielt von Hand füllt, bekommt sie früher.
 
 ### 4.7 Gegenspieler: Aluhutträger
 - Alle 30–90 s erscheint ein **Aluhutträger** in einem kontrollierten Bundesland. Er tritt erst ab 2.000 kontrollierten Menschen auf, gleichzeitig sind höchstens 1–4 aktiv.
 - Jeder aktive Aluhutträger senkt die gesamte Produktion um 10 % (höchstens −50 %).
-- Ein Klick „überzeugt“ ihn per Gratis-WLAN. Dafür gibt es `max(30 s Produktion, 10 Impulse)` FP, und er zieht ab.
-- **Telegram-Influencer** (umgesetzt): erscheint ab 500 FP/s mit 15 % Wahrscheinlichkeit, braucht 10 Klicks und bringt die 10-fache Belohnung.
-- Geplant: **Aluhut-Demo** (5 Figuren) und **Wünschelruten-Trupp** (wandert über die Karte).
+- Ein Klick „überzeugt“ ihn per Gratis-WLAN. Dafür gibt es `max(6 s Produktion, 5 Impulse)` FP (vor dem 09.11.: 30 s, siehe §0), und er zieht ab. Impulse zählen dabei ohne Klickwahn.
+- **Telegram-Influencer**: erscheint ab 500 FP/s mit 10 % Wahrscheinlichkeit, braucht 10 Klicks und bringt die 4-fache Belohnung.
+- **Wünschelruten-Trupp** ✅: erscheint ab 3.000 FP/s mit 12 % Wahrscheinlichkeit. Er braucht 3 Klicks, zieht alle 8 s in eine andere Region (gleitet über die Karte) und bringt die 3-fache Belohnung. Er bleibt 40 s.
+- **Aluhut-Demo** ✅: erscheint ab 20.000 FP/s mit 8 % Wahrscheinlichkeit, aber nur, wenn gerade kein anderer Aluhut aktiv ist. Fünf Figuren tauchen in einer Region auf, jede kostet 10 % (zusammen −50 %). Jede Figur bringt die normale Belohnung. Wer alle fünf überzeugt, bekommt zusätzlich die 3-fache Prämie. Die Demo bleibt 50 s.
 - Nach 60 s ohne Reaktion verschwindet er von selbst. Es gibt keine dauerhafte Strafe, damit das Spiel idle-tauglich bleibt.
 
 ### 4.8 Bonus-Events: der „Goldene Mast“
-Ein goldener Mast erscheint alle 2–5 min an einer zufälligen Stelle und bleibt 13 s sichtbar.
+Ein goldener Mast erscheint alle 5–10 min an einer zufälligen Stelle und bleibt 13 s sichtbar (vor dem 09.11.: alle 2–5 min, siehe §0).
 
 | Effekt | Wirkung | Dauer |
 |---|---|---|
-| Frequenzrausch | FP/s ×7 | 77 s |
+| Frequenzrausch | FP/s ×4 | 44 s |
 | Glücksfund | +15 % des Guthabens (max. 15 min Produktion) | sofort |
-| Klickwahn | FP pro Klick ×777 | 13 s |
+| Klickwahn | FP pro Klick ×77 | 13 s |
 | Funkloch *(selten, negativ)* | FP/s ×0,5 | 30 s |
 
 ### 4.9 Prestige: „Neustart nach Weltherrschaft“
 
 **Status:** ✅ umgesetzt (Tab „Prestige“, `data/patents.js`, `Game.prestige()`).
 - Verfügbar, sobald im aktuellen Durchlauf die Welt erobert ist (Phase ≥ 4) und mindestens eine neue Träne fällig wäre.
-- **Aluhut-Tränen** insgesamt: `floor(sqrt(Gesamt-FP_jemals / 4e9))`. Ein Neustart bringt die Differenz zu den schon erhaltenen Tränen. Laut Simulation sind das bei der Welt ca. 10, beim Universum ca. 300.
-- Jede Träne bringt dauerhaft +2 % FP/s. **Ausgegebene Tränen behalten ihren Bonus** (wie bei Cookie Clicker): Patente kosten nur die Entscheidung.
+- **Aluhut-Tränen** insgesamt: `floor(Kubikwurzel(Gesamt-FP_jemals / 4,6e9))` (seit 09.11.2026, vorher Quadratwurzel durch 4e9). Ein Neustart bringt die Differenz zu den schon erhaltenen Tränen. Laut Simulation sind das nach der Welt ca. 5, nach Orbit & Mond ca. 14 und nach dem Universum ca. 47.
+- Jede Träne bringt dauerhaft +8 % FP/s (vorher +2 %). **Ausgegebene Tränen behalten ihren Bonus** (wie bei Cookie Clicker): Patente kosten nur die Entscheidung.
 - **Bleibt erhalten:** Tränen, Patente, Erfolge, Gesamt-FP, Statistik (Klicks, Aluhüte, Goldene Masten, Spielzeit), Einstellungen. **Wird zurückgesetzt:** FP, Anlagen, Masten, Upgrades, übernommene Gebiete, Phase.
 - Nach dem Neustart wird die Seite neu geladen (einfacher und robuster als alle Karten im Betrieb zurückzubauen).
-- **Himmlische Patente** (Kosten in Tränen): Startpaket Funkmast (1) · Goldene Antenne (2) · Nachtschicht-Zulage, offline 75 % (3) · Dauer-Impuls, 1 Impuls/s (5) · Aluhut-Gewerkschaft ×3 (5) · Erfolgsprämie +2 % je Erfolg (10) · Express-Genehmigung, Übernahme-Boni ×2 (15) · Weitsicht-Erlass, Reichweite +50 % (20) · Beamten-Startgeld 1 Mio. FP (30) · Ewige Frequenz (60) · Impuls-Automat Mk II (100) · Diplomatischer Pass, 1 Mrd. FP Startgeld (250). Startgeld zählt nicht als verdient, sonst gäbe es Tränen aus dem Nichts.
+- **Himmlische Patente** (Kosten in Tränen, seit 09.11.2026): Startpaket Funkmast (1) · Goldene Antenne (1) · Nachtschicht-Zulage, offline 75 % (2) · Dauer-Impuls, 1 Impuls/s (2) · Aluhut-Gewerkschaft ×3 (3) · Erfolgsprämie +2 % je Erfolg (4) · Express-Genehmigung, Übernahme-Boni ×2 (6) · Weitsicht-Erlass, Reichweite +50 % (8) · Beamten-Startgeld 1 Mio. FP (10) · Ewige Frequenz (15) · Impuls-Automat Mk II (25) · Diplomatischer Pass, 1 Mrd. FP Startgeld (40). Mit den Tränen aus dem ersten Universum (47) sind die ersten neun Patente drin. Startgeld zählt nicht als verdient, sonst gäbe es Tränen aus dem Nichts.
 - Flavor: „Die Menschheit wurde per Software-Update zurückgesetzt.“
 
-### 4.10 News-Ticker
-- Fortlaufende Meldungen, abhängig von Fortschritt und Phase. Zum Start mindestens 80 Texte.
-- Beispiele:
-  - „Telegram-Gruppe ‚Wahrheitsfunk‘ entdeckt Mast in Wanne-Eickel. Aluhut-Absatz +300 %“
-  - „Oma Gisela (84) empfängt jetzt Radio über ihre Plomben“
-  - „Studie: 9 von 10 Tauben sind Drohnen. Die zehnte ist Bundesbeamter.“
-  - „Heilpraktiker verkauft Orgonit gegen Funkwellen. Funkwellen unbeeindruckt.“
-- Gelegentlich steht eine **echte Fakten-Meldung** im Ticker, gekennzeichnet mit „🔍 Geheimakte:“. Sie verlinkt auf die Faktenseite.
+**Simulation mit Prestige** (`tests/sim-prestige.html`, Stand 09.11.2026). Ein Plan legt für jeden Durchlauf fest, wann neu gestartet wird: **4** = sofort nach der Welt (frühester Zeitpunkt), **5** = nach Orbit & Mond, **U** = nach dem Universum. Patente kauft der Spieler nach jedem Neustart, billigste zuerst. Zeiten in Std:Min.
 
-### 4.11 Achievements
-Etwa 40 zum Start. Beispiele: „Erster Mast“, „Bielefeld existiert doch!“, „Ganz Bayern hört mit“, „Ein Aluhut weniger“ (100 überzeugt), „Funkloch-Überlebender“, „Das Ende der Welt (und der Anfang des Mondes)“. Jedes Achievement gibt +1 % FP/s.
+| Plan | Universum nach (aktiv, Ereignisse an) | letzter Durchlauf | Universum nach (Ereignisse aus) | letzter Durchlauf | Tränen am Ende |
+|---|---|---|---|---|---|
+| U (kein Neustart) | 4:19 | 4:19 | 6:46 | 6:46 | 47 |
+| 4 → U | 6:00 | 3:11 | 9:43 | 5:33 | 47 |
+| 5 → U | 5:04 | 1:35 | 9:08 | 3:50 | 48 |
+| 4 → 4 → U | 7:30 | 2:52 | 12:35 | 5:13 | 47 |
+| 4 → 5 → U | 6:45 | 1:34 | 12:11 | 3:49 | 49 |
+| 5 → 5 → U | 6:06 | 1:26 | 11:39 | 3:34 | 48 |
+| U → U | 5:07 | 0:48 | 8:35 | 1:48 | 55 |
+| U → U → U | 5:51 | 0:45 | 10:11 | 1:36 | 61 |
 
-### 4.12 Speichern & Offline-Fortschritt
-- Gespeichert wird in `localStorage` als versioniertes JSON (`save.version` für Migrationen), automatisch alle 30 s und beim Schließen des Tabs.
-- Export und Import als Text-String (Base64) für Backups und Gerätewechsel.
-- Offline-Fortschritt: 50 % der FP/s, höchstens 12 h. Beim Zurückkommen erscheint ein Dialog: „Während du weg warst, hat die BAfG 4,2 Mio. FP für dich gefunkt.“
-- „Spielstand löschen“ mit doppelter Bestätigung.
+**Vorher (Quadratwurzel, +2 % je Träne):** Welt 12 Tränen, Universum 349. Der zweite Universum-Durchlauf dauerte 33 Min., der dritte 21 Min. Ein Neustart nach der Welt kostete 1,5 Std.
 
-### 4.13 Zahlenformat
-- Deutsches Format mit `Intl.NumberFormat('de-DE')`.
-- Große Zahlen: Tsd., Mio., Mrd., Bio., Brd., Trio., Trd., Quadr., … und danach wissenschaftlich (1,23e45).
-- Für die Spielwerte reichen JS-Doubles (max. ≈ 1,8e308).
+**Befund nach der Umstellung:**
+1. Nach dem Universum bleibt das Spiel länger interessant: Der zweite Durchlauf dauert 48 Min. statt 33 Min. (ohne Ereignisse 1:48), der dritte 45 Min. statt 21 Min. Weitere Universen bringen nur noch wenige Tränen (+8, dann weniger). Das ist ein natürliches Ende, ähnlich wie bei Cookie Clicker.
+2. Frühe Tränen sind relativ mehr wert: Die Welt bringt jetzt 11 % der Universum-Tränen statt 3 %.
+3. **Ein früher Neustart lohnt sich trotzdem nicht.** Das ist strukturell: Die FP wachsen je Phase etwa um den Faktor 30, und die Tränen hängen an den Gesamt-FP. Ein zweiter Welt-Durchlauf bringt deshalb nur +1 Träne, egal welche Wurzel. Der Bonus je Träne ändert daran kaum etwas (5 % statt 8 % getestet: Unterschied von wenigen Minuten).
+4. Die Zwischensequenz nach der Welt sagt das jetzt ehrlich: „Nach dem Universum sind es fast zehnmal so viele.“
 
-### 4.14 Teilen
-- Der Button **„Prahlen“** nutzt die Web Share API. Fallback: Text in die Zwischenablage kopieren.
-- Text: *„Ich kontrolliere bereits 12,4 Mio. Deutsche 📡 Wie viele schaffst du? 5gsendemast.de“*
-- Open-Graph-Bild (statisch) für schöne Vorschauen in Messengern.
+**Falls frühe Neustarts sich lohnen sollen (nicht umgesetzt):** Tränen je erreichtem Checkpoint vergeben statt aus den Gesamt-FP, z. B. Welt 3, Orbit 6, Universum 12 Tränen **pro Durchlauf**. Dann lohnen sich schnelle Welt-Schleifen, sobald ein Durchlauf schnell genug ist. Nachteil: Man braucht eine Obergrenze oder abnehmende Erträge, sonst lässt sich endlos farmen.
 
 ---
 
@@ -488,7 +490,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
 | M0 ✅ | Konzept | Dieses Dokument, Mockups, Stil-Entscheidung |
 | M1 ✅ | Spielkern | Klicken, Anlagen 1–8, Speichern, Zahlenformat, Ticker (statische Karte) |
 | M2 ✅ | Karte | Bundesländer-SVG, Masten platzieren, Kontrolle, Übernahme-Effekte |
-| M3 ✅ (Basis) | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Offen: Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades, mehr News |
+| M3 ✅ | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Seit 09.11.2026 auch Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades |
 | M4 ✅ | Eskalation | Phasen 2–5 mit eigenen Karten, Prestige mit Tränen und Patenten (08.11.2026) |
 | M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). Offen: Portal, Impressum/Datenschutz ausfüllen |
 | M6 | Online | Bestenliste (Functions + D1), Teilen, OG-Bild |

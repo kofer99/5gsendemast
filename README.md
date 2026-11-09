@@ -18,10 +18,11 @@ python -m http.server 8765
 | http://localhost:8765/ | Spiel |
 | http://localhost:8765/tests/ | Unit-Tests |
 | http://localhost:8765/tests/e2e.html | End-to-End-Test (löscht den lokalen Spielstand!) |
-| http://localhost:8765/tests/sim.html?cps=3&h=4 | Balancing-Simulation |
+| http://localhost:8765/tests/sim.html?cps=3&h=16 | Balancing-Simulation eines Durchlaufs (`ev=0` ohne Ereignisse, `manual=0` Auto-Platzieren, `off=syn_,land_` Upgrades abschalten) |
+| http://localhost:8765/tests/sim-prestige.html | Prestige-Simulation: mehrere Durchläufe, Neustart an Checkpoints (`plans=U|4,U|5,U`) |
 | http://localhost:8765/tests/seed.html?level=1\|2\|3 | Test-Spielstand mit Fortschritt erzeugen (überschreibt den eigenen!) |
 | http://localhost:8765/tests/seed.html?phase=2\|3\|4\|5 | Test-Spielstand mitten in Phase 2–5 (optional `&tears=40`) |
-| http://localhost:8765/tests/shot.html?phase=3&tab=prestige | Seed laden und Spiel in 1400 px zeigen (für Screenshots) |
+| http://localhost:8765/tests/shot.html?phase=3&tab=prestige | Seed laden und Spiel in 1400 px zeigen (für Screenshots), `spawn=demo,trupp` erzeugt Gegenspieler |
 | http://localhost:8765/tests/shot-mobile.html?phase=3 | dasselbe in Handy-Breite |
 | http://localhost:8765/tests/maps.html | Vorschau der Europa- und Weltkarte |
 | http://localhost:8765/tests/mobile.html | Handy-Vorschau (390 px / 360 px) |

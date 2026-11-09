@@ -203,7 +203,7 @@ export class Shop {
         btn.className = 'upg';
         btn.dataset.id = u.id;
         btn.setAttribute('aria-label', `Upgrade ${u.name}: ${fmt(u.cost)} Funkpunkte. ${u.desc}`);
-        btn.innerHTML = u.effect.type === 'building'
+        btn.innerHTML = u.icon
           ? `${icon(u.icon, 22)}<span class="upg-tier">${u.short}</span>`
           : `<span>${u.short}</span>`;
         btn.addEventListener('click', () => {

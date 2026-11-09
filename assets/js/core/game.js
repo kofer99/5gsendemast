@@ -13,12 +13,36 @@ export const MAX_MARKERS = 400; // je Phase
 const ALUHUT_LIFE = 60_000;
 const INFLUENCER_LIFE = 45_000;
 const GOLDEN_LIFE = 13_000;
+const DEMO_LIFE = 50_000;
+const DEMO_SIZE = 5;
+const TRUPP_LIFE = 40_000;
+const TRUPP_STEP = 8_000;   // so oft zieht der Wünschelruten-Trupp weiter
+const TRUPP_HP = 3;
+// Ab welcher Produktion die Sonderformen auftauchen und mit welcher Wahrscheinlichkeit (ein Würfelwurf je Spawn).
+// Balancing der Ereignisse (DESIGN.md §4.7/§4.8, per Simulation abgestimmt am 09.11.2026).
+// Ein normaler Aluhutträger bringt max(ALUHUT_REWARD_SEC Sek. Produktion, ALUHUT_REWARD_CLICKS Impulse).
+export const ALUHUT_REWARD_SEC = 6;
+export const ALUHUT_REWARD_CLICKS = 5;
+// Belohnung je Figur als Vielfaches davon. Die Demo bringt zusätzlich DEMO_BONUS, wenn sie ganz aufgelöst ist.
+export const ALUHUT_REWARD = { aluhut: 1, influencer: 4, trupp: 3, demo: 1 };
+export const DEMO_BONUS = 3;
+export const INAUGURATION_SEC = 5;          // Einweihungsbonus: Sekunden Produktion …
+export const INAUGURATION_MAX_PRICE = 0.5;  // … aber höchstens dieser Anteil des Kaufpreises
+export const GOLDEN_INTERVAL = [300, 600]; // Sekunden zwischen zwei Goldenen Masten
+export const RAUSCH = { mult: 4, sec: 44 };
+export const KLICKWAHN = { mult: 77, sec: 13 };
+export const SPECIAL_ALUHUTS = {
+  influencer: { minCps: 500,   from: 0,    to: 0.10 },
+  trupp:      { minCps: 3000,  from: 0.10, to: 0.22 },
+  demo:       { minCps: 20000, from: 0.22, to: 0.30 },
+};
 
 // Diese Felder überleben einen Prestige-Neustart.
 const KEEP_ON_PRESTIGE = [
   'version', 'runId', 'startedAt', 'lastTick', 'playtime', 'fpAll', 'clicks', 'clickFp', 'manualPlaced',
   'achievements', 'aluhutConverted', 'goldenClicked', 'funklochSeen', 'offlineReturns', 'introSeen', 'settings',
   'nickname', 'phaseReached', 'universeDone', 'tears', 'tearsSpent', 'patents', 'prestiges', 'bestControlledAll',
+  'demosDissolved', 'truppsCaught',
 ];
 
 export class Game {
@@ -177,7 +201,10 @@ export class Game {
     this.place(id, code, { x, y });
     this.s.manualPlaced++;
     const before = this.d;
-    const bonus = Math.max(before.rawCps * 5, before.perClick * 3);
+    // Höchstens der halbe Preis der Anlage, sonst lohnt es sich, endlos billige Funkmasten zu kaufen und einzuweihen.
+    const b = BUILDING_BY_ID[id];
+    const price = eco.buildingCost(b, Math.max(0, (this.s.owned[id] || 1) - 1));
+    const bonus = Math.max(before.basePerClick * 3, Math.min(before.rawCps * INAUGURATION_SEC, price * INAUGURATION_MAX_PRICE));
     this.earn(bonus);
     this.refresh();
     this.emit('inauguration', { id, code, x, y, amount: bonus });
@@ -268,35 +295,102 @@ export class Game {
       this.goldens = this.goldens.filter((g) => g.until > t);
       goneG.forEach((g) => this.emit('goldenLeave', g));
     }
+    this.moveTrupps(t);
     if (t >= this.nextAluhutAt) {
       this.nextAluhutAt = t + (30 + this.random() * 60) * 1000;
       if (this.d.controlled >= 2000 && this.aluhuts.length < this.maxAluhuts()) this.spawnAluhut(t);
     }
     if (t >= this.nextGoldenAt) {
-      this.nextGoldenAt = t + (120 + this.random() * 180) * 1000 * this.d.mods.goldenInterval;
+      const [lo, hi] = GOLDEN_INTERVAL;
+      this.nextGoldenAt = t + (lo + this.random() * (hi - lo)) * 1000 * this.d.mods.goldenInterval;
       if (this.s.fpAll >= 150 && !this.goldens.length) this.spawnGolden(t);
     }
   }
 
-  spawnAluhut(t = this.now()) {
+  /** Wählt die Region für einen neuen Aluhutträger (gewichtet nach Kontrolle und Größe). */
+  aluhutRegion() {
     const ctrl = this.d.control;
     let candidates = this.phase.open.filter((r) => ctrl[r.code] > 0);
     // Zu Beginn einer neuen Phase ist oft noch nichts abgedeckt – dann tauchen sie überall auf.
     if (!candidates.length && this.s.phase > 1) candidates = this.phase.open;
     if (!candidates.length) return null;
-    const r = this.pickWeighted(candidates, (x) => Math.max(ctrl[x.code], 0.05) * Math.sqrt(x.pop));
-    const influencer = this.d.rawCps >= 500 && this.random() < 0.15;
+    return this.pickWeighted(candidates, (x) => Math.max(ctrl[x.code], 0.05) * Math.sqrt(x.pop));
+  }
+
+  /** Welche Sonderform? Ein Würfelwurf, erst ab 500 FP/s (wie früher beim Influencer). */
+  rollAluhutKind() {
+    const cps = this.d.rawCps;
+    if (cps < SPECIAL_ALUHUTS.influencer.minCps) return 'aluhut';
+    const roll = this.random();
+    for (const [kind, k] of Object.entries(SPECIAL_ALUHUTS)) {
+      if (cps >= k.minCps && roll >= k.from && roll < k.to) return kind;
+    }
+    return 'aluhut';
+  }
+
+  spawnAluhut(t = this.now(), kind = null) {
+    const r = this.aluhutRegion();
+    if (!r) return null;
+    kind ||= this.rollAluhutKind();
+    // Eine Demo kommt nur, wenn gerade niemand sonst protestiert (sonst wäre sofort −50 %).
+    if (kind === 'demo') return this.aluhuts.length ? this.spawnAluhut(t, 'aluhut') : this.spawnDemo(t, r);
+    if (kind === 'trupp') return this.spawnTrupp(t, r);
+    const influencer = kind === 'influencer';
     const pt = this.pointIn(r.code);
     const a = {
       id: this.nextId++, code: r.code, p: this.s.phase, x: pt.x, y: pt.y,
-      kind: influencer ? 'influencer' : 'aluhut',
-      hp: influencer ? 10 : 1, maxHp: influencer ? 10 : 1,
+      kind, hp: influencer ? 10 : 1, maxHp: influencer ? 10 : 1,
       until: t + (influencer ? INFLUENCER_LIFE : ALUHUT_LIFE),
     };
     this.aluhuts.push(a);
     this.refresh();
     this.emit('aluhutSpawn', a);
     return a;
+  }
+
+  /** Aluhut-Demo: fünf Figuren in einer Region. Jede kostet 10 %, wer alle überzeugt, bekommt eine Prämie. */
+  spawnDemo(t = this.now(), r = this.aluhutRegion()) {
+    if (!r) return null;
+    const group = this.nextId++;
+    const members = [];
+    for (let i = 0; i < DEMO_SIZE; i++) {
+      const pt = this.pointIn(r.code);
+      const a = {
+        id: this.nextId++, code: r.code, p: this.s.phase, x: pt.x, y: pt.y,
+        kind: 'demo', group, hp: 1, maxHp: 1, until: t + DEMO_LIFE,
+      };
+      this.aluhuts.push(a);
+      members.push(a);
+    }
+    this.refresh();
+    for (const a of members) this.emit('aluhutSpawn', a);
+    this.emit('demoSpawn', { group, code: r.code, name: r.name, members });
+    return members[0];
+  }
+
+  /** Wünschelruten-Trupp: braucht drei Klicks und zieht alle 8 Sekunden in eine andere Region weiter. */
+  spawnTrupp(t = this.now(), r = this.aluhutRegion()) {
+    if (!r) return null;
+    const pt = this.pointIn(r.code);
+    const a = {
+      id: this.nextId++, code: r.code, p: this.s.phase, x: pt.x, y: pt.y,
+      kind: 'trupp', hp: TRUPP_HP, maxHp: TRUPP_HP, until: t + TRUPP_LIFE, nextMove: t + TRUPP_STEP, step: TRUPP_STEP,
+    };
+    this.aluhuts.push(a);
+    this.refresh();
+    this.emit('aluhutSpawn', a);
+    return a;
+  }
+
+  moveTrupps(t) {
+    for (const a of this.aluhuts) {
+      if (a.kind !== 'trupp' || t < a.nextMove) continue;
+      a.nextMove = t + TRUPP_STEP;
+      const r = this.pickWeighted(this.phase.open, (x) => Math.sqrt(x.pop));
+      const pt = this.pointIn(r.code);
+      a.code = r.code; a.x = pt.x; a.y = pt.y;
+      this.emit('aluhutMove', a);
+    }
   }
 
   hitAluhut(id) {
@@ -307,9 +401,21 @@ export class Game {
     this.aluhuts = this.aluhuts.filter((x) => x.id !== id);
     this.s.aluhutConverted++;
     const d = this.refresh();
-    const reward = Math.max(d.rawCps * 30, d.perClick * 10) * (a.kind === 'influencer' ? 10 : 1) * d.mods.aluhutMult;
+    const base = Math.max(d.rawCps * ALUHUT_REWARD_SEC, d.basePerClick * ALUHUT_REWARD_CLICKS) * d.mods.aluhutMult;
+    const reward = base * (ALUHUT_REWARD[a.kind] || 1);
     this.earn(reward);
     this.emit('aluhutConverted', { ...a, reward });
+    if (a.kind === 'trupp') {
+      this.s.truppsCaught = (this.s.truppsCaught || 0) + 1;
+      this.emit('truppCaught', { ...a, reward });
+    }
+    // Letzte Figur einer Demo überzeugt → Versammlung aufgelöst, Prämie obendrauf.
+    if (a.kind === 'demo' && !this.aluhuts.some((x) => x.group === a.group)) {
+      const bonus = base * DEMO_BONUS;
+      this.earn(bonus);
+      this.s.demosDissolved = (this.s.demosDissolved || 0) + 1;
+      this.emit('demoDissolved', { ...a, reward: bonus });
+    }
     return a;
   }
 
@@ -336,15 +442,15 @@ export class Game {
       this.s.funklochSeen++;
       effect = { id: 'funkloch', title: 'FUNKLOCH!', text: 'Produktion ×0,5 für 30 Sek. Typisch Deutschland.' };
     } else if (r < 0.5) {
-      this.addBuff({ id: 'rausch', mult: 7, until: t + 77_000 * dur });
-      effect = { id: 'rausch', title: 'FREQUENZRAUSCH!', text: `FP/Sek. ×7 für ${Math.round(77 * dur)} Sek.` };
+      this.addBuff({ id: 'rausch', mult: RAUSCH.mult, until: t + RAUSCH.sec * 1000 * dur });
+      effect = { id: 'rausch', title: 'FREQUENZRAUSCH!', text: `FP/Sek. ×${RAUSCH.mult} für ${Math.round(RAUSCH.sec * dur)} Sek.` };
     } else if (r < 0.9) {
       const gain = Math.min(this.s.fp * 0.15, this.d.rawCps * 900) + 13;
       this.earn(gain);
       effect = { id: 'fund', title: 'GLÜCKSFUND!', amount: gain };
     } else {
-      this.addBuff({ id: 'klickwahn', clickMult: 777, until: t + 13_000 * dur });
-      effect = { id: 'klickwahn', title: 'KLICKWAHN!', text: `Impulse ×777 für ${Math.round(13 * dur)} Sek.` };
+      this.addBuff({ id: 'klickwahn', clickMult: KLICKWAHN.mult, until: t + KLICKWAHN.sec * 1000 * dur });
+      effect = { id: 'klickwahn', title: 'KLICKWAHN!', text: `Impulse ×${KLICKWAHN.mult} für ${Math.round(KLICKWAHN.sec * dur)} Sek.` };
     }
     this.refresh();
     this.emit('golden', { ...effect, x: g.x, y: g.y, p: g.p });
@@ -386,7 +492,9 @@ export class Game {
   completePhase() {
     const from = this.phase;
     if (from.id >= LAST_PHASE) {
-      if (!this.s.universeDone) {
+      // universeRun gilt für diesen Durchlauf, universeDone für immer (Erfolg, Statistik).
+      if (!this.s.universeRun) {
+        this.s.universeRun = true;
         this.s.universeDone = true;
         this.emit('universe', { phase: from });
       }

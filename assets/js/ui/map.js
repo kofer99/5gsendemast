@@ -25,6 +25,15 @@ const el = (tag, attrs = {}) => {
   return n;
 };
 
+
+// Aussehen der Gegenspieler (DESIGN.md §4.7)
+const ENTITY_KIND = {
+  aluhut:     { icon: 'aluhut', label: 'ALUHUT – SIGNAL −10 %',       aria: 'Aluhutträger mit Gratis-WLAN überzeugen' },
+  influencer: { icon: 'aluhut', label: 'TELEGRAM-INFLUENCER',         aria: 'Telegram-Influencer überzeugen (mehrmals klicken)' },
+  demo:       { icon: 'demo',   label: 'ALUHUT-DEMO – JE −10 %',      aria: 'Demo-Teilnehmer:in überzeugen' },
+  trupp:      { icon: 'rute',   label: 'WÜNSCHELRUTEN-TRUPP',         aria: 'Wünschelruten-Trupp einfangen (dreimal klicken, er wandert weiter)' },
+};
+
 export class MapView {
   /**
    * @param {HTMLElement} frame    Container der Karte
@@ -212,6 +221,12 @@ export class MapView {
     game.on('aluhutSpawn', (a) => this.addEntity(a, 'aluhut'));
     game.on('aluhutLeave', (a) => this.removeEntity(a.id));
     game.on('aluhutHit', (a) => this.updateEntity(a));
+    game.on('aluhutMove', (a) => {
+      const b = this.entities.get(a.id);
+      const layer = this.layers[a.p];
+      if (b && layer) Object.assign(b.style, this.pos(layer, a.x, a.y));
+    });
+    game.on('demoDissolved', (a) => this.float(this.layers[a.p], a.x, a.y, `DEMO AUFGELÖST +${fmt(a.reward)}`, true));
     game.on('aluhutConverted', (a) => { this.removeEntity(a.id); this.float(this.layers[a.p], a.x, a.y, `ÜBERZEUGT +${fmt(a.reward)}`, true); });
     game.on('goldenSpawn', (g) => this.addEntity(g, 'golden'));
     game.on('goldenLeave', (g) => this.removeEntity(g.id));
@@ -328,11 +343,11 @@ export class MapView {
       b.setAttribute('aria-label', 'Goldener Mast – schnell anklicken!');
       b.addEventListener('click', (e) => { e.stopPropagation(); this.game.clickGolden(obj.id); this.removeEntity(obj.id); });
     } else {
-      const label = obj.kind === 'influencer' ? 'TELEGRAM-INFLUENCER' : 'ALUHUT – SIGNAL −10 %';
-      b.innerHTML = icon('aluhut', 26) + `<span class="ent-label">${label}</span>` + (obj.maxHp > 1 ? '<span class="hp"><span></span></span>' : '');
-      b.setAttribute('aria-label', obj.kind === 'influencer'
-        ? 'Telegram-Influencer überzeugen (mehrmals klicken)'
-        : 'Aluhutträger mit Gratis-WLAN überzeugen');
+      const k = ENTITY_KIND[obj.kind] || ENTITY_KIND.aluhut;
+      // Bei der Demo trägt nur die erste Figur das Schild, sonst wird die Karte unlesbar.
+      const label = obj.kind === 'demo' && obj.id !== obj.group + 1 ? '' : `<span class="ent-label">${k.label}</span>`;
+      b.innerHTML = icon(k.icon, obj.kind === 'demo' ? 20 : 26) + label + (obj.maxHp > 1 ? '<span class="hp"><span></span></span>' : '');
+      b.setAttribute('aria-label', k.aria);
       b.addEventListener('click', (e) => { e.stopPropagation(); this.game.hitAluhut(obj.id); });
     }
     layer.overlay.append(b);

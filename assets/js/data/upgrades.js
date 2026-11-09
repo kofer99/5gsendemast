@@ -1,5 +1,6 @@
 // Upgrades. unlock(s, d): s = Spielstand, d = abgeleitete Werte (economy.derive).
 import { BUILDINGS } from './buildings.js';
+import { STATE_BY_CODE } from './states.js';
 
 // [benötigte Anzahl, Kostenfaktor × Basispreis, Bezeichnung, Flavor]
 const TIERS = [
@@ -73,9 +74,70 @@ UPGRADES.push(
   { id: 'golden_2', name: 'Vergoldete Frequenzen', short: 'G',   desc: 'Effekte goldener Masten halten doppelt so lange.', flavor: 'Klingt teurer.', cost: 7777777, effect: { type: 'goldenDuration', mult: 2 }, unlock: (s) => s.goldenClicked >= 27 },
 
   // Aluhutträger
-  { id: 'alu_1', name: 'Gratis-WLAN-Gutscheine',  short: 'A×2', desc: 'Überzeugte Aluhutträger bringen doppelt so viel.', flavor: 'Passwort: „wahrheit123“.', cost: 5e4, effect: { type: 'aluhut', mult: 2 }, unlock: (s) => s.aluhutConverted >= 10 },
-  { id: 'alu_2', name: 'Streaming-Abo zum Geburtstag', short: 'A×2', desc: 'Überzeugte Aluhutträger bringen doppelt so viel.', flavor: 'Wer Serien schaut, hat keine Zeit für Telegram.', cost: 5e7, effect: { type: 'aluhut', mult: 2 }, unlock: (s) => s.aluhutConverted >= 50 },
+  { id: 'alu_1', name: 'Gratis-WLAN-Gutscheine',  short: 'A+', desc: 'Überzeugte Aluhutträger bringen 50 % mehr.', flavor: 'Passwort: „wahrheit123“.', cost: 5e4, effect: { type: 'aluhut', mult: 1.5 }, unlock: (s) => s.aluhutConverted >= 10 },
+  { id: 'alu_2', name: 'Streaming-Abo zum Geburtstag', short: 'A+', desc: 'Überzeugte Aluhutträger bringen 50 % mehr.', flavor: 'Wer Serien schaut, hat keine Zeit für Telegram.', cost: 5e7, effect: { type: 'aluhut', mult: 1.5 }, unlock: (s) => s.aluhutConverted >= 50 },
 );
+
+// Synergien: Anlage A bekommt +pct je Stück der Partner-Anlage B (DESIGN.md §4.6).
+// [A, B, pct, benötigt A, benötigt B, Kosten, Name, Flavor]
+const SYNERGIES = [
+  ['kirche',    'tanne',     0.01, 15, 15, 1e5,   'Weihnachtsgottesdienst',        'Die Tanne steht ohnehin schon im Altarraum. Sie sendet die Predigt jetzt in Stereo.'],
+  ['chemtrail', 'windrad',   0.005, 5, 25, 2e7,   'Rückenwind für Lavendel',       'Das Windrad pustet, die Staffel sprüht. Teamwork.'],
+  ['reptil',    'toaster',   0.01, 1,  25, 2e8,   'Warmhalteplatte für Reptiloiden', 'Kaltblüter lieben die Abwärme eines guten Toasts.'],
+  ['haarp',     'mast',      0.005, 1, 40, 3e9,   'Bielefelder Kleinmast-Initiative', 'Viele kleine Masten tragen das große Signal. Wie ein Chor, nur unsichtbar.'],
+  ['euro',      'kirche',    0.005, 5, 40, 1e10,  'Ökumenischer Rundfunkrat',      'Brüssel und der Vatikan teilen sich jetzt einen Frequenzplan.'],
+  ['sat',       'chemtrail', 0.01, 3,  30, 2e11,  'Gemeinsamer Luftraum',          'Die Staffel tankt jetzt am Satelliten. Die Flugsicherung schaut weg.'],
+  ['mond',      'sat',       0.015, 3, 10, 3e12,  'Mondsüchtige Satelliten',       'Sie kreisen ohnehin ständig um ihn. Jetzt wenigstens mit Auftrag.'],
+  ['quant',     'reptil',    0.01, 2,  25, 5e13,  'Reptiloiden-Quantenkühlung',    'Bei 38 °C rechnet der Quantenturm am liebsten. Die Reptiloiden auch.'],
+];
+const B = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]));
+for (const [a, b, pct, needA, needB, cost, name, flavor] of SYNERGIES) {
+  UPGRADES.push({
+    id: `syn_${a}_${b}`,
+    name: `${name}`,
+    desc: `${B[a].name}: +${String(pct * 100).replace('.', ',')} % FP/Sek. je ${B[b].name}.`,
+    flavor,
+    cost,
+    icon: B[a].icon,
+    short: 'S',
+    effect: { type: 'synergy', building: a, per: b, pct },
+    unlock: (s) => (s.owned[a] || 0) >= needA && (s.owned[b] || 0) >= needB,
+  });
+}
+
+// Bundesland-Upgrades: nach der Übernahme eines Landes (DESIGN.md §4.6). Je +1,5 % FP/Sek.
+// Preis ∝ Einwohnerzahl (20 FP je Mensch), weil große Länder später fallen.
+const LAND = [
+  ['NW', 'Zechen-Kühlung für Rechenzentren',  'Unter Tage ist es schön kühl. Und Bielefeld ist auch nicht im Weg, weil es nicht existiert.'],
+  ['BY', 'Maibaum-Antennen',                  'Jeder Maibaum ist jetzt ein Sendemast. Beim Klettern bitte nicht in die Antenne beißen.'],
+  ['BW', 'Kehrwoche für Funkwellen',          'Die Frequenzen werden jetzt jeden Samstag gefegt. Laut Plan.'],
+  ['NI', 'Grünkohl-Resonanzboden',            'Bei der Kohlfahrt wird jetzt mitgesendet. Der Schnaps dämpft die Nebenwirkungen.'],
+  ['HE', 'Funk-Hochfrequenzhandel',           'Die Börse in Frankfurt handelt jetzt mit Gedanken. Im Millisekundentakt.'],
+  ['RP', 'Weinberg-Richtfunk',                'Die Rebstöcke stehen schon in Reih und Glied. Perfekte Antennen.'],
+  ['SN', 'Stollen-Repeater',                  'Im Dresdner Christstollen steckt jetzt ein Verstärker. Die Rosinen sind die LEDs.'],
+  ['BE', 'Fernsehturm-Reaktivierung',         'Der Fernsehturm war immer schon ein Sendemast. Jetzt wieder offiziell.'],
+  ['SH', 'Leuchtturm-Funkfeuer',              'Die Leuchttürme blinken jetzt in Binärcode.'],
+  ['BB', 'Funkloch-Sanierung Brandenburg',    'Das letzte Funkloch wurde zugeschüttet. Mit Sand aus der Lausitz.'],
+  ['ST', 'Frühaufsteher-Sendefenster',        'Gesendet wird ab 4:30 Uhr. Die Einheimischen sind dann eh schon wach.'],
+  ['TH', 'Bratwurst-Grillrost-Antenne',       'Der Rost ist aus Edelstahl, also leitfähig. Senf dient als Isolierung.'],
+  ['HH', 'Elbphilharmonie-Akustikverstärker', 'Klingt in jedem Saal gleich gut. Auch die Gedanken.'],
+  ['MV', 'Ostsee-Quallen-Netz',               'Die Quallen schwimmen jetzt im Formationsflug.'],
+  ['SL', 'Kantinen-Verordnung Saarland',      'Ab sofort wird das ganze Land über die Kantinendurchsage erreicht.'],
+  ['HB', 'Stadtmusikanten-Verstärker',        'Esel, Hund, Katze und Hahn senden jetzt in Dolby Surround.'],
+];
+for (const [code, name, flavor] of LAND) {
+  const st = STATE_BY_CODE[code];
+  UPGRADES.push({
+    id: `land_${code}`,
+    name: `${st.name}: ${name}`,
+    desc: `Alle FP/Sek. +1,5 %. Freigeschaltet durch die Übernahme von ${st.name}.`,
+    flavor,
+    cost: Math.round(st.pop * 20),
+    short: code,
+    effect: { type: 'global', mult: 1.015 },
+    unlock: (s) => s.taken.includes(code),
+  });
+}
 
 for (const u of UPGRADES) u.short = shortLabel(u);
 

@@ -124,6 +124,8 @@ body.game { height: 100dvh; overflow: hidden; }
 .ent .hp { position: absolute; bottom: -2px; left: 6px; right: 6px; height: 3px; background: rgba(255, 176, 46, 0.25); }
 .ent .hp > span { display: block; height: 100%; background: var(--amber); }
 .ent.hit { animation: shake 0.2s; }
+.ent.demo { width: 36px; height: 36px; }
+.ent.trupp { border-style: dotted; transition: left 6s ease-in-out, top 6s ease-in-out; }
 .ent.golden { border-style: dashed; animation: entIn 0.35s ease-out, glow 0.8s ease-in-out infinite alternate; }
 @keyframes entIn { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
 @keyframes shake { 25% { margin-left: -3px; } 75% { margin-left: 3px; } }

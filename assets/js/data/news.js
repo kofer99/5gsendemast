@@ -85,6 +85,14 @@ export const NEWS = [
   { text: 'Ehemaliger Aluhutträger: „Das Gratis-WLAN war einfach zu gut.“', when: (s) => s.aluhutConverted >= 5 },
   { text: 'Goldener Mast gesichtet! Augenzeuge: „Er funkelte so… harmlos.“', when: (s) => s.goldenClicked >= 1 },
   { text: 'Telegram-Influencer startet Spendenaktion für „Strahlenschutz-Bunker“. Bunker = Gartenhäuschen.', when: (s, d) => d.rawCps >= 500 },
+  { text: 'Aluhut-Demo angemeldet. Motto: „Wir sind das Funkloch!“ Teilnehmer: fünf. Plakate: zwölf.', when: (s, d) => d.rawCps >= 2e4 },
+  { text: 'Demo-Teilnehmer verabreden sich per Messenger, um gegen Funkwellen zu protestieren. Die Nachricht kam pünktlich an.', when: (s) => s.demosDissolved >= 1 },
+  { text: 'Polizeibericht: Aluhut-Demo löste sich friedlich auf. Grund: Das Gratis-WLAN am Bahnhof.', when: (s) => s.demosDissolved >= 3 },
+  { text: 'Wünschelruten-Trupp meldet Strahlung im Stadtpark. Es war ein Hydrant.', when: (s, d) => d.rawCps >= 3000 },
+  { text: 'Wünschelruten-Trupp findet Wasserader, Erdstrahlen und drei verlorene Autoschlüssel. Masten: keine.', when: (s) => s.truppsCaught >= 1 },
+  { text: 'Neue Wünschelrute „Pro 5G Edition“ für 399 €. Besteht aus zwei Kleiderbügeln.', when: (s) => s.truppsCaught >= 3 },
+  { text: 'Kirchengemeinde verwundert: Die Tanne im Altarraum hat jetzt Empfangsbalken.', when: (s) => s.upgrades.includes('syn_kirche_tanne') },
+  { text: 'Bundesrat einstimmig: Alle 16 Länder senden jetzt im Gleichtakt. Erstmals seit 1949.', when: (s) => s.upgrades.filter((u) => u.startsWith('land_')).length >= 16 },
 
   // Fakten (echt!)
   { fact: true, text: 'Geheimakte: 5G nutzt Radiowellen – dieselbe Art Strahlung wie Radio, WLAN und LTE.', href: '/geheimakte/#was-ist-5g' },

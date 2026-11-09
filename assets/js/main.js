@@ -16,6 +16,8 @@ const map = new MapView($('map-frame'), tooltip, { tabs: $('map-tabs'), title: $
 const state = loadState() || newState();
 const game = new Game(state, { pointIn: (code) => map.randomPoint(code) });
 map.attach(game);
+// Nur lokal: Zugriff für Test-Seiten (tests/shot.html ?spawn=demo,trupp).
+if (location.hostname === 'localhost') window.__game = game;
 
 const hud = new Hud(game);
 const shop = new Shop({ list: $('buildings'), upgrades: $('upgrades'), amounts: $('amounts'), autoPlace: $('autoplace'), tooltip }, game);
@@ -38,7 +40,11 @@ game.on('golden', (g) => {
 });
 game.on('aluhutSpawn', (a) => {
   if (a.kind === 'influencer') toast('TELEGRAM-INFLUENCER!', 'Verkauft Abschirm-Unterhosen. Mehrmals anklicken zum Überzeugen.', 'warn');
+  if (a.kind === 'trupp') toast('WÜNSCHELRUTEN-TRUPP!', 'Sucht nach „Erdstrahlen“ und wandert über die Karte. Dreimal anklicken, bevor er weiterzieht.', 'warn');
 });
+game.on('demoSpawn', (dm) => toast('ALUHUT-DEMO IN ' + dm.name.toUpperCase() + '!', 'Fünf Leute, zwölf Plakate. Jede Figur kostet 10 % Signal. Alle überzeugen gibt eine Prämie.', 'warn'));
+game.on('demoDissolved', (a) => toast('DEMO AUFGELÖST', `Alle haben sich ins Gratis-WLAN eingeloggt. Prämie: +${fmt(a.reward)} FP.`));
+game.on('truppCaught', (a) => toast('TRUPP GEFANGEN', `Die Wünschelrute zeigte auf eine Wasserader. +${fmt(a.reward)} FP.`));
 game.on('upgrade', () => renderPanels(true));
 game.on('offline', ({ seconds, gain }) => toast('WILLKOMMEN ZURÜCK', `Die BAfG hat in ${fmtDuration(seconds)} ${fmt(gain)} FP für dich gefunkt.`));
 // Zwischensequenzen beim Phasenwechsel (DESIGN.md §4.5)
@@ -63,7 +69,7 @@ const CUTSCENES = {
     body: () => [
       'Die Welt gehört der BAfG. Ihr Dienstwagen wurde auf ein Raumschiff hochgestuft (Tankkarte liegt im Handschuhfach).',
       'NÄCHSTES ZIEL: ORBIT & MOND. Neue Anlage freigegeben: Mond-Sendemast.',
-      'NEU: PRESTIGE. Unter „Prestige“ können Sie jetzt neu anfangen und bekommen dafür Aluhut-Tränen – dauerhaft +2 % FP/Sek. je Träne. Sie können aber auch einfach weiterfunken.',
+      `NEU: PRESTIGE. Unter „Prestige“ können Sie jetzt neu anfangen und bekommen dafür Aluhut-Tränen – dauerhaft +${fmtInt(eco.TEAR_BONUS * 100)} % FP/Sek. je Träne. Je weiter Sie vorher kommen, desto mehr Tränen gibt es: Nach dem Universum sind es fast zehnmal so viele wie jetzt.`,
     ],
   },
   5: {
@@ -131,7 +137,7 @@ function save(silent = true) {
 function shareText(done) {
   if (done) return `Ich habe ${done.name} komplett unter Funkkontrolle 📡 Schaffst du das auch? 5gsendemast.de (Satire – 5G ist harmlos)`;
   const { phase, controlled } = game.d;
-  if (game.s.universeDone) return `Ich kontrolliere das gesamte Universum 📡 ${fmt(controlled)} Lebewesen. Und du? 5gsendemast.de (Satire – 5G ist harmlos)`;
+  if (game.s.universeRun) return `Ich kontrolliere das gesamte Universum 📡 ${fmt(controlled)} Lebewesen. Und du? 5gsendemast.de (Satire – 5G ist harmlos)`;
   const where = { 1: 'in Deutschland', 2: 'in Europa', 3: 'auf der Welt', 4: 'zwischen Erde und Mars', 5: 'im Universum' }[phase.id];
   return `Ich kontrolliere bereits ${fmt(controlled)} ${phase.beings} ${where} 📡 Wie viele schaffst du? 5gsendemast.de (Satire – 5G ist harmlos)`;
 }

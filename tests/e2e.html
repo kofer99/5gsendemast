@@ -85,6 +85,7 @@ try {
 
   // ---------- Phasenwechsel: alter Spielstand (v1) mit vollem Deutschland ----------
   const { newState } = await import('/assets/js/core/state.js');
+  const { fpForTears } = await import('/assets/js/core/economy.js');
   const loadGame = async (state) => {
     // Erst die alte Seite verlassen (sie speichert beim Schließen), dann den Testspielstand setzen
     const blank = new Promise((r) => f.addEventListener('load', r, { once: true }));
@@ -110,7 +111,7 @@ try {
   log([...d3.querySelectorAll('.bld:not([hidden]) .bld-name')].some((n) => n.textContent === 'Euro-Funknetz' || n.textContent === '??? GESPERRT'), 'Euro-Funknetz im Shop (oder als Teaser)');
 
   // ---------- Prestige ----------
-  const p4 = newState(Date.now()); p4.introSeen = true; p4.phase = 4; p4.phaseReached = 4; p4.fpAll = 4e9 * 49 + 1; p4.owned.mast = 20;
+  const p4 = newState(Date.now()); p4.introSeen = true; p4.phase = 4; p4.phaseReached = 4; p4.fpAll = fpForTears(7) + 1; p4.owned.mast = 20;
   p4.achievements = ['click_1'];
   d3 = await loadGame(p4);
   d3.getElementById('t-prestige').click(); await wait(1200);

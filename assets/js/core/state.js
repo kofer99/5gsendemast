@@ -30,7 +30,8 @@ export function newState(now = Date.now()) {
     taken: [],      // übernommene Regionen (alle Phasen)
     phase: 1,       // aktuelle Eskalationsphase (1 Deutschland … 5 Universum)
     phaseReached: 1,// höchste je erreichte Phase (über Prestige hinweg, für Statistik)
-    universeDone: false,
+    universeDone: false, // jemals das Universum erobert (bleibt über Prestige)
+    universeRun: false,  // in diesem Durchlauf erobert
     tears: 0,       // Aluhut-Tränen insgesamt (Bonus bleibt auch nach dem Ausgeben)
     tearsSpent: 0,
     patents: [],
@@ -38,6 +39,8 @@ export function newState(now = Date.now()) {
     bestControlledAll: 0,
     bestControlled: 0,
     aluhutConverted: 0,
+    demosDissolved: 0,  // vollständig aufgelöste Aluhut-Demos
+    truppsCaught: 0,    // gefangene Wünschelruten-Trupps
     goldenClicked: 0,
     funklochSeen: 0,
     offlineReturns: 0,
@@ -56,12 +59,14 @@ export function normalize(raw, now = Date.now()) {
   const s = { ...base, ...raw, settings: { ...base.settings, ...(raw.settings || {}) } };
   for (const key of ['owned', 'placed']) if (typeof s[key] !== 'object' || !s[key]) s[key] = {};
   for (const key of ['hand', 'markers', 'upgrades', 'achievements', 'taken', 'buffs', 'patents']) if (!Array.isArray(s[key])) s[key] = [];
-  for (const key of ['fp', 'fpRun', 'fpAll', 'clicks', 'playtime', 'lastTick', 'tears', 'tearsSpent', 'prestiges']) if (!Number.isFinite(s[key])) s[key] = base[key];
+  for (const key of ['fp', 'fpRun', 'fpAll', 'clicks', 'playtime', 'lastTick', 'tears', 'tearsSpent', 'prestiges', 'demosDissolved', 'truppsCaught']) if (!Number.isFinite(s[key])) s[key] = base[key];
   // v1 → v2: Phasen. Alte Masten liegen alle in Phase 1. Der Wechsel nach Europa passiert beim nächsten Tick.
   if (!(s.phase >= 1 && s.phase <= 5)) s.phase = 1;
   s.phase = Math.floor(s.phase);
   if (!(s.phaseReached >= s.phase)) s.phaseReached = s.phase;
   for (const m of s.markers) if (!m.p) m.p = 1;
+  // Ältere Stände kennen universeRun nicht: Wer gerade im eroberten Universum steht, soll den Abschlussdialog nicht noch einmal sehen.
+  if (typeof s.universeRun !== 'boolean') s.universeRun = !!s.universeDone && s.phase === 5;
   if (!(s.bestControlledAll >= s.bestControlled)) s.bestControlledAll = s.bestControlled || 0;
   s.version = SAVE_VERSION;
   return s;

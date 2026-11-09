@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><title>Shot</title></head>
 <body style="margin:0;background:#000">
-<p style="color:#fff">Lädt einen Seed-Spielstand und zeigt das Spiel im iframe (für Screenshots). Parameter wie seed.html, plus <code>tab=</code> (anlagen|prestige|akte|erfolge).</p>
+<p style="color:#fff">Lädt einen Seed-Spielstand und zeigt das Spiel im iframe (für Screenshots). Parameter wie seed.html, plus <code>tab=</code> (anlagen|prestige|akte|erfolge) und <code>spawn=</code> (demo,trupp,influencer,aluhut,golden).</p>
 <iframe id="f" style="width:1400px;height:900px;border:0"></iframe>
 <script>
 const q = new URLSearchParams(location.search);
@@ -18,6 +18,11 @@ seed.onload = () => setTimeout(() => {
     const tab = q.get('tab');
     if (tab) doc.getElementById('t-' + tab)?.click();
     doc.querySelector('dialog[open] .btn-primary')?.click();
+    // spawn=demo,trupp,influencer,aluhut,golden – Gegenspieler für Screenshots erzeugen
+    const game = f.contentWindow.__game;
+    for (const k of (q.get('spawn') || '').split(',').filter(Boolean)) {
+      if (k === 'golden') game.spawnGolden(); else game.spawnAluhut(undefined, k);
+    }
     document.title = 'READY';
   }, 1500);
 }, 800);

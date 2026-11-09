@@ -6,11 +6,12 @@ import { PHASE_BY_ID, REGION_INDEX } from '../data/phases.js';
 
 export const COST_GROWTH = 1.15;
 export const ACHIEVEMENT_BONUS = 0.01;  // +1 % FP/s je Erfolg
-export const TEAR_BONUS = 0.02;         // +2 % FP/s je Aluhut-Träne
+export const TEAR_BONUS = 0.08;         // +8 % FP/s je Aluhut-Träne
 export const ALUHUT_PENALTY = 0.1;      // −10 % FP/s je aktivem Aluhutträger
 export const ALUHUT_PENALTY_MAX = 0.5;
 export const OFFLINE_RATE = 0.5;
-export const TEAR_DIVISOR = 4e9;        // Tränen = floor(sqrt(Gesamt-FP / TEAR_DIVISOR))
+export const TEAR_DIVISOR = 4.6e9;      // Tränen = floor(Kubikwurzel(Gesamt-FP / TEAR_DIVISOR))
+export const TEAR_EXP = 3;              // 3 = Kubikwurzel (bis 09.11.2026: Quadratwurzel, siehe DESIGN.md §4.9)
 
 /** Gesamtkosten für n Stück, wenn bereits `owned` vorhanden sind. */
 export function buildingCost(b, owned, n = 1) {
@@ -32,6 +33,7 @@ export function maxAffordable(b, owned, fp) {
 function applyEffect(m, e) {
   switch (e.type) {
     case 'building': m.building[e.building] = (m.building[e.building] || 1) * e.mult; break;
+    case 'synergy': (m.synergy[e.building] ||= []).push(e); break;
     case 'click': m.click *= e.mult; break;
     case 'clickCps': m.clickCps += e.pct; break;
     case 'global': m.global *= e.mult; break;
@@ -48,7 +50,7 @@ function applyEffect(m, e) {
 
 export function modifiers(s) {
   const m = {
-    building: {}, click: 1, clickCps: 0, global: 1, reach: 1, goldenInterval: 1, goldenDuration: 1, aluhutMult: 1,
+    building: {}, synergy: {}, click: 1, clickCps: 0, global: 1, reach: 1, goldenInterval: 1, goldenDuration: 1, aluhutMult: 1,
     offlineRate: OFFLINE_RATE, autoClick: 0, achBonus: ACHIEVEMENT_BONUS, takeMult: 1,
   };
   for (const id of s.upgrades) {
@@ -73,14 +75,26 @@ export function bonusMult(s, m = modifiers(s)) {
   return 1 + takeoverBonus(s) * m.takeMult + m.achBonus * s.achievements.length + TEAR_BONUS * (s.tears || 0);
 }
 
+/** Synergie-Faktor: +pct je Stück der Partner-Anlage (z. B. Kirchturm +2 % je Tanne). */
+export function synergyMult(s, m, id) {
+  let x = 1;
+  for (const e of m.synergy[id] || []) x += e.pct * (s.owned[e.per] || 0);
+  return x;
+}
+
+/** Multiplikator einer Anlage aus Stufen-Upgrades und Synergien. */
+export function buildingMult(s, m, id) {
+  return (m.building[id] || 1) * synergyMult(s, m, id);
+}
+
 /** FP/s einer einzelnen Anlage (inkl. aller dauerhaften Multiplikatoren). */
 export function unitCps(s, m, b) {
-  return b.cps * (m.building[b.id] || 1) * m.global * bonusMult(s, m);
+  return b.cps * buildingMult(s, m, b.id) * m.global * bonusMult(s, m);
 }
 
 export function rawCps(s, m) {
   let sum = 0;
-  for (const b of BUILDINGS) sum += (s.owned[b.id] || 0) * b.cps * (m.building[b.id] || 1);
+  for (const b of BUILDINGS) sum += (s.owned[b.id] || 0) * b.cps * buildingMult(s, m, b.id);
   return sum * m.global * bonusMult(s, m);
 }
 
@@ -144,10 +158,13 @@ export function derive(s, now, activeAluhuts = 0) {
   const mods = modifiers(s);
   const raw = rawCps(s, mods);
   const cps = raw * buffMult(s, now, 'mult') * aluhutPenalty(activeAluhuts);
-  const perClick = (mods.click + raw * mods.clickCps) * buffMult(s, now, 'clickMult');
+  // basePerClick: ohne Klickwahn. Belohnungen, die sich an Impulsen orientieren, nutzen diesen Wert,
+  // sonst würde Klickwahn auch Einweihungsbonus und Aluhut-Prämien vervielfachen.
+  const basePerClick = mods.click + raw * mods.clickCps;
+  const perClick = basePerClick * buffMult(s, now, 'clickMult');
   const phase = currentPhase(s);
   const { control, controlled, local, fill, rem } = computeControl(s, mods, phase);
-  return { mods, rawCps: raw, cps, perClick, control, controlled, local, fill, rem, phase, ratio: controlled / phase.total };
+  return { mods, rawCps: raw, cps, perClick, basePerClick, control, controlled, local, fill, rem, phase, ratio: controlled / phase.total };
 }
 
 export function availableUpgrades(s, d) {
@@ -168,7 +185,8 @@ export function isTaken(ratio) {
 
 /** Wie viele Tränen insgesamt hätte man bei diesem Gesamt-FP verdient? */
 export function tearsFor(fpAll) {
-  return Math.floor(Math.sqrt(Math.max(0, fpAll) / TEAR_DIVISOR));
+  // + 1e-9 gegen Rundungsfehler: fpForTears(n) soll genau n Tränen ergeben.
+  return Math.floor((Math.max(0, fpAll) / TEAR_DIVISOR) ** (1 / TEAR_EXP) + 1e-9);
 }
 
 /** Tränen, die ein Neustart jetzt zusätzlich bringen würde. */
@@ -178,5 +196,5 @@ export function pendingTears(s) {
 
 /** Gesamt-FP, ab dem die nächste Träne fällig wird. */
 export function fpForTears(n) {
-  return n * n * TEAR_DIVISOR;
+  return n ** TEAR_EXP * TEAR_DIVISOR;
 }

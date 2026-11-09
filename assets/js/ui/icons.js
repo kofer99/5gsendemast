@@ -14,6 +14,8 @@ const P = {
   quant: '<path d="M12 2 V22 M8 22 H16"/><path d="M5 10 c2-4 5-4 7 0 s5 4 7 0 c-2 4-5 4-7 0 s-5-4-7 0 Z"/>',
   logo: '<path d="M12 10 L7 22 M12 10 L17 22 M8.5 18 H15.5 M9.7 15 H14.3"/><circle cx="12" cy="8" r="1.6"/><path d="M8.5 4.5 a5 5 0 0 0 0 7 M15.5 4.5 a5 5 0 0 1 0 7 M5.8 2 a8.5 8.5 0 0 0 0 12 M18.2 2 a8.5 8.5 0 0 1 0 12"/>',
   aluhut: '<path d="M5 16 L12 3 L19 16 Z"/><path d="M9 9 L11 11 M14 7 L13 10"/><circle cx="12" cy="19" r="3.2"/>',
+  demo: '<path d="M7 15 L12 5 L17 15 Z"/><circle cx="12" cy="18.5" r="2.6"/><path d="M19 3 V13 M15.5 3 H22.5 V7.5 H15.5"/>',
+  rute: '<path d="M12 21 V13 L5 3 M12 13 L19 3"/><path d="M3 7 a3 3 0 0 0 4 3 M21 7 a3 3 0 0 1 -4 3"/>',
   golden: '<path d="M12 6 L7 22 M12 6 L17 22 M9 16 H15"/><path d="M12 1 L13 4 L16 4 L13.5 5.8 L14.5 9 L12 7 L9.5 9 L10.5 5.8 L8 4 L11 4 Z"/>',
   lock: '<rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11 V7 a4 4 0 0 1 8 0 V11"/>',
   check: '<path d="M4 12 L10 18 L20 6"/>',

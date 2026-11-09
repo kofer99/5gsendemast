@@ -66,6 +66,12 @@ export const ACHIEVEMENTS = [
   { id: 'alu_1',      name: 'Ein Aluhut weniger',               desc: 'Überzeuge einen Aluhutträger.',               check: (s) => s.aluhutConverted >= 1 },
   { id: 'alu_25',     name: 'WLAN für alle',                    desc: 'Überzeuge 25 Aluhutträger.',                  check: (s) => s.aluhutConverted >= 25 },
   { id: 'alu_100',    name: 'Albtraum der Alufolien-Industrie', desc: 'Überzeuge 100 Aluhutträger.',                 check: (s) => s.aluhutConverted >= 100 },
+  { id: 'demo_1',     name: 'Versammlung aufgelöst',            desc: 'Löse eine Aluhut-Demo vollständig auf.',      check: (s) => s.demosDissolved >= 1 },
+  { id: 'demo_10',    name: 'Ordnungsamt des Jahres',           desc: 'Löse 10 Aluhut-Demos auf.',                   check: (s) => s.demosDissolved >= 10 },
+  { id: 'trupp_1',    name: 'Wasserader gefunden',              desc: 'Fange einen Wünschelruten-Trupp.',            check: (s) => s.truppsCaught >= 1 },
+  { id: 'trupp_10',   name: 'Die Rute schlägt aus',             desc: 'Fange 10 Wünschelruten-Trupps.',              check: (s) => s.truppsCaught >= 10 },
+  { id: 'syn_4',      name: 'Synergieeffekte',                  desc: 'Kaufe 4 Synergie-Upgrades.',                  check: (s) => s.upgrades.filter((u) => u.startsWith('syn_')).length >= 4 },
+  { id: 'land_16',    name: 'Föderale Feinabstimmung',          desc: 'Kaufe alle 16 Bundesland-Upgrades.',          check: (s) => s.upgrades.filter((u) => u.startsWith('land_')).length >= 16 },
 
   { id: 'gold_1',     name: 'Goldkind',                         desc: 'Klicke einen Goldenen Mast.',                 check: (s) => s.goldenClicked >= 1 },
   { id: 'gold_7',     name: 'Glückssträhne',                    desc: 'Klicke 7 Goldene Masten.',                    check: (s) => s.goldenClicked >= 7 },

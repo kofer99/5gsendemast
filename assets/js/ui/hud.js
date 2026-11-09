@@ -74,7 +74,7 @@ export class Hud {
 
   updateBuffs(now) {
     const buffs = this.game.s.buffs.filter((b) => b.until > now);
-    const names = { rausch: 'FREQUENZRAUSCH ×7', klickwahn: 'KLICKWAHN ×777', funkloch: 'FUNKLOCH ×0,5' };
+    const names = { rausch: 'FREQUENZRAUSCH ×4', klickwahn: 'KLICKWAHN ×77', funkloch: 'FUNKLOCH ×0,5' };
     const alu = this.game.aluhuts.length;
     const parts = buffs.map((b) => `<div class="buff${b.id === 'funkloch' ? ' bad' : ''}">${names[b.id] || b.id} · ${Math.ceil((b.until - now) / 1000)} s</div>`);
     if (alu) parts.push(`<div class="buff bad">${alu}× ALUHUT · SIGNAL −${Math.min(50, alu * 10)} %</div>`);
@@ -268,6 +268,8 @@ export function renderStats(el, game) {
     ['Anlagen', fmtInt(totalOwned)],
     ['Von Hand platziert', fmtInt(s.manualPlaced)],
     ['Aluhutträger überzeugt', fmtInt(s.aluhutConverted)],
+    ['Aluhut-Demos aufgelöst', fmtInt(s.demosDissolved || 0)],
+    ['Wünschelruten-Trupps gefangen', fmtInt(s.truppsCaught || 0)],
     ['Goldene Masten', fmtInt(s.goldenClicked)],
     ['Erfolge', `${s.achievements.length}/${ACHIEVEMENTS.length}`],
     ['Aluhut-Tränen', `${fmtInt(s.tears)} (+${fmtInt(s.tears * eco.TEAR_BONUS * 100)} % FP/Sek.)`],
@@ -288,7 +290,7 @@ export function renderPrestige(el, game, { onPrestige }) {
   const free = s.tears - s.tearsSpent;
   const can = game.canPrestige();
   // Nur neu aufbauen, wenn sich etwas Sichtbares ändert (sonst verliert man den Tastaturfokus).
-  const key = [s.phase, s.universeDone, s.taken.length, pending, s.tears, s.tearsSpent, s.patents.join(), can].join('|');
+  const key = [s.phase, s.universeRun, s.taken.length, pending, s.tears, s.tearsSpent, s.patents.join(), can].join('|');
   if (el.dataset.key === key) return;
   el.dataset.key = key;
   el.innerHTML = '';
@@ -313,7 +315,7 @@ export function renderPrestige(el, game, { onPrestige }) {
     const row = document.createElement('div');
     let status;
     let cls;
-    if (p.id < s.phase || (p.id === s.phase && s.universeDone)) { status = 'ERLEDIGT'; cls = 'done'; }
+    if (p.id < s.phase || (p.id === s.phase && s.universeRun)) { status = 'ERLEDIGT'; cls = 'done'; }
     else if (p.id === s.phase) { status = `${p.open.filter((r) => s.taken.includes(r.code)).length}/${p.open.length} Gebiete`; cls = 'active'; }
     else { status = 'GESPERRT'; cls = 'locked'; }
     row.className = 'phase ' + cls;
@@ -334,7 +336,7 @@ export function renderPrestige(el, game, { onPrestige }) {
   big.innerHTML = `<b>${fmtInt(s.tears)}</b> ALUHUT-TRÄNEN <span class="dim">· +${fmtInt(s.tears * eco.TEAR_BONUS * 100)} % FP/SEK. DAUERHAFT</span>`;
   box.append(big);
   if (s.phase <= 3) {
-    box.append(para('ZUGANG VERWEIGERT. Freigabe nach Erreichen der Weltherrschaft (Ende von Phase 3). Dann: Neustart gegen Aluhut-Tränen – dauerhaft +2 % FP/Sek. je Träne.'));
+    box.append(para(`ZUGANG VERWEIGERT. Freigabe nach Erreichen der Weltherrschaft (Ende von Phase 3). Dann: Neustart gegen Aluhut-Tränen – dauerhaft +${fmtInt(eco.TEAR_BONUS * 100)} % FP/Sek. je Träne.`));
   } else {
     box.append(para(`Ein Neustart bringt jetzt ${fmtInt(pending)} ${pending === 1 ? 'Träne' : 'Tränen'}. Nächste Träne bei ${fmt(eco.fpForTears(s.tears + pending + 1))} FP insgesamt (bisher ${fmt(s.fpAll)}).`));
     box.append(para('Alles wird zurückgesetzt: Masten, Upgrades, Funkpunkte, Phasen. Es bleiben: Tränen, Patente, Erfolge und Statistik. „Die Menschheit wurde per Software-Update zurückgesetzt.“'));
@@ -350,7 +352,7 @@ export function renderPrestige(el, game, { onPrestige }) {
 
   if (s.tears > 0 || s.prestiges > 0) {
     el.append(label(`HIMMLISCHE PATENTE · ${fmtInt(free)} TRÄNEN FREI`));
-    el.append(para('Ausgegebene Tränen behalten ihren +2-%-Bonus. Patente gelten für immer.'));
+    el.append(para(`Ausgegebene Tränen behalten ihren Bonus von +${fmtInt(eco.TEAR_BONUS * 100)} %. Patente gelten für immer.`));
     const grid = document.createElement('div');
     grid.className = 'patents';
     for (const p of PATENTS) {

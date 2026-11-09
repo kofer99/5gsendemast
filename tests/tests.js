@@ -147,13 +147,90 @@ test('Aluhut: Strafe und Belohnung', () => {
   const fp0 = s.fp; g.hitAluhut(a.id);
   ok(s.fp > fp0); eq(g.aluhuts.length, 0); eq(s.aluhutConverted, 1);
 });
+test('Aluhut-Demo: fünf Figuren, −50 %, Prämie beim Auflösen', () => {
+  const c = clock();
+  const s = newState(c.now()); s.owned.tanne = 10; s.placed.tanne = { BY: 10 };
+  const g = new Game(s, { now: c.now, random: seeded() });
+  let dissolved = null; g.on('demoDissolved', (x) => { dissolved = x; });
+  g.spawnDemo();
+  eq(g.aluhuts.length, 5); near(g.d.cps, g.d.rawCps * 0.5);
+  const ids = g.aluhuts.map((a) => a.id);
+  for (const id of ids.slice(0, 4)) g.hitAluhut(id);
+  eq(dissolved, null, 'noch nicht aufgelöst');
+  const fp0 = s.fp; g.hitAluhut(ids[4]);
+  ok(dissolved && dissolved.reward > 0, 'Prämie'); eq(s.demosDissolved, 1); eq(s.aluhutConverted, 5);
+  ok(s.fp - fp0 >= 3 * 6 * g.d.rawCps, 'Prämie mind. 3 × 6 s Produktion');
+});
+test('Demo kommt nicht, wenn schon jemand protestiert', () => {
+  const c = clock();
+  const s = newState(c.now()); s.owned.tanne = 10; s.placed.tanne = { BY: 10 };
+  const g = new Game(s, { now: c.now, random: seeded() });
+  g.spawnAluhut(c.now(), 'aluhut');
+  g.spawnAluhut(c.now(), 'demo');
+  eq(g.aluhuts.length, 2); ok(g.aluhuts.every((a) => a.kind === 'aluhut'));
+});
+test('Wünschelruten-Trupp: wandert und braucht drei Klicks', () => {
+  const c = clock();
+  const s = newState(c.now()); s.owned.tanne = 10; s.placed.tanne = { BY: 10 };
+  const g = new Game(s, { now: c.now, random: seeded(7) });
+  let moves = 0; g.on('aluhutMove', () => { moves++; });
+  const a = g.spawnTrupp();
+  for (let i = 0; i < 9; i++) { c.advance(1000); g.tick(); }
+  ok(moves >= 1, 'ist weitergezogen');
+  g.hitAluhut(a.id); g.hitAluhut(a.id);
+  eq(g.aluhuts.length, 1, 'nach zwei Klicks noch da');
+  g.hitAluhut(a.id);
+  eq(g.aluhuts.length, 0); eq(s.truppsCaught, 1);
+});
+test('Sonderformen erst ab genug FP/s', () => {
+  const c = clock();
+  const s = newState(c.now()); s.owned.tanne = 10; s.placed.tanne = { BY: 10 };
+  const g = new Game(s, { now: c.now, random: () => 0.25 });
+  eq(g.rollAluhutKind(), 'aluhut', 'bei 10 FP/s nie Demo');
+  s.owned.reptil = 10; g.refresh();
+  eq(g.rollAluhutKind(), 'demo', 'Wurf 0,25 bei viel FP/s = Demo');
+});
+test('Synergie: Kirchturm +1 % je Tanne', () => {
+  const s = newState(); s.owned.kirche = 15; s.owned.tanne = 20;
+  const before = eco.rawCps(s, eco.modifiers(s));
+  s.upgrades.push('syn_kirche_tanne');
+  const m = eco.modifiers(s);
+  near(eco.synergyMult(s, m, 'kirche'), 1.2);
+  near(eco.rawCps(s, m) - before, 15 * 8 * 0.2);
+  near(eco.unitCps(s, m, BUILDING_BY_ID.kirche), 8 * 1.2);
+});
+test('Bundesland-Upgrade erst nach Übernahme', () => {
+  const s = newState();
+  const u = UPGRADES.find((x) => x.id === 'land_HB');
+  ok(u, 'existiert'); ok(!u.unlock(s), 'gesperrt');
+  s.taken.push('HB'); ok(u.unlock(s), 'frei');
+  eq(UPGRADES.filter((x) => x.id.startsWith('land_')).length, 16);
+});
+test('Prestige behält Demo- und Trupp-Statistik', () => {
+  const c = clock();
+  const s = newState(c.now()); s.phase = 4; s.fpAll = 1e12; s.demosDissolved = 2; s.truppsCaught = 3;
+  const g = new Game(s, { now: c.now, random: seeded() });
+  ok(g.prestige() > 0); eq(s.demosDissolved, 2); eq(s.truppsCaught, 3); eq(s.phase, 1);
+});
+test('Universum nach Prestige erneut erobert → wieder Abschlussdialog', () => {
+  const c = clock();
+  const s = newState(c.now()); s.phase = 5; s.fpAll = 1e15;
+  const g = new Game(s, { now: c.now, random: seeded() });
+  let n = 0; g.on('universe', () => { n++; });
+  g.completePhase(); g.completePhase();
+  eq(n, 1, 'nur einmal je Durchlauf'); ok(s.universeDone && s.universeRun);
+  g.prestige();
+  ok(s.universeDone, 'bleibt für immer'); ok(!s.universeRun, 'neuer Durchlauf');
+  s.phase = 5; g.completePhase();
+  eq(n, 2);
+});
 test('Goldener Mast wirkt', () => {
   const c = clock();
   const s = newState(c.now()); s.owned.tanne = 10;
   const g = new Game(s, { now: c.now, random: () => 0.3 });
   const gm = g.spawnGolden();
   const eff = g.clickGolden(gm.id);
-  eq(eff.id, 'rausch'); near(g.d.cps, 10 * 7);
+  eq(eff.id, 'rausch'); near(g.d.cps, 10 * 4);
 });
 test('Export/Import Rundreise (mit Umlauten)', () => {
   const s = newState(); s.nickname = 'Jürgen-Ü'; s.fp = 123.5;
@@ -221,18 +298,27 @@ test('Prestige: erst nach der Welt, setzt zurück, behält Tränen', () => {
   eq(s.tears, 12); eq(s.phase, 1); eq(s.owned.mast, undefined); eq(s.upgrades.length, 0);
   eq(s.achievements[0], 'click_1'); eq(s.prestiges, 1); ok(s.fpAll > 0);
   eq(eco.pendingTears(s), 0);
-  near(eco.bonusMult(s), 1 + 0.01 + 12 * 0.02);
+  near(eco.bonusMult(s), 1 + 0.01 + 12 * eco.TEAR_BONUS);
+});
+test('Tränen: Kubikwurzel der Gesamt-FP', () => {
+  eq(eco.tearsFor(0), 0);
+  for (const n of [1, 5, 14, 47, 100]) {
+    eq(eco.tearsFor(eco.fpForTears(n)), n, `genau ${n}`);
+    eq(eco.tearsFor(eco.fpForTears(n) * 0.999), n - 1, `knapp unter ${n}`);
+  }
+  // Achtfache FP → doppelte Tränen
+  eq(eco.tearsFor(eco.fpForTears(10) * 8), 20);
 });
 test('Patente kaufen und Startpaket', () => {
   const c = clock();
-  const s = newState(c.now()); s.tears = 3;
+  const s = newState(c.now()); s.tears = 5;
   const g = new Game(s, { now: c.now, random: seeded() });
   ok(g.buyPatent('start')); ok(g.buyPatent('gold'));
-  eq(g.buyPatent('night'), false, 'zu teuer');
-  eq(s.tearsSpent, 3);
+  ok(g.buyPatent('night'), 'Nachtschicht kostet 2'); eq(g.buyPatent('auto'), false, 'zu teuer');
+  eq(s.tearsSpent, 4);
   near(g.d.mods.goldenInterval, 0.9);
-  near(eco.bonusMult(s), 1 + 3 * 0.02, 1e-9, 'ausgegebene Tränen behalten Bonus');
-  s.phase = 4; s.fpAll = eco.fpForTears(5);
+  near(eco.bonusMult(s), 1 + 5 * eco.TEAR_BONUS, 1e-9, 'ausgegebene Tränen behalten Bonus');
+  s.phase = 4; s.fpAll = eco.fpForTears(8);
   g.prestige();
   eq(s.owned.mast, 10); eq(s.owned.tanne, 5);
   eq(Object.values(s.placed.mast).reduce((a, b) => a + b, 0), 10, 'Startmasten platziert');
