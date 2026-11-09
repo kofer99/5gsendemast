@@ -320,7 +320,7 @@ Fehler: `400` (`error: name` oder `invalid`, mit deutschem `reason`), `409` Name
 
 **Aufbau:** `functions/api/*.js` sind dünne Hüllen. Die Logik steckt in `functions/_lib/handlers.js` (nur Web-Standard-APIs), der Speicher in `functions/_lib/store.js` (`d1Store` für Produktion, `memoryStore` für Tests). Die Regeln (Namensfilter, Plausibilität, Grenzwerte) stehen in `assets/js/data/leaderboard-rules.js` und gelten im Browser und auf dem Server gleich.
 
-**Datenbank (D1, SQLite):** siehe `migrations/0001_init.sql`. Tabelle `scores` mit `run_id` (Primärschlüssel), `name`, `name_key` (eindeutig), `score`, `fp_all`, `phase`, `playtime`, `ip_hash`, `created_at`, `updated_at`.
+**Datenbank (D1, SQLite):** siehe `migrations/0001_init.sql`. Die Datei enthält bewusst **keine Kommentare**: Die D1-Konsole im Dashboard fügt Zeilen zusammen, ein `--` kommentiert dann den Rest aus („incomplete input: SQLITE_ERROR“). Tabelle `scores` mit `run_id` (Primärschlüssel), `name`, `name_key` (eindeutig), `score`, `fp_all`, `phase`, `playtime`, `ip_hash`, `created_at`, `updated_at`.
 
 **Missbrauchsschutz (plausibilisieren statt verhindern)**
 
