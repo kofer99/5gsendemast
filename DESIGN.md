@@ -10,14 +10,18 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 1. Du: Portal ansehen (`/portal/`, beliebige Anmeldung). Texte gegenlesen (`assets/js/data/portal.js`).
-> 2. Danach: Bestenliste (§5) oder gleich online gehen (§11). Das Spiel testest du, sobald es online ist.
+> 1. **Online gehen (§11, M7):** GitHub-Repo, Cloudflare Pages, D1-Datenbank, Secret `IP_SALT`, Domain-Umzug inkl. E-Mail-Einträge. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
+> 2. Vorher von dir: Impressum und Datenschutz ausfüllen (eigene Daten). Was in die Datenschutzerklärung muss, steht unter „Offen“.
+> 3. Nach dem Online-Gang: Spiel komplett durchspielen, Bestenliste und Prestige echt testen.
 
 ### ❗ Offen (Stand 09.11.2026)
 - [x] ~~Prestige-Balancing entscheiden~~: Kubikwurzel, +8 % je Träne, Patente billiger (09.11.2026, §4.9)
 - [ ] Prestige im Spiel einmal durchspielen: Fühlen sich 5 Tränen nach der Welt bzw. 47 nach dem Universum gut an? (nach dem Online-Gang)
 - [ ] Portal-Texte gegenlesen: 14 Rundschreiben, 8 Stellen, Kantinenplan, Organigramm, 8 Dienstgrade (`data/portal.js`).
-- [ ] Datenschutzerklärung (beim Ausfüllen): Das Portal nutzt zusätzlich `sendemast.portal.seen` (localStorage, gelesene Rundschreiben) und `sendemast.portal.session` (sessionStorage, nur „angemeldet“). Beides bleibt im Browser, nichts wird gesendet.
+- [ ] **Datenschutzerklärung** (beim Ausfüllen), mindestens:
+  - Browser-Speicher: `sendemast.save` (Spielstand), `sendemast.lb` (nur der Spitzname für die Bestenliste), `sendemast.portal.seen` (gelesene Rundschreiben), `sendemast.portal.session` (sessionStorage, nur „angemeldet“). Bleibt im Browser.
+  - **Bestenliste (Server, nur nach aktivem Eintragen):** Spitzname, Bestwert, Phase, Gesamt-FP, Spielzeit, zufällige Spielstand-ID, `ip_hash` = SHA-256(IP + Tagesdatum + geheimes Salz), gekürzt auf 128 Bit. Zweck: Spam- und Missbrauchsschutz. Löschung jederzeit per „Austragen“. Speicherort: Cloudflare D1. Rechtsgrundlage klären (vermutlich berechtigtes Interesse bzw. Einwilligung durch Eintragen).
+  - Hosting bei Cloudflare (Server-Logs, Auftragsverarbeitung).
 - [x] ~~M3-Texte gegenlesen~~ („Das Spiel passt so“, 09.11.2026)
 - [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
 - [ ] Einwohnerzahlen Europa/Welt stammen aus Natural Earth (POP_EST, Stand 2019, Welt ≈ 7,68 Mrd.). Vor dem Release ggf. aktualisieren (`tools/build_world.py`).
@@ -25,6 +29,7 @@
 - [x] ~~Zweiten Durchlauf nach Prestige simulieren~~ (`tests/sim-prestige.html`, 09.11.2026)
 
 ### Wo wir stehen geblieben sind (09.11.2026)
+- **Neu am 09.11. (dritter Teil): Bestenliste fertig** (§5). Pages Functions `functions/api/leaderboard.js` und `functions/api/score.js`, Logik in `functions/_lib/`, D1-Schema in `migrations/0001_init.sql`, `wrangler.toml`. Seite `/bestenliste/` mit Eintragen, Rang, „Diese Woche/Ewig“ und Austragen. Das Spiel meldet automatisch, sobald man eingetragen ist. Getestet ohne Cloudflare: Logik im Browser mit In-Memory-Speicher (`tests/index.html`, `tests/e2e-board.html` mit `?mock=1`), SQL mit `python tools/check_sql.py` gegen SQLite. **Noch nie gegen echtes D1 gelaufen.**
 - **Neu am 09.11. (zweiter Teil): Mitarbeiterportal fertig** (§7). Fake-Login, Rundschreiben (teils über Erfolge freigeschaltet), Personalakte mit Laufbahn, Beförderungsurkunde als PNG, Stellenbörse, Kantinenplan, Organigramm. Tests: `tests/e2e-portal.html`, Screenshots: `tests/shot-portal.html?tab=urkunde`.
 - **Neu am 09.11.: M3 ist komplett.**
   - **Aluhut-Demo:** fünf Figuren in einer Region, jede kostet 10 % Signal. Wer alle überzeugt, bekommt eine Prämie (§4.7).
@@ -46,12 +51,11 @@
 - **Prestige umgestellt (Option a):** Tränen = Kubikwurzel statt Quadratwurzel, +8 % statt +2 % je Träne, Patente kosten 1–40 statt 1–250 Tränen. Die Texte im Spiel lesen den Bonus jetzt aus `TEAR_BONUS`.
 - **Simulation:** Der Kern liegt jetzt in `tests/simcore.js`, die Ausgabe zeigt zusätzlich, woher die FP kommen. Neu ist `tests/sim-prestige.html` (mehrere Durchläufe, Neustart an Checkpoints).
 - **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
-- **Platzhalter:** Portal, Bestenliste, Impressum, Datenschutz (Impressum/Datenschutz: eigene Daten eintragen!).
+- **Platzhalter:** Impressum, Datenschutz (eigene Daten eintragen!).
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
 - **Noch nicht online:** kein GitHub-Remote, kein Hosting. Repo ist lokal unter `D:\FunProjectDomain`.
 
 ### Nächste Schritte (Reihenfolge offen)
-2. Bestenliste mit Cloudflare Pages Functions + D1 (§5)
 3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)
 
 ---
@@ -301,39 +305,36 @@ Ein goldener Mast erscheint alle 5–10 min an einer zufälligen Stelle und blei
 
 ## 5. Bestenliste
 
-**Eintrag:** Der Spieler gibt nur einen Spitznamen ein (3–16 Zeichen, a–z, 0–9, Umlaute, `-` und `_`). Name und Score werden vom Server gespeichert. Es gibt keinen Login und keine E-Mail.
+**Status:** ✅ umgesetzt am 09.11.2026, noch nicht online getestet (es gibt lokal kein wrangler/Node).
 
-**Gewertet wird:** die Zahl der jemals kontrollierten Bürger beziehungsweise der Gesamt-FP inklusive Prestige (endgültig beim Balancing festlegen).
+**Eintrag:** Der Spieler trägt sich auf `/bestenliste/` mit einem Spitznamen ein (3–16 Zeichen, a–z, 0–9, Umlaute, ß, `-` und `_`, Groß/Klein egal eindeutig). Es gibt keinen Login und keine E-Mail. Im Browser wird nur der Spitzname gemerkt (`sendemast.lb`). Danach meldet das Spiel den Bestwert automatisch: bei jedem Phasenwechsel und beim Universum sofort, sonst höchstens alle 5 Min. und nur bei neuem Bestwert. Wer nie auf „Eintragen“ klickt, sendet nichts. „Austragen“ löscht den Eintrag auf dem Server.
+
+**Gewertet wird** (entschieden 09.11.2026): `bestControlledAll`, also die höchste je erreichte Zahl kontrollierter Menschen/Lebewesen, über Prestige hinweg. Wer das Universum erobert, hat immer denselben Höchstwert (1,5 Brd.). Bei Gleichstand entscheiden deshalb die insgesamt gefunkten FP (`fpAll`), dann der frühere Eintrag. „Diese Woche“ = in den letzten 7 Tagen gemeldet.
 
 **API (Cloudflare Pages Functions + D1)**
 
 | Methode | Pfad | Zweck |
 |---|---|---|
-| `GET` | `/api/leaderboard?range=week\|all` | Top 100 |
-| `POST` | `/api/score` | Eintrag oder Update: `{ name, score, phase, playtimeSec, runId }` |
+| `GET` | `/api/leaderboard?range=week\|all` | Top 100: `{ range, total, entries: [{ rank, name, score, fpAll, phase, updatedAt }] }`, 30 s Cache |
+| `POST` | `/api/score` | Eintrag oder Verbesserung: `{ name, runId, score, fpAll, phase, playtime }` → `{ ok, rank, rankWeek, score, name }` |
+| `DELETE` | `/api/score` | Eintrag löschen: `{ runId }` |
 
-**Datenbank (D1, SQLite)**
-```sql
-CREATE TABLE scores (
-  run_id      TEXT PRIMARY KEY,   -- zufällige ID je Spielstand (im Save)
-  name        TEXT NOT NULL,
-  score       REAL NOT NULL,
-  phase       INTEGER NOT NULL,
-  playtime    INTEGER NOT NULL,
-  ip_hash     TEXT NOT NULL,      -- SHA-256(IP + täglich rotierendes Salt), nie Klar-IP
-  created_at  INTEGER NOT NULL,
-  updated_at  INTEGER NOT NULL
-);
-CREATE INDEX idx_scores_score ON scores(score DESC);
-```
+Fehler: `400` (`error: name` oder `invalid`, mit deutschem `reason`), `409` Name vergeben, `429` Rate-Limit, `413` Anfrage zu groß, `503` Datenbank nicht verbunden. Werte gehen beim Melden nur nach oben (Bestwert, FP, Phase, Spielzeit). Der Name darf sich ändern. `runId` und `ip_hash` werden nie ausgeliefert.
+
+**Aufbau:** `functions/api/*.js` sind dünne Hüllen. Die Logik steckt in `functions/_lib/handlers.js` (nur Web-Standard-APIs), der Speicher in `functions/_lib/store.js` (`d1Store` für Produktion, `memoryStore` für Tests). Die Regeln (Namensfilter, Plausibilität, Grenzwerte) stehen in `assets/js/data/leaderboard-rules.js` und gelten im Browser und auf dem Server gleich.
+
+**Datenbank (D1, SQLite):** siehe `migrations/0001_init.sql`. Tabelle `scores` mit `run_id` (Primärschlüssel), `name`, `name_key` (eindeutig), `score`, `fp_all`, `phase`, `playtime`, `ip_hash`, `created_at`, `updated_at`.
 
 **Missbrauchsschutz (plausibilisieren statt verhindern)**
 
 Ein reines Browser-Spiel lässt sich nie vollständig gegen Cheats absichern. Das ist bewusst akzeptiert.
-- Der Server prüft die Plausibilität: Ist der Score für diese Spielzeit überhaupt möglich (maximale theoretische Rate)?
-- Rate-Limit: höchstens 1 Submit pro Minute je `ip_hash`.
-- Namensfilter: Schimpfwort- und Blockliste, keine URLs.
-- Admins können Einträge per `wrangler d1 execute` löschen.
+- **Plausibilität:** Der Wert darf nicht größer sein als alle Einwohner der gemeldeten Phase und nicht kleiner als die der Vorphase. Mindest-Spielzeit je Phase: Europa 20 Min., Welt 40 Min., Orbit 60 Min., Universum-Phase 75 Min., ganzes Universum 90 Min. (etwa ein Drittel des schnellsten simulierten Durchlaufs). Gesamt-FP höchstens 1e22.
+- **Rate-Limit:** höchstens 1 Meldung pro Minute und höchstens 5 neue Einträge pro Tag je `ip_hash`.
+- **`ip_hash`** = SHA-256(IP + Tagesdatum + Secret `IP_SALT`), auf 128 Bit gekürzt. Die IP wird nie gespeichert, und über Tage hinweg lassen sich Einträge nicht verknüpfen.
+- **Namensfilter:** kurze Sperrliste (Beleidigungen, NS-Begriffe), auch mit Ziffern statt Buchstaben („N4zi“). Dazu reservierte Namen wie „Admin“ oder „BAfG“. URLs sind durch den Zeichensatz ausgeschlossen.
+- Admins können Einträge per `wrangler d1 execute sendemast-db --remote --command "DELETE FROM scores WHERE name_key = '…'"` löschen.
+
+**Tests ohne Cloudflare:** `tests/index.html` (Regeln und Handler mit `memoryStore`), `tests/e2e-board.html` (Seite mit `?mock=1`: die echten Handler laufen im Browser), `python tools/check_sql.py` (alle SQL-Befehle gegen SQLite inkl. Upsert, Sortierung, Rang, Eindeutigkeit). Der Mock-Modus funktioniert nur auf `localhost`.
 
 ---
 
@@ -481,7 +482,8 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status
 
 1. **GitHub:** privates oder öffentliches Repository, Push auf `main`
 2. **Cloudflare Pages:** mit dem GitHub-Repo verbinden. Build-Befehl: keiner. Ausgabeordner: `/`. Jeder Push deployt automatisch, Branches erhalten Preview-URLs.
-3. **D1:** Datenbank `sendemast-db` anlegen, Migration ausführen und in den Pages-Einstellungen binden (`DB`)
+3. **D1:** Datenbank `sendemast-db` anlegen (`wrangler d1 create sendemast-db` oder im Dashboard), die `database_id` in `wrangler.toml` eintragen, Migration ausführen (`wrangler d1 migrations apply sendemast-db --remote`, oder den Inhalt von `migrations/0001_init.sql` in der D1-Konsole ausführen) und in den Pages-Einstellungen als `DB` binden. Secret `IP_SALT` setzen (lange Zufallszeichenkette, Pages → Einstellungen → Umgebungsvariablen, verschlüsselt).
+   - Achtung: Mit `pages_build_output_dir = "."` werden auch `tests/`, `tools/` und `DESIGN.md` öffentlich ausgeliefert. Bei einem öffentlichen Repo ist das unkritisch. Wer es nicht will, legt die Seiten in einen Unterordner (z. B. `public/`) oder blockt die Pfade mit `_redirects`.
 4. **Domain:** `5gsendemast.de` in Cloudflare als Zone hinzufügen und **die Nameserver bei CheckDomain** auf die beiden Cloudflare-Nameserver umstellen
 5. In Pages die Custom Domains `5gsendemast.de` und `www.5gsendemast.de` hinzufügen, mit Weiterleitung von www auf die Hauptdomain
 6. HTTPS (automatisch) prüfen und „Always Use HTTPS“ aktivieren
@@ -499,7 +501,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status
 | M3 ✅ | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Seit 09.11.2026 auch Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades |
 | M4 ✅ | Eskalation | Phasen 2–5 mit eigenen Karten, Prestige mit Tränen und Patenten (08.11.2026) |
 | M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). ✅ Mitarbeiterportal (09.11.2026). Offen: Impressum/Datenschutz ausfüllen |
-| M6 | Online | Bestenliste (Functions + D1), Teilen, OG-Bild |
+| M6 (teilweise) | Online | ✅ Bestenliste (Functions + D1, 09.11.2026, noch nicht online getestet), ✅ Teilen (Prahlen-Knopf, Urkunde). Offen: OG-Bild |
 | M7 | Launch | Hosting, Domain, Balancing-Feinschliff, Mobile-Test |
 
 ---

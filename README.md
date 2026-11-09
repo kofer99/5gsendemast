@@ -7,7 +7,7 @@ Satire-Website mit einem eskalierenden Idle-Game: Platziere 5G-Sendemasten auf e
 
 ## Lokal starten
 
-Kein Build-Schritt nötig. Wegen der ES-Module muss die Seite über einen Webserver laufen (nicht per `file://`):
+Kein Build-Schritt nötig. Wegen der ES-Module muss die Seite über einen Webserver laufen (nicht per `file://`). Die Bestenlisten-API läuft lokal nicht (dafür bräuchte es wrangler), deshalb gibt es den Mock-Modus `?mock=1`:
 
 ```bash
 python -m http.server 8765
@@ -18,6 +18,8 @@ python -m http.server 8765
 | http://localhost:8765/ | Spiel |
 | http://localhost:8765/tests/ | Unit-Tests |
 | http://localhost:8765/tests/e2e.html | End-to-End-Test (löscht den lokalen Spielstand!) |
+| http://localhost:8765/bestenliste/?mock=1 | Bestenliste mit Server im Browser (nur localhost, Beispieldaten) |
+| http://localhost:8765/tests/e2e-board.html | End-to-End-Test Bestenliste im Mock-Modus (überschreibt den eigenen Spielstand!) |
 | http://localhost:8765/tests/e2e-portal.html | End-to-End-Test Mitarbeiterportal (überschreibt den eigenen Spielstand!) |
 | http://localhost:8765/tests/shot-portal.html?tab=urkunde | Portal angemeldet zeigen (für Screenshots), Reiter: rundschreiben, personalakte, urkunde, stellen, kantine, organigramm |
 | http://localhost:8765/tests/sim.html?cps=3&h=16 | Balancing-Simulation eines Durchlaufs (`ev=0` ohne Ereignisse, `manual=0` Auto-Platzieren, `off=syn_,land_` Upgrades abschalten) |
@@ -35,7 +37,10 @@ python -m http.server 8765
 assets/js/core/   Spiellogik (state, economy, game) – ohne DOM, testbar
 assets/js/data/   Anlagen, Upgrades, Erfolge, News, Bundesländer, Kartendaten
 assets/js/ui/     Karte, Shop, HUD
-tools/            build_map.py – erzeugt map-de.js aus Natural-Earth-Daten (Bundesländer)
+functions/        Cloudflare Pages Functions der Bestenliste (api/), Logik und Speicher in _lib/
+migrations/       D1-Schema
+tools/            check_sql.py – prüft die SQL-Befehle der Bestenliste gegen SQLite
+                  build_map.py – erzeugt map-de.js aus Natural-Earth-Daten (Bundesländer)
                   build_world.py – erzeugt map-eu.js und map-world.js (Länder, ne_50m_admin_0_countries)
 ```
 

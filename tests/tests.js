@@ -9,10 +9,17 @@ import { MAP_DE } from '../assets/js/data/map-de.js';
 import { PHASES, PHASE_BY_ID } from '../assets/js/data/phases.js';
 import * as portal from '../assets/js/data/portal.js';
 import { ACHIEVEMENT_BY_ID } from '../assets/js/data/achievements.js';
+import * as lb from '../assets/js/data/leaderboard-rules.js';
+import { memoryStore } from '../functions/_lib/store.js';
+import * as api from '../functions/_lib/handlers.js';
 
 const results = [];
 function test(name, fn) {
   try { fn(); results.push({ name, ok: true }); } catch (e) { results.push({ name, ok: false, err: e.message }); }
+}
+const pending = [];
+function atest(name, fn) {
+  pending.push(fn().then(() => results.push({ name, ok: true }), (e) => results.push({ name, ok: false, err: e.message })));
 }
 function eq(a, b, msg = '') { if (a !== b) throw new Error(`${msg} erwartet ${JSON.stringify(b)}, bekommen ${JSON.stringify(a)}`); }
 function near(a, b, eps = 1e-6, msg = '') { if (Math.abs(a - b) > eps * Math.max(1, Math.abs(b))) throw new Error(`${msg} erwartet ≈${b}, bekommen ${a}`); }
@@ -351,7 +358,96 @@ test('Alter Spielstand (v1) wird migriert', () => {
   eq(s.phase, 1); eq(s.markers[0].p, 1); eq(s.tears, 0); ok(Array.isArray(s.patents));
 });
 
+// ---------- Bestenliste ----------
+test('Bestenliste: Einwohner je Phase stimmen mit den Karten überein', () => {
+  for (const p of PHASES) near(lb.PHASE_TOTALS[p.id], p.total, 1e-12, p.name);
+});
+test('Bestenliste: Namensprüfung', () => {
+  for (const n of ['Funk_Frieda', 'Jürgen-99', 'abc', 'X'.repeat(16)]) ok(lb.checkName(n).ok, n);
+  for (const n of ['ab', 'X'.repeat(17), 'mit leer', 'a.b', 'www.de', '<b>', '']) ok(!lb.checkName(n).ok, `abgelehnt: ${n}`);
+  for (const n of ['Admin', 'B_A_f_G', 'Hitler88', 'F1ck3r', 'N4zi']) ok(!lb.checkName(n).ok, `gesperrt: ${n}`);
+  eq(lb.nameKey('FunkFrieda'), 'funkfrieda');
+});
+test('Bestenliste: Plausibilität', () => {
+  const base = { name: 'Testkraft', runId: 'a'.repeat(24), score: 5e7, fpAll: 1e9, phase: 1, playtime: 3000 };
+  ok(lb.checkEntry(base).ok, 'gültig');
+  eq(lb.checkEntry({ ...base, score: 9e7 }).field, 'score', 'mehr als Deutschland');
+  eq(lb.checkEntry({ ...base, phase: 2, score: 1e7 }).field, 'score', 'Phase 2, aber weniger als Deutschland');
+  eq(lb.checkEntry({ ...base, phase: 3, score: 1e9, playtime: 600 }).field, 'playtime', 'zu schnell');
+  ok(lb.checkEntry({ ...base, phase: 5, score: lb.PHASE_TOTALS[4] * 2, playtime: 80 * 60 }).ok, 'Phase 5 nach 80 Min. ok');
+  eq(lb.checkEntry({ ...base, phase: 5, score: Math.floor(lb.PHASE_TOTALS[5]), playtime: 80 * 60 }).field, 'playtime', 'Universum in 80 Min.');
+  eq(lb.checkEntry({ ...base, runId: 'xyz' }).field, 'runId');
+  eq(lb.checkEntry({ ...base, fpAll: Infinity }).field, 'fpAll');
+  eq(lb.checkEntry({ ...base, phase: 2.5 }).field, 'phase');
+  eq(lb.checkEntry(null).ok, false);
+});
+test('Bestenliste: Eintrag aus dem Spielstand ist gültig', () => {
+  const s = newState(); s.runId = 'c'.repeat(24); s.bestControlledAll = 8.2e9; s.phaseReached = 4; s.phase = 1; s.fpAll = 3.3e12; s.playtime = 4 * 3600 + 0.7;
+  const e = lb.entryFromState(s, 'Testkraft');
+  eq(e.phase, 4, 'höchste Phase, nicht die aktuelle'); eq(e.playtime, 14400);
+  ok(lb.checkEntry(e).ok, 'Server würde annehmen');
+  ok(/^[0-9a-f]{24}$/.test(newState().runId), 'Spielstand-ID passt zum Format');
+});
+
+const post = (body, ip = '1.2.3.4') => new Request('https://x/api/score', {
+  method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json', 'cf-connecting-ip': ip },
+});
+const entry = (over = {}) => ({ name: 'Anna', runId: 'a'.repeat(24), score: 5e7, fpAll: 1e9, phase: 1, playtime: 3000, ...over });
+
+atest('Bestenliste-API: melden, verbessern, Rang', async () => {
+  const store = memoryStore();
+  let r = await api.postScore({ request: post(entry()), store, salt: 's', now: 1000 });
+  eq(r.status, 200); eq((await r.json()).rank, 1);
+  r = await api.postScore({ request: post(entry({ name: 'Bert', runId: 'b'.repeat(24), score: 8e7 }), '5.6.7.8'), store, salt: 's', now: 1010 });
+  eq((await r.json()).rank, 1, 'Bert vorn');
+  // schlechterer Wert senkt nichts, Umbenennen geht
+  r = await api.postScore({ request: post(entry({ name: 'Anna2', score: 1 })), store, salt: 's', now: 1100 });
+  const d = await r.json();
+  eq(d.score, 5e7, 'Bestwert bleibt'); eq(d.name, 'Anna2'); eq(d.rank, 2);
+  r = await api.getLeaderboard({ request: new Request('https://x/api/leaderboard?range=all'), store, now: 1200 });
+  const b = await r.json();
+  eq(b.total, 2); eq(b.entries[0].name, 'Bert'); eq(b.entries[1].rank, 2);
+  ok(!('runId' in b.entries[0]) && !('ipHash' in b.entries[0]), 'keine IDs/Prüfsummen öffentlich');
+  r = await api.getLeaderboard({ request: new Request('https://x/api/leaderboard?range=week'), store, now: 1100 + 8 * 86400 });
+  eq((await r.json()).total, 0, 'nach 8 Tagen nicht mehr in „diese Woche“');
+});
+atest('Bestenliste-API: Missbrauchsschutz', async () => {
+  const store = memoryStore();
+  await api.postScore({ request: post(entry()), store, salt: 's', now: 1000 });
+  let r = await api.postScore({ request: post(entry()), store, salt: 's', now: 1030 });
+  eq(r.status, 429, 'zweite Meldung nach 30 s');
+  r = await api.postScore({ request: post(entry({ runId: 'b'.repeat(24) }), '9.9.9.9'), store, salt: 's', now: 2000 });
+  eq(r.status, 409, 'Name vergeben');
+  r = await api.postScore({ request: post(entry({ runId: 'b'.repeat(24), name: 'ANNA' }), '9.9.9.9'), store, salt: 's', now: 2100 });
+  eq(r.status, 409, 'auch in anderer Schreibweise');
+  r = await api.postScore({ request: post(entry({ name: 'Admin', runId: 'c'.repeat(24) }), '8.8.8.8'), store, salt: 's', now: 2200 });
+  eq(r.status, 400); eq((await r.json()).error, 'name');
+  r = await api.postScore({ request: new Request('https://x/api/score', { method: 'POST', body: '{kaputt' }), store, salt: 's', now: 2300 });
+  eq(r.status, 400);
+  // höchstens 5 neue Einträge pro Tag je Anschluss
+  let t = 10000;
+  for (let i = 0; i < 5; i++) {
+    r = await api.postScore({ request: post(entry({ name: 'Spam' + i, runId: String(i).repeat(24) }), '7.7.7.7'), store, salt: 's', now: t += 100 });
+    eq(r.status, 200, 'Eintrag ' + i);
+  }
+  r = await api.postScore({ request: post(entry({ name: 'Spam9', runId: '9'.repeat(24) }), '7.7.7.7'), store, salt: 's', now: t += 100 });
+  eq(r.status, 429, 'sechster neuer Eintrag');
+  // IP-Prüfsumme: keine Klar-IP, wechselt täglich
+  const h1 = await api.ipHash('7.7.7.7', 's', 1000); const h2 = await api.ipHash('7.7.7.7', 's', 1000 + 86400);
+  ok(/^[0-9a-f]{32}$/.test(h1) && h1 !== h2, 'Prüfsumme 32 Hex-Zeichen, täglich anders');
+  ok(![...store.rows.values()].some((x) => x.ipHash.includes('7.7')), 'keine IP gespeichert');
+});
+atest('Bestenliste-API: Austragen', async () => {
+  const store = memoryStore();
+  await api.postScore({ request: post(entry()), store, salt: 's', now: 1000 });
+  const del = (body) => new Request('https://x/api/score', { method: 'DELETE', body: JSON.stringify(body) });
+  eq((await api.deleteScore({ request: del({ runId: 'zz' }), store })).status, 400);
+  eq((await api.deleteScore({ request: del({ runId: 'a'.repeat(24) }), store })).status, 200);
+  eq(store.rows.size, 0);
+});
+
 // ---------- Ausgabe ----------
+await Promise.all(pending);
 const failed = results.filter((r) => !r.ok);
 document.getElementById('out').innerHTML = results
   .map((r) => (r.ok ? `✔ ${r.name}` : `<span class="fail">✘ ${r.name}: ${r.err}</span>`))

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>E2E Bestenliste – Projekt Sendemast</title>
+<style>body{background:#070b08;color:#3dff8a;font:13px/1.5 monospace;padding:16px}.fail{color:#ff6b5c}iframe{width:1280px;height:900px;border:1px solid #1f3a26}</style></head>
+<body>
+<h1>End-to-End-Test Bestenliste (Mock-Server im Browser)</h1>
+<p>Achtung: setzt einen Test-Spielstand (überschreibt den eigenen!).</p>
+<pre id="out">läuft …</pre>
+<iframe id="f" title="Bestenliste"></iframe>
+<script type="module">
+import { newState } from '/assets/js/core/state.js';
+const out = [];
+const log = (ok, msg) => out.push(ok ? `✔ ${msg}` : `<span class="fail">✘ ${msg}</span>`);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn, ms = 4000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (fn()) return true; await wait(50); } return fn(); };
+const f = document.getElementById('f');
+const load = async (url) => {
+  const p = new Promise((r) => f.addEventListener('load', r, { once: true }));
+  f.src = url;
+  await p; await wait(300);
+  return f.contentWindow.document;
+};
+const shown = (d, id) => f.contentWindow.getComputedStyle(d.getElementById(id)).display !== 'none';
+try {
+  // 1) Echter Server lokal nicht vorhanden → freundliche Meldung
+  localStorage.removeItem('sendemast.save'); localStorage.removeItem('sendemast.lb');
+  let d = await load('/bestenliste/');
+  log(await until(() => d.getElementById('board-status').textContent.includes('nicht erreichbar')), 'Ohne Server: Hinweis „nicht erreichbar“');
+  log(d.getElementById('me-stats').textContent.includes('Noch kein Bestwert') && !shown(d, 'me-form'), 'Ohne Spielstand: kein Eintragen möglich');
+
+  // 2) Mit Spielstand und Mock-Server
+  const s = newState(Date.now()); s.introSeen = true; s.phase = 4; s.phaseReached = 4; s.bestControlledAll = 9.5e10; s.fpAll = 4e13; s.playtime = 5 * 3600; s.nickname = 'Testkraft';
+  localStorage.setItem('sendemast.save', JSON.stringify(s));
+  d = await load('/bestenliste/?mock=1');
+  log(await until(() => d.querySelectorAll('#board-body tr').length === 6), `Liste: ${d.querySelectorAll('#board-body tr').length} Beispiel-Einträge`);
+  log(d.querySelector('#board-body tr td.rank').textContent === '1' && d.querySelector('#board-body tr').textContent.includes('Universum ✓'), 'Platz 1 mit „Universum ✓“');
+  log(shown(d, 'me-form') && d.getElementById('me-name').value === 'Testkraft', 'Formular sichtbar, Name vorbelegt');
+  d.getElementById('me-name').value = 'ab';
+  d.getElementById('me-join').click(); await wait(100);
+  log(d.getElementById('me-msg').textContent.includes('3 bis 16'), 'Zu kurzer Name: Hinweis');
+  d.getElementById('me-name').value = 'tannenbaum';
+  d.getElementById('me-join').click();
+  log(await until(() => d.getElementById('me-msg').textContent.includes('vergeben')), 'Vergebener Name (andere Schreibweise): abgelehnt');
+  // Der Mock zählt die IP-Prüfsumme wie der echte Server: nach einem Fehlversuch ist kein Eintrag entstanden, also kein Rate-Limit
+  d.getElementById('me-name').value = 'Testkraft';
+  d.getElementById('me-join').click();
+  log(await until(() => shown(d, 'me-reg')), 'Eingetragen');
+  log(d.getElementById('me-rank').textContent.startsWith('Platz 3'), `Rang: ${d.getElementById('me-rank').textContent}`);
+  log(JSON.parse(localStorage.getItem('sendemast.lb')).name === 'Testkraft', 'Nur der Spitzname wird lokal gemerkt');
+  log(await until(() => d.querySelector('#board-body tr.mine')?.textContent.includes('Testkraft')), 'Eigene Zeile hervorgehoben');
+  d.querySelector('[data-range="week"]').click();
+  log(await until(() => d.querySelectorAll('#board-body tr').length === 5), `Diese Woche (4 Beispiele + eigener): ${d.querySelectorAll('#board-body tr').length} Einträge`);
+  d.getElementById('me-update').click();
+  log(await until(() => d.getElementById('me-msg').textContent.includes('Minute')), 'Sofort erneut melden: Rate-Limit-Hinweis');
+  f.contentWindow.confirm = () => true;
+  d.getElementById('me-leave').click();
+  log(await until(() => shown(d, 'me-form') && !localStorage.getItem('sendemast.lb')), 'Austragen: Formular wieder da, lokale Anmeldung gelöscht');
+  log(await until(() => !d.querySelector('#board-body tr.mine')), 'Eintrag aus der Liste verschwunden');
+} catch (e) {
+  log(false, 'Ausnahme: ' + e.message);
+}
+const failed = out.filter((x) => x.includes('fail')).length;
+document.getElementById('out').innerHTML = out.join('\n') + `\n\n${out.length - failed}/${out.length} bestanden`;
+document.title = 'E2E DONE';
+</script>
+</body>
+</html>

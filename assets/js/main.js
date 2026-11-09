@@ -6,6 +6,7 @@ import { MapView } from './ui/map.js';
 import { Shop } from './ui/shop.js';
 import { Hud, Ticker, toast, dialog, setupTabs, renderAchievements, renderStats, renderPrestige } from './ui/hud.js';
 import { fmt, fmtInt, fmtDuration } from './util/format.js';
+import { autoSubmitter } from './leaderboard-client.js';
 
 const $ = (id) => document.getElementById(id);
 const TICK_MS = 100;
@@ -80,6 +81,18 @@ const CUTSCENES = {
     ],
   },
 };
+// ---------- Bestenliste: nur wer sich auf /bestenliste/ eingetragen hat, meldet automatisch ----------
+let rankToast = false;
+const reportScore = autoSubmitter(() => game.s, {
+  onResult: (r) => {
+    if (rankToast && r.rank) toast('BESTENLISTE', `Neuer Bestwert gemeldet: Platz ${fmtInt(r.rank)}.`);
+    rankToast = false;
+  },
+});
+game.on('phase', () => { rankToast = true; reportScore(true); });
+game.on('universe', () => { rankToast = true; reportScore(true); });
+setInterval(() => reportScore(), 60_000); // prüft jede Minute, meldet höchstens alle 5 Min. und nur bei neuem Bestwert
+
 game.on('phase', async ({ from, to }) => {
   save();
   const c = CUTSCENES[to.id];

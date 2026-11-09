@@ -4,9 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bestenliste – Projekt Sendemast</title>
+<meta name="description" content="Die Agent:innen der Bundesanstalt für Gedankenfunk mit den meisten kontrollierten Menschen. Satire.">
 <meta name="theme-color" content="#070b08">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bestenliste der BAfG – wer kontrolliert die meisten Gedanken?">
+<meta property="og:description" content="Ein Satire-Spiel über 5G-Mythen. Wer schafft das Universum?">
+<meta property="og:url" content="https://5gsendemast.de/bestenliste/">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/board.css">
 </head>
 <body>
 <header class="topbar">
@@ -21,17 +27,67 @@
     <a class="btn" href="/portal/">[ PORTAL ]</a>
   </nav>
 </header>
-<main class="page">
-<div class="stamp">IN VORBEREITUNG</div>
-<h1>Bestenliste</h1>
-<p>Hier erscheinen bald die Agent:innen mit den meisten kontrollierten Menschen. Die Zählung läuft bereits – dein Bestwert wird lokal gespeichert.</p>
-<p><a class="btn" href="/">Zurück zum Dienst</a></p>
+
+<main class="board-page">
+  <div class="stamp">DIENSTLICHE RANGLISTE</div>
+  <h1>Bestenliste</h1>
+  <p class="lead">Die Agent:innen mit den meisten kontrollierten Menschen. Gewertet wird der höchste je erreichte Wert, auch über Neustarts hinweg. Bei Gleichstand (etwa beim ganzen Universum) entscheiden die insgesamt gefunkten FP.</p>
+
+  <div class="board-grid">
+    <section class="board" aria-labelledby="h-board">
+      <h2 id="h-board" class="visually-hidden">Rangliste</h2>
+      <div class="range" role="tablist" aria-label="Zeitraum">
+        <button type="button" role="tab" data-range="all" aria-selected="true">Ewig</button>
+        <button type="button" role="tab" data-range="week" aria-selected="false">Diese Woche</button>
+        <span id="board-total" class="dim"></span>
+      </div>
+      <div id="board-status" class="board-status" aria-live="polite">Lade …</div>
+      <div class="table-wrap">
+        <table id="board-table" hidden>
+          <thead><tr><th scope="col">Platz</th><th scope="col">Name</th><th scope="col" class="num">Kontrolliert</th><th scope="col" class="hide-s">Einsatzgebiet</th><th scope="col" class="num hide-s">FP gesamt</th></tr></thead>
+          <tbody id="board-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="me" aria-labelledby="h-me">
+      <h2 id="h-me">Ihr Eintrag</h2>
+      <div id="me-stats" class="me-stats"></div>
+
+      <div id="me-form" hidden>
+        <label class="field">
+          <span>Spitzname</span>
+          <input id="me-name" type="text" autocomplete="nickname" maxlength="16" spellcheck="false" placeholder="3–16 Zeichen">
+        </label>
+        <button id="me-join" type="button" class="btn btn-go">Eintragen</button>
+      </div>
+
+      <div id="me-reg" hidden>
+        <p>Eingetragen als <b id="me-regname"></b>.<br><span id="me-rank" class="dim"></span></p>
+        <p class="dim small">Ihr Bestwert wird aus dem Spiel automatisch aktualisiert, höchstens alle 5 Minuten.</p>
+        <div class="me-actions">
+          <button id="me-update" type="button" class="btn">Jetzt melden</button>
+          <button id="me-leave" type="button" class="btn btn-danger">Austragen</button>
+        </div>
+      </div>
+
+      <p id="me-msg" class="me-msg" aria-live="polite"></p>
+
+      <details class="privacy">
+        <summary>Was wird gespeichert?</summary>
+        <p>Beim Eintragen speichert der Server: Ihren Spitznamen, Ihren Bestwert, die erreichte Phase, die insgesamt gefunkten FP, die Spielzeit und eine zufällige Kennung Ihres Spielstands. Dazu kommt eine Prüfsumme aus Ihrer IP-Adresse und dem Tagesdatum gegen Spam. Die IP-Adresse selbst wird nicht gespeichert.</p>
+        <p>Kein Login, keine E-Mail, kein Tracking. „Austragen“ löscht den Eintrag sofort vom Server. Details in der <a href="/datenschutz/">Datenschutzerklärung</a>.</p>
+      </details>
+    </aside>
+  </div>
 </main>
+
 <footer class="legal-bar">
   <span><strong>Satire.</strong> Die Bundesanstalt für Gedankenfunk existiert nicht. 5G ist nach aktuellem Stand der Wissenschaft unbedenklich → <a href="/geheimakte/">Geheimakte</a></span>
   <a href="/impressum/">Impressum</a>
   <a href="/datenschutz/">Datenschutz</a>
 </footer>
 <div class="scanlines" aria-hidden="true"></div>
+<script type="module" src="/assets/js/board.js"></script>
 </body>
 </html>
