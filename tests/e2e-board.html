@@ -22,6 +22,8 @@ const load = async (url) => {
 };
 const shown = (d, id) => f.contentWindow.getComputedStyle(d.getElementById(id)).display !== 'none';
 try {
+  // Nur lokal: Online würde der Test echte Einträge in der Bestenliste anlegen.
+  if (!['localhost', '127.0.0.1'].includes(location.hostname)) throw new Error('Dieser Test läuft nur auf localhost (Mock-Server).');
   // 1) Echter Server lokal nicht vorhanden → freundliche Meldung
   localStorage.removeItem('sendemast.save'); localStorage.removeItem('sendemast.lb');
   let d = await load('/bestenliste/');
@@ -56,6 +58,13 @@ try {
   d.getElementById('me-leave').click();
   log(await until(() => shown(d, 'me-form') && !localStorage.getItem('sendemast.lb')), 'Austragen: Formular wieder da, lokale Anmeldung gelöscht');
   log(await until(() => !d.querySelector('#board-body tr.mine')), 'Eintrag aus der Liste verschwunden');
+
+  // 3) Test-Spielstand (z. B. aus seed.html): kein Eintragen möglich, auch nicht mit alter Anmeldung
+  localStorage.setItem('sendemast.save', JSON.stringify({ ...s, test: true }));
+  localStorage.setItem('sendemast.lb', JSON.stringify({ name: 'Testkraft' }));
+  d = await load('/bestenliste/?mock=1&t=3');
+  log(d.getElementById('me-stats').textContent.includes('Test-Spielstand') && !shown(d, 'me-form') && !shown(d, 'me-reg'), 'Test-Spielstand: Hinweis statt Formular');
+  localStorage.removeItem('sendemast.lb');
 } catch (e) {
   log(false, 'Ausnahme: ' + e.message);
 }

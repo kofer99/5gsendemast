@@ -37,6 +37,7 @@ if (phase > 1) {
   if (q.get('tears')) s.tears = Number(q.get('tears'));
   g.refresh(); g.checkAchievements();
 }
+s.test = true; // nie in die Bestenliste (siehe leaderboard-rules.js)
 saveState(s);
 if (q.get('go') !== '0') location.href = '/';
 </script>

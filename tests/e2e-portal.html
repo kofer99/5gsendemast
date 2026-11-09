@@ -51,6 +51,7 @@ try {
   const s = newState(Date.now());
   s.introSeen = true; s.phase = 4; s.phaseReached = 4; s.bestControlledAll = 8e9; s.playtime = 7200; s.nickname = 'Testkraft';
   s.achievements = ['state_1', 'ctrl_half', 'eu_1', 'world_all', 'alu_1', 'haarp_1', 'gold_1'];
+  s.test = true;
   localStorage.setItem('sendemast.save', JSON.stringify(s));
   d = await load('/portal/?t=2#personalakte');
   log(!d.getElementById('app').hidden, 'Sitzung bleibt angemeldet (sessionStorage)');

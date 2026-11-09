@@ -78,6 +78,7 @@ export function autoSubmitter(getState, { minGapMs = 5 * 60_000, onResult } = {}
     const reg = getRegistration();
     if (!reg || !navigator.onLine) return null;
     const s = getState();
+    if (s.test) return null; // Test-Spielstand (Seed/e2e) – nie melden
     const now = Date.now();
     if (!force && now - last < minGapMs) return null;
     if (!force && Math.floor(s.bestControlledAll || 0) === lastScore) return null;

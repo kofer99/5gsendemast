@@ -51,6 +51,7 @@ export function checkName(name) {
  */
 export function checkEntry(body) {
   if (!body || typeof body !== 'object') return { ok: false, field: 'body', reason: 'Ungültige Anfrage.' };
+  if (body.test === true) return { ok: false, field: 'test', reason: 'Test-Spielstände sind von der Bestenliste ausgeschlossen.' };
   const name = checkName(body.name);
   if (!name.ok) return { ok: false, field: 'name', reason: name.reason };
   if (typeof body.runId !== 'string' || !RUN_ID_RE.test(body.runId)) return { ok: false, field: 'runId', reason: 'Ungültige Einsatz-ID.' };
@@ -82,6 +83,7 @@ export function entryFromState(s, name) {
     fpAll: Math.floor(s.fpAll || 0),
     phase: Math.max(1, Math.min(5, s.phaseReached || s.phase || 1)),
     playtime: Math.floor(s.playtime || 0),
+    test: s.test === true,
   };
 }
 

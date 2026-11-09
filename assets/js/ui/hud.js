@@ -274,6 +274,7 @@ export function renderStats(el, game) {
     ['Erfolge', `${s.achievements.length}/${ACHIEVEMENTS.length}`],
     ['Aluhut-Tränen', `${fmtInt(s.tears)} (+${fmtInt(s.tears * eco.TEAR_BONUS * 100)} % FP/Sek.)`],
     ['Neustarts', fmtInt(s.prestiges)],
+    ...(s.test ? [['Test-Spielstand', 'ja – nicht für die Bestenliste']] : []),
   ];
   el.innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 }

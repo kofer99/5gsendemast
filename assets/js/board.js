@@ -70,6 +70,12 @@ function renderMe() {
     $('me-reg').hidden = true;
     return;
   }
+  if (s.test) {
+    $('me-stats').innerHTML = '<span class="amber">Test-Spielstand</span><span>Dieser Spielstand wurde mit einer Testseite erzeugt und kann nicht in die Bestenliste. Für einen echten Eintrag im Spiel unter „Optionen“ einen neuen Einsatz starten.</span>';
+    $('me-form').hidden = true;
+    $('me-reg').hidden = true;
+    return;
+  }
   const phase = s.phaseReached || 1;
   $('me-stats').innerHTML = `<span class="dim">Ihr Bestwert</span><b>${esc(fmt(s.bestControlledAll))}</b>
     <span>${phase >= 4 ? 'Lebewesen' : 'Menschen'} · ${area(phase, s.bestControlledAll)}</span>`;
@@ -84,6 +90,7 @@ function showRank(data) {
 }
 
 async function send(name) {
+  if (s.test) { msg('Test-Spielstände können nicht in die Bestenliste.'); return false; }
   let res;
   try { res = await submit(s, name); } catch { res = { ok: false, status: 0, data: {} }; }
   if (res.ok) {

@@ -42,7 +42,7 @@ const KEEP_ON_PRESTIGE = [
   'version', 'runId', 'startedAt', 'lastTick', 'playtime', 'fpAll', 'clicks', 'clickFp', 'manualPlaced',
   'achievements', 'aluhutConverted', 'goldenClicked', 'funklochSeen', 'offlineReturns', 'introSeen', 'settings',
   'nickname', 'phaseReached', 'universeDone', 'tears', 'tearsSpent', 'patents', 'prestiges', 'bestControlledAll',
-  'demosDissolved', 'truppsCaught',
+  'demosDissolved', 'truppsCaught', 'test',
 ];
 
 export class Game {

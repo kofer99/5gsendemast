@@ -92,7 +92,7 @@ try {
     f.src = 'about:blank';
     await blank;
     const re = new Promise((r) => f.addEventListener('load', r, { once: true }));
-    localStorage.setItem('sendemast.save', JSON.stringify(state));
+    localStorage.setItem('sendemast.save', JSON.stringify({ ...state, test: true }));
     f.src = '/?t=' + Math.random();
     await re; await wait(900);
     return f.contentWindow.document;

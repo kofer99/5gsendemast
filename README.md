@@ -24,7 +24,7 @@ python -m http.server 8765
 | http://localhost:8765/tests/shot-portal.html?tab=urkunde | Portal angemeldet zeigen (für Screenshots), Reiter: rundschreiben, personalakte, urkunde, stellen, kantine, organigramm |
 | http://localhost:8765/tests/sim.html?cps=3&h=16 | Balancing-Simulation eines Durchlaufs (`ev=0` ohne Ereignisse, `manual=0` Auto-Platzieren, `off=syn_,land_` Upgrades abschalten) |
 | http://localhost:8765/tests/sim-prestige.html | Prestige-Simulation: mehrere Durchläufe, Neustart an Checkpoints (`plans=U|4,U|5,U`) |
-| http://localhost:8765/tests/seed.html?level=1\|2\|3 | Test-Spielstand mit Fortschritt erzeugen (überschreibt den eigenen!) |
+| http://localhost:8765/tests/seed.html?level=1\|2\|3 | Test-Spielstand mit Fortschritt erzeugen (überschreibt den eigenen!). Ist als Test markiert und kommt nie in die Bestenliste |
 | http://localhost:8765/tests/seed.html?phase=2\|3\|4\|5 | Test-Spielstand mitten in Phase 2–5 (optional `&tears=40`) |
 | http://localhost:8765/tests/shot.html?phase=3&tab=prestige | Seed laden und Spiel in 1400 px zeigen (für Screenshots), `spawn=demo,trupp` erzeugt Gegenspieler |
 | http://localhost:8765/tests/shot-mobile.html?phase=3 | dasselbe in Handy-Breite |

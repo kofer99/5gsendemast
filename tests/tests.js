@@ -456,6 +456,30 @@ atest('Bestenliste-API: gleiches Netz = gleiche Prüfsumme, nach 24 h gelöscht'
   const r = await api.postScore({ request: post(entry({ score: 6e7 })), store, salt: 's', now: 1000 + 86400 + 100 });
   eq(r.status, 200, 'gelöschte Prüfsumme blockiert nichts');
 });
+test('Bestenliste: Test-Spielstände (Seeds) sind ausgeschlossen', () => {
+  const s = newState(); s.runId = 'd'.repeat(24); s.bestControlledAll = 5e7; s.playtime = 100; s.test = true;
+  const e = lb.entryFromState(s, 'Testkraft');
+  eq(e.test, true, 'Merkmal wird mitgesendet');
+  eq(lb.checkEntry(e).field, 'test', 'Server lehnt ab');
+  ok(lb.checkEntry({ ...e, test: false }).ok, 'ohne Merkmal gültig');
+  eq(normalize({ ...s }).test, true, 'bleibt beim Laden');
+  eq(normalize({ ...s, test: 'ja' }).test, false, 'nur echtes true zählt');
+  eq(newState().test, false);
+  const c = clock(); s.phase = 4; s.fpAll = 1e13;
+  const g = new Game(s, { now: c.now, random: seeded() });
+  g.prestige(); eq(s.test, true, 'bleibt über Prestige');
+});
+atest('Bestenliste: Spiel meldet Test-Spielstand nie automatisch', async () => {
+  const { autoSubmitter } = await import('../assets/js/leaderboard-client.js');
+  const s = newState(); s.test = true; s.bestControlledAll = 1e6;
+  let old; try { old = localStorage.getItem('sendemast.lb'); localStorage.setItem('sendemast.lb', JSON.stringify({ name: 'Testkraft' })); } catch { return; }
+  try {
+    const r = await autoSubmitter(() => s)(true);
+    eq(r, null, 'nichts gesendet');
+  } finally {
+    if (old == null) localStorage.removeItem('sendemast.lb'); else localStorage.setItem('sendemast.lb', old);
+  }
+});
 atest('Bestenliste-API: Austragen', async () => {
   const store = memoryStore();
   await api.postScore({ request: post(entry()), store, salt: 's', now: 1000 });

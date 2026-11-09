@@ -49,6 +49,7 @@ export function newState(now = Date.now()) {
     introSeen: false,
     settings: { autoPlace: false, buyAmount: 1 },
     nickname: '',
+    test: false,    // von einer Testseite erzeugt (tests/seed.html, e2e) → nie in die Bestenliste
   };
 }
 
@@ -68,6 +69,7 @@ export function normalize(raw, now = Date.now()) {
   // Ältere Stände kennen universeRun nicht: Wer gerade im eroberten Universum steht, soll den Abschlussdialog nicht noch einmal sehen.
   if (typeof s.universeRun !== 'boolean') s.universeRun = !!s.universeDone && s.phase === 5;
   if (!(s.bestControlledAll >= s.bestControlled)) s.bestControlledAll = s.bestControlled || 0;
+  s.test = s.test === true;
   s.version = SAVE_VERSION;
   return s;
 }

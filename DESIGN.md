@@ -332,6 +332,7 @@ Ein reines Browser-Spiel lässt sich nie vollständig gegen Cheats absichern. Da
 - **Rate-Limit:** höchstens 1 Meldung pro Minute und höchstens 5 neue Einträge pro Tag je `ip_hash`.
 - **`ip_hash`** = SHA-256(gekürzte IP + Tagesdatum + Secret `IP_SALT`), auf 128 Bit gekürzt. Gekürzt wird auf das Netz (IPv4 drei Blöcke, IPv6 48 Bit). Nach 24 h wird der Wert gelöscht (bei jeder Meldung). Die IP wird nie gespeichert.
 - **Namensfilter:** kurze Sperrliste (Beleidigungen, NS-Begriffe), auch mit Ziffern statt Buchstaben („N4zi“). Dazu reservierte Namen wie „Admin“ oder „BAfG“. URLs sind durch den Zeichensatz ausgeschlossen.
+- **Test-Spielstände:** Spielstände von Testseiten (`tests/seed.html`, e2e) tragen `test: true`. Das bleibt über Prestige und Export/Import erhalten und verschwindet erst mit „Neuer Einsatz“. Spiel und Bestenlisten-Seite melden sie nie, der Server lehnt sie zusätzlich ab. `tests/e2e-board.html` läuft nur auf localhost, damit online keine echten Einträge entstehen. Gegen absichtliches Schummeln hilft das nicht, nur gegen versehentliche Testeinträge.
 - Admins können Einträge per `wrangler d1 execute sendemast-db --remote --command "DELETE FROM scores WHERE name_key = '…'"` löschen.
 
 **Tests ohne Cloudflare:** `tests/index.html` (Regeln und Handler mit `memoryStore`), `tests/e2e-board.html` (Seite mit `?mock=1`: die echten Handler laufen im Browser), `python tools/check_sql.py` (alle SQL-Befehle gegen SQLite inkl. Upsert, Sortierung, Rang, Eindeutigkeit). Der Mock-Modus funktioniert nur auf `localhost`.
