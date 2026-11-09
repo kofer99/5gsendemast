@@ -305,7 +305,7 @@ Ein goldener Mast erscheint alle 5–10 min an einer zufälligen Stelle und blei
 ### 4.15 Hintergrundmusik
 
 **Status:** ✅ umgesetzt am 09.11.2026 (`assets/js/audio/synthwave.js`).
-- **Selbst erzeugter 80er-Synthwave** mit der Web Audio API: keine Audiodateien, keine fremden Samples, daher keine Lizenzfragen und kein externer Abruf (Datenschutz unverändert). Die Datei ist ca. 15 KB groß.
+- **Selbst erzeugter 80er-Synthwave** mit der Web Audio API: keine Audiodateien, keine fremden Samples, daher keine Lizenzfragen und kein externer Abruf (Datenschutz unverändert). Die Datei ist ca. 19 KB groß (ungepackt).
 - **Song:** 96 BPM, A-Moll, Teile A B A C D B à 8 Takte = 48 Takte, 2 Minuten, dann von vorn. Jeder Teil hat eigene Akkorde, Bass-, Arpeggio- und Drum-Muster. C ist ein Breakdown (Drums setzen aus, Aufbau mit Snare-Wirbel). Snare-Fills vor jedem Teilwechsel.
 - **Instrumente:** Pads (verstimmte Sägezähne, atmender Tiefpass), Bass (Säge + Sub), Arpeggio (Rechteck mit punktiertem Achtel-Echo), Kick, Snare mit Hall, Hi-Hats, Crash, Lead (Säge mit Vibrato). Hall aus vier Rückkopplungs-Echos (kein ConvolverNode).
 - **Intensität folgt der Phase:** 1 Pads, Bass, leise Drums · 2 + Snare, Fills · 3 + Arpeggio, Crash · 4 + volle Kick, 16tel-Hats, hellerer Klang · 5 + Lead-Melodien in A, B und D.
