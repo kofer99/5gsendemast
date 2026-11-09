@@ -122,14 +122,15 @@ $('music-vol').addEventListener('change', () => save());
 game.on('phase', ({ to }) => music.setIntensity(to.id));
 game.on('prestige', () => music.setIntensity(1));
 // War die Musik beim letzten Mal an, startet sie mit der ersten Interaktion (Browser erlauben Ton erst danach).
+// Wichtig für iOS: Nur das Loslassen (touchend/click) zählt als Erlaubnis, nicht das Drücken (pointerdown).
 if (state.settings.music) {
-  const resume = () => {
-    removeEventListener('pointerdown', resume, true);
-    removeEventListener('keydown', resume, true);
+  const events = ['touchend', 'click', 'keydown'];
+  const resume = (e) => {
+    if (e.target?.closest?.('#music-btn, #music-toggle')) return; // der Knopf schaltet selbst
+    events.forEach((ev) => removeEventListener(ev, resume, true));
     if (state.settings.music) music.start();
   };
-  addEventListener('pointerdown', resume, true);
-  addEventListener('keydown', resume, true);
+  events.forEach((ev) => addEventListener(ev, resume, true));
 }
 renderMusicUi();
 

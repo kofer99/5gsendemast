@@ -322,13 +322,19 @@ export class Synthwave {
     this.wanted = true;
     if (!this.ctx) {
       const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
-      if (!AC) return false;
+      if (!AC) return false;               // nur dann gibt es wirklich keinen Ton
       this.ctx = new AC();
       this.build(this.ctx, this.ctx.destination);
       document.addEventListener('visibilitychange', this.onVisibility);
+      // iOS unterbricht Audio z. B. bei Anrufen („interrupted“) – bei der nächsten Berührung weiter
+      this.ctx.onstatechange = () => { if (this.wanted && this.ctx.state !== 'running' && !document.hidden) this.armResume(); };
     }
+    // Alles bis hier läuft noch synchron im Klick – wichtig für iOS.
+    this.unlock();
     if (this.ctx.state !== 'running') await this.ctx.resume().catch(() => {});
-    if (this.ctx.state !== 'running') return false;
+    // Manche Browser (v. a. iOS) melden erst etwas später „running“. Kein Grund aufzugeben:
+    // Der Planer läuft trotzdem los, und die nächste Berührung versucht es erneut.
+    if (this.ctx.state !== 'running') this.armResume();
     const t = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(t);
     this.master.gain.setValueAtTime(this.master.gain.value, t);
@@ -341,8 +347,51 @@ export class Synthwave {
     return true;
   }
 
+  /**
+   * Freischalten für iOS/Safari, muss synchron in einer Nutzeraktion laufen:
+   * 1. Audio-Session „playback“ (Safari 17+): spielt auch bei eingeschaltetem Stummschalter – die Musik
+   *    wurde ja ausdrücklich eingeschaltet (wie bei Video- oder Musik-Apps).
+   * 2. Ein stiller Mini-Puffer – der klassische Trick, mit dem ältere iOS-Versionen Web Audio entsperren.
+   * 3. Ältere iOS-Versionen ohne audioSession: ein stilles <audio> in Schleife schaltet die Session
+   *    ebenfalls auf Wiedergabe, sodass der Stummschalter die Musik nicht verschluckt.
+   */
+  unlock() {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* egal */ }
+    try {
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.ctx.createBuffer(1, 1, this.ctx.sampleRate);
+      src.connect(this.ctx.destination);
+      src.start(0);
+    } catch { /* egal */ }
+    if (isIOS() && !navigator.audioSession) {
+      if (!this.silentEl) {
+        this.silentEl = new Audio(silentWavUrl());
+        this.silentEl.loop = true;
+        this.silentEl.setAttribute('playsinline', '');
+        this.silentEl.volume = 0.01;
+      }
+      this.silentEl.play().catch(() => {});
+    }
+  }
+
+  /** Bei der nächsten Berührung/Taste erneut versuchen, den Ton fortzusetzen (iOS braucht dafür eine Nutzeraktion). */
+  armResume() {
+    if (this.resumeArmed) return;
+    this.resumeArmed = true;
+    const events = ['touchend', 'click', 'keydown'];
+    const go = () => {
+      events.forEach((e) => removeEventListener(e, go, true));
+      this.resumeArmed = false;
+      if (!this.wanted || !this.ctx) return;
+      this.unlock();
+      this.ctx.resume().then(() => { if (this.ctx.state !== 'running') this.armResume(); }).catch(() => this.armResume());
+    };
+    events.forEach((e) => addEventListener(e, go, true));
+  }
+
   stop() {
     this.wanted = false;
+    this.silentEl?.pause();
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(t);
@@ -389,8 +438,10 @@ export class Synthwave {
     if (document.hidden) {
       clearInterval(this.timer);
       this.timer = null;
+      this.silentEl?.pause();
       this.ctx.suspend().catch(() => {});
     } else {
+      this.silentEl?.play().catch(() => {});
       this.ctx.resume().then(() => {
         if (!this.timer && this.wanted) {
           this.nextTime = this.ctx.currentTime + 0.05;
@@ -847,6 +898,26 @@ function env(param, t, attack, hold, peak, release) {
   param.linearRampToValueAtTime(peak, t + attack);
   param.setValueAtTime(peak, t + Math.max(attack, hold - release));
   param.linearRampToValueAtTime(0, t + hold + release);
+}
+
+function isIOS() {
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/** Eine halbe Sekunde Stille als WAV (8 kHz, 8 Bit) – für den iOS-Trick mit dem <audio>-Element. */
+let silentUrl = null;
+function silentWavUrl() {
+  if (silentUrl) return silentUrl;
+  const n = 4000;
+  const dv = new DataView(new ArrayBuffer(44 + n));
+  const w = (o, str) => [...str].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); dv.setUint32(4, 36 + n, true); w(8, 'WAVE'); w(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true); dv.setUint32(24, 8000, true);
+  dv.setUint32(28, 8000, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true); w(36, 'data'); dv.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) dv.setUint8(44 + i, 128); // 8 Bit: 128 = Stille
+  silentUrl = URL.createObjectURL(new Blob([dv], { type: 'audio/wav' }));
+  return silentUrl;
 }
 
 function noiseBuffer(ctx) {
