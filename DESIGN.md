@@ -10,7 +10,8 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 1. **Online gehen (§11, M7)**, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Erledigt (09.11.2026): GitHub-Repo, D1-Datenbank, Domain in Cloudflare, **Nameserver auf Cloudflare umgestellt**. Offen: Pages-Projekt, Secret `IP_SALT`, Custom Domain. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
+> 0. **🟢 LIVE seit 09.11.2026:** https://5gsendemast.de (Cloudflare Pages-Projekt `sendemast`, auch https://sendemast.pages.dev). Spiel, Seiten und Bestenliste (D1) laufen. Offen: `www.5gsendemast.de` liefert Fehler 521 (alter DNS-Eintrag zur CheckDomain-Parkseite) → als Custom Domain hinzufügen und auf die Hauptdomain umleiten; bestätigen, dass `IP_SALT` gesetzt ist; Spiel komplett durchspielen.
+> 1. ~~**Online gehen (§11, M7)**~~, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Erledigt (09.11.2026): GitHub-Repo, D1-Datenbank, Domain in Cloudflare, **Nameserver auf Cloudflare umgestellt**. Offen: Pages-Projekt, Secret `IP_SALT`, Custom Domain. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
 > 2. Impressum und Datenschutz sind ausgefüllt (09.11.2026). Damit ist alles für den Live-Gang bereit: Pages-Projekt anlegen (HOSTING-ANLEITUNG.md Schritt 5/6).
 > 3. Nach dem Online-Gang: Spiel komplett durchspielen, Bestenliste und Prestige echt testen.
 
@@ -51,6 +52,7 @@
 - **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
 - **Impressum und Datenschutz:** ausgefüllt am 09.11.2026 (Datenschutz auf Basis von Datenschutz-Generator.de, angepasst). Bei Änderungen an Bestenliste, Browser-Speicher oder Hosting mitpflegen.
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
+- **Live:** https://5gsendemast.de seit 09.11.2026 (Pages-Projekt `sendemast`). Jeder Push auf `main` geht sofort live.
 - **Code auf GitHub:** https://github.com/kofer99/5gsendemast (privat, Branch `main`, seit 09.11.2026). D1-Datenbank `sendemast-db` angelegt (ID in `wrangler.toml`), Tabelle `scores` per Konsole erstellt. Noch kein Pages-Projekt, also noch nicht live.
 
 ### Nächste Schritte (Reihenfolge offen)

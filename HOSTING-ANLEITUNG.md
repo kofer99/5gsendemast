@@ -45,6 +45,10 @@ Kosten: 0 € (abgesehen von der Domain). Pages, Functions und D1 sind im kosten
 
 ## 5. Pages-Projekt – erst beim Live-Gang anlegen
 
+> ✅ 09.11.2026: Pages-Projekt `sendemast` angelegt, läuft unter https://sendemast.pages.dev und https://5gsendemast.de. Datenbank verbunden.
+>
+> **Stolperfalle:** Unter „Workers & Pages → Erstellen“ landet man standardmäßig bei **Workers**. Erkennbar am Feld „Deploy command: npx wrangler deploy“ und am Build-Fehler „Missing entry-point to Worker script“. Richtig ist der Reiter bzw. Link **Pages** → „Connect to Git“. Dort gibt es nur „Framework preset“, „Build command“ und „Build output directory“.
+
 Sobald ein Pages-Projekt mit GitHub verbunden ist, ist die Seite **sofort öffentlich** unter `<name>.pages.dev` erreichbar, auch ohne eigene Domain. Deshalb erst anlegen, wenn Impressum und Datenschutzerklärung fertig sind.
 
 Falls doch schon vorher:
