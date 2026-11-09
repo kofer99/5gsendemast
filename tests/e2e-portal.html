@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><title>E2E Portal – Projekt Sendemast</title>
+<style>body{background:#070b08;color:#3dff8a;font:13px/1.5 monospace;padding:16px}.fail{color:#ff6b5c}iframe{width:1280px;height:900px;border:1px solid #1f3a26}</style></head>
+<body>
+<h1>End-to-End-Test Mitarbeiterportal</h1>
+<p>Achtung: setzt einen Test-Spielstand (überschreibt den eigenen!).</p>
+<pre id="out">läuft …</pre>
+<iframe id="f" title="Portal"></iframe>
+<script type="module">
+import { newState } from '/assets/js/core/state.js';
+const out = [];
+const log = (ok, msg) => out.push(ok ? `✔ ${msg}` : `<span class="fail">✘ ${msg}</span>`);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn, ms = 4000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (fn()) return true; await wait(50); } return fn(); };
+const f = document.getElementById('f');
+const load = async (url) => {
+  const p = new Promise((r) => f.addEventListener('load', r, { once: true }));
+  f.src = url;
+  await p; await wait(400);
+  return f.contentWindow.document;
+};
+// Netzwerk-Wächter: Das Portal darf nichts senden.
+const requests = () => f.contentWindow.performance.getEntriesByType('resource').map((e) => e.name);
+try {
+  // 1) Ohne Spielstand
+  localStorage.removeItem('sendemast.save');
+  sessionStorage.removeItem('sendemast.portal.session');
+  localStorage.removeItem('sendemast.portal.seen');
+  let d = await load('/portal/?t=1');
+  log(!d.getElementById('login').hidden && d.getElementById('app').hidden, 'Login-Seite sichtbar');
+  log(!d.querySelector('form') && ![...d.querySelectorAll('input')].some((i) => i.name), 'Kein <form>, keine name-Attribute');
+  d.getElementById('login-user').value = 'test.user';
+  d.getElementById('login-pass').value = 'geheim123';
+  d.getElementById('login-btn').click();
+  log(d.getElementById('login-user').value === '' && d.getElementById('login-pass').value === '', 'Eingaben sofort geleert');
+  log(await until(() => d.getElementById('login-log').textContent.includes('Wir wussten ohnehin')), 'Meldung „Zugang gewährt …“');
+  log(await until(() => !d.getElementById('app').hidden), 'Portal nach Anmeldung sichtbar');
+  const shown = (id) => f.contentWindow.getComputedStyle(d.getElementById(id)).display !== 'none';
+  log(!shown('login') && shown('app'), 'Login wirklich ausgeblendet (CSS), Portal eingeblendet');
+  log(d.getElementById('who-rank').textContent === 'Funkanwärter:in', `Ohne Spielstand: ${d.getElementById('who-rank').textContent}`);
+  log(!d.getElementById('no-save').hidden, 'Hinweis „Kein Personaldatensatz“');
+  const locked = d.querySelectorAll('.circ.locked').length;
+  log(locked >= 8, `Gesperrte Rundschreiben ohne Fortschritt: ${locked}`);
+  const store = JSON.stringify({ ...f.contentWindow.localStorage }) + JSON.stringify({ ...f.contentWindow.sessionStorage });
+  log(!store.includes('test.user') && !store.includes('geheim123'), 'Eingaben nirgends gespeichert');
+  const sent = requests().filter((u) => !/\.(js|css|woff2|svg|png)(\?|$)/.test(u) && !u.includes('/portal/'));
+  log(sent.length === 0, `Keine Anfragen außer Dateien: ${sent.join(', ') || 'keine'}`);
+
+  // 2) Mit Spielstand: Welt erobert, ein paar Erfolge
+  const s = newState(Date.now());
+  s.introSeen = true; s.phase = 4; s.phaseReached = 4; s.bestControlledAll = 8e9; s.playtime = 7200; s.nickname = 'Testkraft';
+  s.achievements = ['state_1', 'ctrl_half', 'eu_1', 'world_all', 'alu_1', 'haarp_1', 'gold_1'];
+  localStorage.setItem('sendemast.save', JSON.stringify(s));
+  d = await load('/portal/?t=2#personalakte');
+  log(!d.getElementById('app').hidden, 'Sitzung bleibt angemeldet (sessionStorage)');
+  log(d.getElementById('who-rank').textContent.startsWith('Oberfunkrat'), `Dienstgrad: ${d.getElementById('who-rank').textContent}`);
+  log(!d.getElementById('tab-personalakte').hidden, 'Direktlink #personalakte');
+  log(d.querySelectorAll('#career li.done').length === 5 && d.querySelector('#career li.current'), 'Laufbahn: 5 erreicht + aktueller');
+  log(d.getElementById('badge-circ').textContent === '5', `Neue Rundschreiben (4 schon gelesen): ${d.getElementById('badge-circ').textContent}`);
+  d.querySelector('[data-tab="rundschreiben"]').click(); await wait(100);
+  log(d.querySelectorAll('.circ:not(.locked)').length === 9, `Freigegebene Rundschreiben: ${d.querySelectorAll('.circ:not(.locked)').length}`);
+  log(d.getElementById('badge-circ').textContent === '', 'Markierung „neu“ nach dem Lesen weg');
+  d.querySelector('[data-tab="stellen"]').click(); await wait(100);
+  log(d.querySelectorAll('.job:not(.locked)').length === 8, 'Mond-Stelle nach der Weltherrschaft ausgeschrieben');
+  d.querySelector('.job [data-job]').click();
+  log(d.querySelector('.job .reply').textContent.length > 10, 'Bewerbung: Antwort erscheint');
+  d.querySelector('[data-tab="kantine"]').click(); await wait(100);
+  log(d.querySelectorAll('.dish').length === 5 && d.getElementById('kw').textContent.includes('KW'), 'Kantinenplan mit KW');
+  d.querySelector('[data-tab="organigramm"]').click(); await wait(100);
+  log(d.querySelectorAll('.org-unit').length === 7, 'Organigramm: 7 Abteilungen');
+  d.querySelector('[data-tab="urkunde"]').click(); await wait(800);
+  log(d.getElementById('cert-name').value === 'Testkraft', 'Urkunde: Name aus dem Spielstand vorbelegt');
+  const cv = d.getElementById('cert');
+  const px = cv.getContext('2d').getImageData(600, 160, 200, 20).data;
+  let lit = 0; for (let i = 0; i < px.length; i += 4) if (px[i + 1] > 150) lit++;
+  log(lit > 20, `Urkunde gezeichnet (${lit} helle Pixel im Titel)`);
+  const after = JSON.parse(localStorage.getItem('sendemast.save'));
+  log(after.nickname === 'Testkraft' && after.phase === 4, 'Spielstand unverändert');
+  d.getElementById('logout-btn').click(); await wait(100);
+  log(!d.getElementById('login').hidden, 'Abmelden');
+} catch (e) {
+  log(false, 'Ausnahme: ' + e.message);
+}
+const failed = out.filter((x) => x.includes('fail')).length;
+document.getElementById('out').innerHTML = out.join('\n') + `\n\n${out.length - failed}/${out.length} bestanden`;
+document.title = 'E2E DONE';
+</script>
+</body>
+</html>

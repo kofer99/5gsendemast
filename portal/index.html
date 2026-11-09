@@ -4,9 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mitarbeiterportal – Projekt Sendemast</title>
+<meta name="description" content="Das Intranet der Bundesanstalt für Gedankenfunk: Rundschreiben, Kantinenplan, Stellenbörse und Ihre Beförderungsurkunde. Satire.">
 <meta name="theme-color" content="#070b08">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BAfG-Mitarbeiterportal – nur für den Dienstgebrauch">
+<meta property="og:description" content="Stellenangebot: Reptiloid (m/w/d) in Teilzeit. Heute in der Kantine: Mikrochip-Suppe. Satire.">
+<meta property="og:url" content="https://5gsendemast.de/portal/">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/portal.css">
 </head>
 <body>
 <header class="topbar">
@@ -21,17 +27,104 @@
     <a class="btn" href="/portal/" aria-current="page">[ PORTAL ]</a>
   </nav>
 </header>
-<main class="page">
-<div class="stamp">NUR FÜR DEN DIENSTGEBRAUCH</div>
-<h1>Mitarbeiterportal der BAfG</h1>
-<p>Das Intranet befindet sich in der Wartung. Grund: Jemand hat den Server in Alufolie gewickelt.</p>
-<p><a class="btn" href="/">Zurück zum Dienst</a></p>
+
+<main class="portal">
+  <!-- Anmeldung: absichtlich KEIN <form> und keine name-Attribute. Eingaben werden weder gesendet noch gespeichert. -->
+  <section id="login" class="login" aria-labelledby="login-title">
+    <div class="login-box">
+      <div class="login-head"><span>BAfG-INTRANET v5.0G</span><span>NUR FÜR DEN DIENSTGEBRAUCH</span></div>
+      <h1 id="login-title">Anmeldung</h1>
+      <label class="field">
+        <span>Benutzerkennung</span>
+        <input id="login-user" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" placeholder="z. B. funk.mueller">
+      </label>
+      <label class="field">
+        <span>Dienstpasswort</span>
+        <input id="login-pass" type="password" autocomplete="off" maxlength="40" placeholder="bitte NICHT Ihr echtes Passwort">
+      </label>
+      <div class="login-actions">
+        <button id="login-btn" type="button" class="btn-primary">Anmelden</button>
+        <button id="forgot-btn" type="button" class="linkish">Passwort vergessen?</button>
+      </div>
+      <pre id="login-log" class="login-log" aria-live="polite"></pre>
+      <p class="login-note">Hinweis: Das hier ist Satire. Ihre Eingaben werden weder gesendet noch gespeichert, nicht einmal im Browser. Sie können also irgendetwas eintippen.</p>
+    </div>
+  </section>
+
+  <section id="app" class="app" hidden aria-label="Mitarbeiterportal">
+    <div class="app-bar">
+      <span>ANGEMELDET: <b id="who-rank">–</b> · <span id="who-nr" class="dim"></span></span>
+      <button id="logout-btn" type="button" class="btn">Abmelden</button>
+    </div>
+    <div class="app-grid">
+      <nav class="app-nav" aria-label="Bereiche" role="tablist">
+        <button type="button" role="tab" data-tab="rundschreiben">Rundschreiben <span id="badge-circ" class="badge"></span></button>
+        <button type="button" role="tab" data-tab="personalakte">Personalakte</button>
+        <button type="button" role="tab" data-tab="urkunde">Beförderungsurkunde</button>
+        <button type="button" role="tab" data-tab="stellen">Stellenbörse</button>
+        <button type="button" role="tab" data-tab="kantine">Kantine</button>
+        <button type="button" role="tab" data-tab="organigramm">Organigramm</button>
+      </nav>
+
+      <div class="app-panels">
+        <section id="tab-rundschreiben" class="panel" role="tabpanel" aria-labelledby="h-rund">
+          <h2 id="h-rund">Rundschreiben</h2>
+          <p class="dim">Neue Rundschreiben werden mit Ihrem dienstlichen Fortschritt freigegeben. Geschwärzte Schreiben sind für Ihren Dienstgrad noch nicht bestimmt.</p>
+          <div id="circulars" class="circulars"></div>
+        </section>
+
+        <section id="tab-personalakte" class="panel" role="tabpanel" aria-labelledby="h-akte" hidden>
+          <h2 id="h-akte">Personalakte</h2>
+          <div id="no-save" class="callout" hidden>Kein Personaldatensatz gefunden. Bitte treten Sie zuerst den <a href="/">Dienst</a> an. Bis dahin führen wir Sie als Funkanwärter:in.</div>
+          <dl id="file" class="file"></dl>
+          <h3>Dienstliche Beurteilung</h3>
+          <p id="assessment" class="assessment"></p>
+          <h3>Laufbahn</h3>
+          <ol id="career" class="career"></ol>
+        </section>
+
+        <section id="tab-urkunde" class="panel" role="tabpanel" aria-labelledby="h-urk" hidden>
+          <h2 id="h-urk">Beförderungsurkunde</h2>
+          <p class="dim">Ihre Urkunde zum aktuellen Dienstgrad, als Bild zum Herunterladen oder Teilen. Der Name wird nur in das Bild geschrieben und nirgends gespeichert oder gesendet.</p>
+          <label class="field field-inline">
+            <span>Name auf der Urkunde</span>
+            <input id="cert-name" type="text" autocomplete="off" maxlength="32" placeholder="optional">
+          </label>
+          <canvas id="cert" class="cert" width="1200" height="630" role="img" aria-label="Beförderungsurkunde"></canvas>
+          <div class="cert-actions">
+            <button id="cert-download" type="button" class="btn">Herunterladen (PNG)</button>
+            <button id="cert-share" type="button" class="btn">Teilen</button>
+            <span id="cert-msg" class="dim" aria-live="polite"></span>
+          </div>
+        </section>
+
+        <section id="tab-stellen" class="panel" role="tabpanel" aria-labelledby="h-stellen" hidden>
+          <h2 id="h-stellen">Stellenbörse</h2>
+          <p class="dim">Interne und externe Ausschreibungen. Die BAfG ist eine fiktive Behörde und stellt niemanden ein. Auch keine Reptiloiden.</p>
+          <div id="jobs" class="jobs"></div>
+        </section>
+
+        <section id="tab-kantine" class="panel" role="tabpanel" aria-labelledby="h-kantine" hidden>
+          <h2 id="h-kantine">Kantinenplan <span id="kw" class="dim"></span></h2>
+          <div id="menu" class="menu"></div>
+          <p id="menu-note" class="dim"></p>
+        </section>
+
+        <section id="tab-organigramm" class="panel" role="tabpanel" aria-labelledby="h-org" hidden>
+          <h2 id="h-org">Organigramm</h2>
+          <div id="org" class="org"></div>
+        </section>
+      </div>
+    </div>
+  </section>
 </main>
+
 <footer class="legal-bar">
   <span><strong>Satire.</strong> Die Bundesanstalt für Gedankenfunk existiert nicht. 5G ist nach aktuellem Stand der Wissenschaft unbedenklich → <a href="/geheimakte/">Geheimakte</a></span>
   <a href="/impressum/">Impressum</a>
   <a href="/datenschutz/">Datenschutz</a>
 </footer>
 <div class="scanlines" aria-hidden="true"></div>
+<script type="module" src="/assets/js/portal.js"></script>
 </body>
 </html>

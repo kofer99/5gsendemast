@@ -7,6 +7,8 @@ import { STATES, TOTAL_POP } from '../assets/js/data/states.js';
 import { UPGRADES } from '../assets/js/data/upgrades.js';
 import { MAP_DE } from '../assets/js/data/map-de.js';
 import { PHASES, PHASE_BY_ID } from '../assets/js/data/phases.js';
+import * as portal from '../assets/js/data/portal.js';
+import { ACHIEVEMENT_BY_ID } from '../assets/js/data/achievements.js';
 
 const results = [];
 function test(name, fn) {
@@ -223,6 +225,27 @@ test('Universum nach Prestige erneut erobert → wieder Abschlussdialog', () => 
   ok(s.universeDone, 'bleibt für immer'); ok(!s.universeRun, 'neuer Durchlauf');
   s.phase = 5; g.completePhase();
   eq(n, 2);
+});
+test('Portal: Dienstgrad aus dem Spielstand', () => {
+  eq(portal.RANKS[portal.rankIndex(null)].id, 'anw', 'ohne Spielstand');
+  const s = newState();
+  eq(portal.rankIndex(s), 0);
+  s.achievements.push('state_1'); eq(portal.RANKS[portal.rankIndex(s)].id, 'sek');
+  s.phaseReached = 3; eq(portal.RANKS[portal.rankIndex(s)].id, 'amtr');
+  s.universeDone = true; eq(portal.RANKS[portal.rankIndex(s)].id, 'praes');
+  eq(portal.ASSESSMENTS.length, portal.RANKS.length, 'eine Beurteilung je Dienstgrad');
+});
+test('Portal: Rundschreiben verweisen auf echte Erfolge', () => {
+  // Jede Freischaltung muss auf einen existierenden Erfolg zeigen, sonst bleibt sie für immer gesperrt.
+  const s = newState(); s.achievements = Object.keys(ACHIEVEMENT_BY_ID); s.phaseReached = 5;
+  for (const c of portal.CIRCULARS) ok(portal.isOpen(c, s), `${c.nr} lässt sich freischalten`);
+  ok(portal.CIRCULARS.some((c) => !portal.isOpen(c, newState())), 'zu Beginn ist etwas gesperrt');
+  eq(new Set(portal.CIRCULARS.map((c) => c.nr)).size, portal.CIRCULARS.length, 'Nummern eindeutig');
+});
+test('Portal: Kalenderwoche', () => {
+  eq(portal.isoWeek(new Date(2026, 10, 9)), 46);
+  eq(portal.isoWeek(new Date(2026, 0, 1)), 1);
+  eq(portal.isoWeek(new Date(2027, 0, 1)), 53);
 });
 test('Goldener Mast wirkt', () => {
   const c = clock();

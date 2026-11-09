@@ -18,6 +18,8 @@ python -m http.server 8765
 | http://localhost:8765/ | Spiel |
 | http://localhost:8765/tests/ | Unit-Tests |
 | http://localhost:8765/tests/e2e.html | End-to-End-Test (löscht den lokalen Spielstand!) |
+| http://localhost:8765/tests/e2e-portal.html | End-to-End-Test Mitarbeiterportal (überschreibt den eigenen Spielstand!) |
+| http://localhost:8765/tests/shot-portal.html?tab=urkunde | Portal angemeldet zeigen (für Screenshots), Reiter: rundschreiben, personalakte, urkunde, stellen, kantine, organigramm |
 | http://localhost:8765/tests/sim.html?cps=3&h=16 | Balancing-Simulation eines Durchlaufs (`ev=0` ohne Ereignisse, `manual=0` Auto-Platzieren, `off=syn_,land_` Upgrades abschalten) |
 | http://localhost:8765/tests/sim-prestige.html | Prestige-Simulation: mehrere Durchläufe, Neustart an Checkpoints (`plans=U|4,U|5,U`) |
 | http://localhost:8765/tests/seed.html?level=1\|2\|3 | Test-Spielstand mit Fortschritt erzeugen (überschreibt den eigenen!) |

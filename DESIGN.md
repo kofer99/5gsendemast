@@ -10,20 +10,22 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 1. **Prestige, zweiter Schritt?** Seit 09.11. gilt die Kubikwurzel (§4.9). Ein früher Neustart lohnt sich aber weiterhin nicht. Falls das gewollt ist: Tränen je Checkpoint statt aus den Gesamt-FP (Option in §4.9).
-> 2. Du: M3-Neuerungen anspielen (`/tests/shot.html?level=3&spawn=demo,trupp` zeigt Demo und Trupp sofort). Ton der neuen Texte prüfen (Upgrades in `data/upgrades.js`, News in `data/news.js`).
-> 3. Danach: Portal (§7) oder Bestenliste (§5).
+> 1. Du: Portal ansehen (`/portal/`, beliebige Anmeldung). Texte gegenlesen (`assets/js/data/portal.js`).
+> 2. Danach: Bestenliste (§5) oder gleich online gehen (§11). Das Spiel testest du, sobald es online ist.
 
 ### ❗ Offen (Stand 09.11.2026)
 - [x] ~~Prestige-Balancing entscheiden~~: Kubikwurzel, +8 % je Träne, Patente billiger (09.11.2026, §4.9)
-- [ ] Prestige im Spiel einmal durchspielen: Fühlen sich 5 Tränen nach der Welt bzw. 47 nach dem Universum gut an?
-- [ ] Neue Texte gegenlesen: 8 Synergie-Upgrades, 16 Bundesland-Upgrades, 6 Erfolge, 8 News (Demo, Trupp, Synergien).
+- [ ] Prestige im Spiel einmal durchspielen: Fühlen sich 5 Tränen nach der Welt bzw. 47 nach dem Universum gut an? (nach dem Online-Gang)
+- [ ] Portal-Texte gegenlesen: 14 Rundschreiben, 8 Stellen, Kantinenplan, Organigramm, 8 Dienstgrade (`data/portal.js`).
+- [ ] Datenschutzerklärung (beim Ausfüllen): Das Portal nutzt zusätzlich `sendemast.portal.seen` (localStorage, gelesene Rundschreiben) und `sendemast.portal.session` (sessionStorage, nur „angemeldet“). Beides bleibt im Browser, nichts wird gesendet.
+- [x] ~~M3-Texte gegenlesen~~ („Das Spiel passt so“, 09.11.2026)
 - [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
 - [ ] Einwohnerzahlen Europa/Welt stammen aus Natural Earth (POP_EST, Stand 2019, Welt ≈ 7,68 Mrd.). Vor dem Release ggf. aktualisieren (`tools/build_world.py`).
 - [x] ~~Geheimakte prüfen~~, ~~Phasen 2–5 anspielen~~ (erledigt 09.11.2026)
 - [x] ~~Zweiten Durchlauf nach Prestige simulieren~~ (`tests/sim-prestige.html`, 09.11.2026)
 
 ### Wo wir stehen geblieben sind (09.11.2026)
+- **Neu am 09.11. (zweiter Teil): Mitarbeiterportal fertig** (§7). Fake-Login, Rundschreiben (teils über Erfolge freigeschaltet), Personalakte mit Laufbahn, Beförderungsurkunde als PNG, Stellenbörse, Kantinenplan, Organigramm. Tests: `tests/e2e-portal.html`, Screenshots: `tests/shot-portal.html?tab=urkunde`.
 - **Neu am 09.11.: M3 ist komplett.**
   - **Aluhut-Demo:** fünf Figuren in einer Region, jede kostet 10 % Signal. Wer alle überzeugt, bekommt eine Prämie (§4.7).
   - **Wünschelruten-Trupp:** braucht drei Klicks und zieht alle 8 s in eine andere Region weiter.
@@ -49,7 +51,6 @@
 - **Noch nicht online:** kein GitHub-Remote, kein Hosting. Repo ist lokal unter `D:\FunProjectDomain`.
 
 ### Nächste Schritte (Reihenfolge offen)
-1. Mitarbeiterportal der BAfG (§7)
 2. Bestenliste mit Cloudflare Pages Functions + D1 (§5)
 3. GitHub-Repo (öffentlich) + Cloudflare Pages + Domain-Umzug inkl. E-Mail-Einträge (§11, M7)
 
@@ -363,13 +364,18 @@ Ein reines Browser-Spiel lässt sich nie vollständig gegen Cheats absichern. Da
 
 ## 7. Mitarbeiterportal der BAfG
 
-Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
-- **Login-Seite (Fake):** Benutzername und Passwort werden **nicht** übertragen und nicht gespeichert. Jede Eingabe führt zu „Zugang gewährt. Wir wussten ohnehin, dass Sie es sind.“ Es gibt **kein echtes Formular**, das irgendwohin sendet.
-- **Stellenangebote:** „Reptiloid (m/w/d) in Teilzeit“, „Chemtrail-Pilot:in mit Lavendel-Erfahrung“, „Sachbearbeiter:in Bielefeld-Leugnung“.
-- **Rundschreiben:** „Dienstanweisung 5G/2026-17: Masten sind ab sofort als Tannen zu tarnen.“
-- **Kantinenplan:** „Montag: Mikrochip-Suppe. Dienstag: Gedankenstrom-Auflauf.“
-- **Organigramm** mit absurden Abteilungen.
-- Mit dem Spiel verknüpft: Achievements schalten Portal-Inhalte frei, z. B. eine „Beförderungsurkunde“ als teilbares Bild.
+Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status:** ✅ umgesetzt am 09.11.2026 (`portal/index.html`, `assets/js/portal.js`, Inhalte in `assets/js/data/portal.js`, Stil in `assets/css/portal.css`).
+
+- **Login-Seite (Fake):** Es gibt **kein `<form>`** und keine `name`-Attribute. Die Felder werden beim Klick auf „Anmelden“ sofort geleert, nichts wird gesendet oder gespeichert (der e2e-Test prüft das). Jede Eingabe führt zu „Zugang gewährt. Wir wussten ohnehin, dass Sie es sind.“ Gespeichert wird nur der Merker „angemeldet“ in `sessionStorage`, er ist beim Schließen des Tabs weg. Ein Hinweis unter dem Formular sagt, dass es Satire ist und man kein echtes Passwort eingeben soll.
+- **Bereiche** (Reiter, per Link direkt erreichbar, z. B. `/portal/#urkunde`):
+  - **Rundschreiben:** 14 Stück, 4 immer sichtbar (darunter das „Leck“, das auf die Geheimakte verlinkt). 10 werden über Erfolge freigeschaltet (erster Aluhut, HAARP, Demo, Trupp, Europa, Welt, ISS, Prestige, Universum …). Gesperrte erscheinen geschwärzt mit Hinweis. Ungelesene haben eine Zahl am Reiter. Welche gelesen sind, merkt sich der Browser (`localStorage`).
+  - **Personalakte:** Dienstgrad, Besoldungsgruppe, Personalnummer (aus der Spielstand-ID), Dienstzeit, Bestwert, Erfolge, dienstliche Beurteilung und die ganze Laufbahn mit Voraussetzungen.
+  - **Beförderungsurkunde:** Canvas-Bild 1200 × 630 mit Name (optional, vorbelegt mit dem Spitznamen), Dienstgrad, Bestwert, Datum und Stempel. „Herunterladen“ speichert ein PNG. „Teilen“ nutzt die Web Share API mit Bild, sonst nur den Text bzw. die Zwischenablage. Der Name wird nicht gespeichert.
+  - **Stellenbörse:** 8 Stellen, z. B. „Reptiloid (m/w/d) in Teilzeit“ oder „Sachbearbeiter:in Bielefeld-Leugnung“. Die Stelle für den Mond-Sendemast wird erst nach der Weltherrschaft ausgeschrieben. „Bewerben“ zeigt nur eine Antwort an.
+  - **Kantine:** Mo–Fr mit aktueller Kalenderwoche, der heutige Tag ist markiert. Am Wochenende: „Die Masten senden trotzdem.“
+  - **Organigramm:** Präsident:in (vakant, nach dem Universum „Sie“), Stabsstellen und 7 Abteilungen, Abt. 4 Bielefeld durchgestrichen.
+- **Dienstgrade** (aus dem Spielstand, bleiben über Prestige erhalten): Funkanwärter:in → Funksekretär:in (1. Bundesland) → Oberfunksekretär:in (halbe Republik) → Funkinspektor:in (Deutschland) → Funkamtsrat/-rätin (Europa) → Oberfunkrat/-rätin (Welt) → Ministerialdirigent:in für Orbitalfunk (Orbit) → Präsident:in der BAfG (Universum).
+- Das Portal liest den Spielstand nur und schreibt ihn nie. Ohne Spielstand ist man Funkanwärter:in und bekommt einen Hinweis aufs Spiel.
 
 ---
 
@@ -492,7 +498,7 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie.
 | M2 ✅ | Karte | Bundesländer-SVG, Masten platzieren, Kontrolle, Übernahme-Effekte |
 | M3 ✅ | Würze | Upgrades, Aluhutträger, Goldener Mast, Achievements, Offline-Fortschritt. Seit 09.11.2026 auch Aluhut-Demo, Wünschelruten-Trupp, Synergie- und Bundesland-Upgrades |
 | M4 ✅ | Eskalation | Phasen 2–5 mit eigenen Karten, Prestige mit Tränen und Patenten (08.11.2026) |
-| M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). Offen: Portal, Impressum/Datenschutz ausfüllen |
+| M5 (teilweise) | Seiten | ✅ Geheimakte (11 Akten, 19 geprüfte Quellen, Stand 07.11.2026). ✅ Mitarbeiterportal (09.11.2026). Offen: Impressum/Datenschutz ausfüllen |
 | M6 | Online | Bestenliste (Functions + D1), Teilen, OG-Bild |
 | M7 | Launch | Hosting, Domain, Balancing-Feinschliff, Mobile-Test |
 

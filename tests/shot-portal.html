@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><title>Shot Portal</title></head>
+<body style="margin:0;background:#000">
+<!-- Meldet sich im Portal an und öffnet einen Reiter (für Screenshots). Parameter: tab=, w= (Breite), h= (Höhe). Nutzt den vorhandenen Spielstand. -->
+<iframe id="f" style="border:0"></iframe>
+<script>
+const q = new URLSearchParams(location.search);
+const f = document.getElementById('f');
+f.style.width = (q.get('w') || 1280) + 'px';
+f.style.height = (q.get('h') || 900) + 'px';
+f.src = '/portal/?t=' + Math.random();
+f.onload = () => {
+  const d = f.contentDocument;
+  d.getElementById('login-btn').click();
+  setTimeout(() => {
+    const tab = q.get('tab');
+    if (tab) d.querySelector(`[data-tab="${tab}"]`)?.click();
+    document.title = 'READY';
+  }, 3000);
+};
+</script></body></html>
