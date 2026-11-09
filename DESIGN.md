@@ -52,6 +52,7 @@
 - **Fertig (07./08.11.):** Spielkern, Karte, 12 Anlagen, 5 Phasen, Prestige mit Patenten, Geheimakte (11 Akten, 19 Quellen).
 - **Impressum und Datenschutz:** ausgefüllt am 09.11.2026 (Datenschutz auf Basis von Datenschutz-Generator.de, angepasst). Bei Änderungen an Bestenliste, Browser-Speicher oder Hosting mitpflegen.
 - **Lokal testen:** `python -m http.server 8765` → http://localhost:8765/ (Tests unter `/tests/`, siehe README). Headless-Läufe mit Edge immer mit einem **frischen** `--user-data-dir` (vorher löschen). Sonst landet der Test-Spielstand im echten Browserprofil, und lange nicht geänderte Module (z. B. `patents.js`) kommen nach einer Änderung noch aus dem Cache.
+- **Neu am 09.11. (sechster Teil): 8 neue Anlagen** (§4.3), je zwei für Europa, Welt, Orbit & Mond und Universum, mit Icons, Erfolgen und News. Tränen-Teiler angepasst.
 - **Neu am 09.11. (fünfter Teil): Hintergrundmusik** (§4.15): selbst erzeugter Synthwave-Song, 2 Minuten, wird mit jeder Phase intensiver, standardmäßig aus.
 - **Live:** https://5gsendemast.de seit 09.11.2026 (Pages-Projekt `sendemast`). Jeder Push auf `main` geht sofort live.
 - **Code auf GitHub:** https://github.com/kofer99/5gsendemast (privat, Branch `main`, seit 09.11.2026). D1-Datenbank `sendemast-db` angelegt (ID in `wrangler.toml`), Tabelle `scores` per Konsole erstellt. Noch kein Pages-Projekt, also noch nicht live.
@@ -143,10 +144,20 @@ Die Kosten steigen pro Kauf: `Preis = Basispreis × 1,15^Anzahl`. Werte sind Sta
 | 6 | Chemtrail-Staffel | 1,4 Mio. | 1.400 | „Jetzt mit Lavendelduft.“ | Karte DE |
 | 7 | Reptiloiden-Rechenzentrum | 20 Mio. | 7.800 | „Klimaanlage auf 38 °C.“ | Karte DE |
 | 8 | HAARP-Außenstelle Bielefeld | 330 Mio. | 44.000 | „Existiert nicht. Wie Bielefeld.“ | Karte DE (fester Ort) |
-| 9 | Euro-Funknetz | 1,2 Mrd. | 300.000 | „Brüssel hat's genehmigt.“ | ab Phase 2 |
-| 10 | Satelliten-Schwarm „Gedankenlink“ | 30 Mrd. | 4 Mio. | „Jetzt auch mit Funkloch-Garantie.“ | ab Phase 3 |
-| 11 | Mond-Sendemast | 500 Mrd. | 50 Mio. | „Erklärt die Gezeiten.“ | ab Phase 4 |
-| 12 | ∞G-Quantenturm | 8 Bio. | 600 Mio. | „Sendet, bevor du denkst.“ | ab Phase 5 |
+| 9 | EU-Normantenne *(neu 09.11.)* | 250 Mio. | 83.000 | „Krümmung gemäß Verordnung (EU) 5G/2026.“ | ab Phase 2 |
+| 10 | Euro-Funknetz | 1,2 Mrd. | 300.000 | „Brüssel hat's genehmigt.“ | ab Phase 2 |
+| 11 | Eurovisions-Sendezentrale *(neu)* | 7 Mrd. | 1,4 Mio. | „Douze points für jede Frequenz.“ | ab Phase 2 |
+| 12 | Tiefseekabel-Krake *(neu)* | 9 Mrd. | 1,5 Mio. | „Acht Arme, überall Empfang.“ | ab Phase 3 |
+| 13 | Satelliten-Schwarm „Gedankenlink“ | 30 Mrd. | 4 Mio. | „Jetzt auch mit Funkloch-Garantie.“ | ab Phase 3 |
+| 14 | Pyramiden-Sendeanlage Gizeh *(neu)* | 50 Mrd. | 6,5 Mio. | „Wurde nie für Pharaonen gebaut.“ | ab Phase 3 |
+| 15 | Weltraumschrott-Antennenpark *(neu)* | 180 Mrd. | 20 Mio. | „Recycling auf 400 km Höhe.“ | ab Phase 4 |
+| 16 | Mond-Sendemast | 500 Mrd. | 50 Mio. | „Erklärt die Gezeiten.“ | ab Phase 4 |
+| 17 | Mars-Rover mit Megafon *(neu)* | 1 Bio. | 95 Mio. | „Fährt 4 cm pro Stunde. Sendet schneller.“ | ab Phase 4 |
+| 18 | Schwarzes-Loch-Verstärker *(neu)* | 2,4 Bio. | 200 Mio. | „Nichts entkommt ihm. Auch keine Gedanken.“ | ab Phase 5 |
+| 19 | ∞G-Quantenturm | 8 Bio. | 600 Mio. | „Sendet, bevor du denkst.“ | ab Phase 5 |
+| 20 | Pulsar-Leuchtfeuer *(neu)* | 60 Bio. | 4 Mrd. | „Blinkt seit Milliarden Jahren. Jetzt mit Inhalt.“ | ab Phase 5 |
+
+**Seit 09.11.2026** hat jede spätere Phase drei Anlagen statt einer (vorher: Deutschland 8, jede weitere Phase 1). Die neuen Anlagen liegen preislich vor bzw. nach der bestehenden, das Verhältnis Preis zu FP/s steigt gleichmäßig von 3.000 (Normantenne) bis 15.000 (Pulsar). Alle wirken gebietsweit und bleiben in späteren Phasen nützlich. Je Anlage gibt es automatisch 7 Stufen-Upgrades und einen Erfolg (jetzt 77 Erfolge). Wirkung laut Simulation: Durchlauf ca. 8 % schneller (ohne Ereignisse 6:46 → 6:15), deshalb Tränen-Teiler 4,6e9 → 2,1e9, damit das Universum weiterhin ca. 47 Tränen bringt.
 
 Die Anlagen 9–12 waren ursprünglich deutlich teurer (5,1 Mrd. bis 14 Bio.). Damit dauerte allein die Welt über 5 Stunden. Sie wurden am 08.11.2026 per Simulation angepasst.
 
@@ -165,10 +176,18 @@ Die Anlagen 9–12 waren ursprünglich deutlich teurer (5,1 Mrd. bis 14 Bio.). D
 | Chemtrail | 700.000 | landesweit |
 | Reptiloiden | 2 Mio. | landesweit |
 | HAARP | 15 Mio. | landesweit (steht fest in Bielefeld) |
+| EU-Normantenne | 4 Mio. | gebietsweit |
 | Euro-Funknetz | 25 Mio. | gebietsweit |
+| Eurovisions-Sendezentrale | 55 Mio. | gebietsweit |
+| Tiefseekabel-Krake | 40 Mio. | gebietsweit |
 | Satelliten-Schwarm | 160 Mio. | gebietsweit |
+| Pyramiden-Sendeanlage | 170 Mio. | gebietsweit |
+| Weltraumschrott-Antennenpark | 350 Mio. | gebietsweit |
 | Mond-Sendemast | 1,5 Mrd. | gebietsweit |
+| Mars-Rover mit Megafon | 2,2 Mrd. | gebietsweit |
+| Schwarzes-Loch-Verstärker | 2 Bio. | gebietsweit |
 | ∞G-Quantenturm | 15 Bio. | gebietsweit |
+| Pulsar-Leuchtfeuer | 60 Bio. | gebietsweit |
 
 „Landesweit“ heißt seit M4 **gebietsweit**: Die Anlagen wirken immer auf das ganze Gebiet der aktuellen Phase (europaweit, weltweit …). Lokale Anlagen wirken nur in der Region der aktuellen Phase, in der sie stehen. Die Masten in Deutschland bleiben stehen, zählen in Europa aber nicht mehr.
 
@@ -234,10 +253,12 @@ Landesweite Anlagen füllen also die Lücken proportional auf, ohne dass Reichwe
 | Phase fertig | 3 Klicks/s, von Hand, Ereignisse an | 3 Klicks/s, von Hand, Ereignisse aus | 1 Klick/s, Auto-Platzieren, Ereignisse aus |
 |---|---|---|---|
 | Deutschland | 1 Std. 5 Min. | 1 Std. 30 Min. | 1 Std. 50 Min. |
-| Europa | 2 Std. 4 Min. | 2 Std. 58 Min. | 3 Std. 28 Min. |
-| Welt (Prestige möglich, ca. 12 Tränen) | 2 Std. 49 Min. | 4 Std. 10 Min. | 4 Std. 47 Min. |
-| Orbit & Mond | 3 Std. 26 Min. | 5 Std. 17 Min. | 6 Std. 3 Min. |
-| Universum (ca. 350 Tränen) | 4 Std. 17 Min. | 6 Std. 46 Min. | 7 Std. 39 Min. |
+| Europa | 1 Std. 56 Min. | 2 Std. 57 Min. | 3 Std. 26 Min. |
+| Welt (Prestige möglich, ca. 6 Tränen) | 2 Std. 31 Min. | 3 Std. 52 Min. | 4 Std. 26 Min. |
+| Orbit & Mond (ca. 15 Tränen) | 3 Std. 1 Min. | 4 Std. 41 Min. | 5 Std. 24 Min. |
+| Universum (ca. 46 Tränen) | 3 Std. 50 Min. | 6 Std. 15 Min. | 7 Std. 7 Min. |
+
+Stand mit den 8 neuen Anlagen (09.11.2026, dritte Spalte: 1 Klick/s mit Auto-Platzieren, ohne Ereignisse).
 
 Herkunft der FP bei „Ereignisse an“: Aluhüte ca. 7 %, Demos ca. 7 %, Influencer ca. 6 %, Trupps ca. 3 %, Einweihung ca. 5 %, Impulse ca. 7 %, der Rest kommt aus den Anlagen. Aktives Spielen ist damit etwa 1,6× schneller.
 
@@ -272,7 +293,7 @@ Ein goldener Mast erscheint alle 5–10 min an einer zufälligen Stelle und blei
 
 **Status:** ✅ umgesetzt (Tab „Prestige“, `data/patents.js`, `Game.prestige()`).
 - Verfügbar, sobald im aktuellen Durchlauf die Welt erobert ist (Phase ≥ 4) und mindestens eine neue Träne fällig wäre.
-- **Aluhut-Tränen** insgesamt: `floor(Kubikwurzel(Gesamt-FP_jemals / 4,6e9))` (seit 09.11.2026, vorher Quadratwurzel durch 4e9). Ein Neustart bringt die Differenz zu den schon erhaltenen Tränen. Laut Simulation sind das nach der Welt ca. 5, nach Orbit & Mond ca. 14 und nach dem Universum ca. 47.
+- **Aluhut-Tränen** insgesamt: `floor(Kubikwurzel(Gesamt-FP_jemals / 2,1e9))` (seit 09.11.2026; zuerst 4,6e9, mit den 8 neuen Anlagen 2,1e9; davor Quadratwurzel durch 4e9). Ein Neustart bringt die Differenz zu den schon erhaltenen Tränen. Laut Simulation sind das nach der Welt ca. 6, nach Orbit & Mond ca. 15 und nach dem Universum ca. 46.
 - Jede Träne bringt dauerhaft +8 % FP/s (vorher +2 %). **Ausgegebene Tränen behalten ihren Bonus** (wie bei Cookie Clicker): Patente kosten nur die Entscheidung.
 - **Bleibt erhalten:** Tränen, Patente, Erfolge, Gesamt-FP, Statistik (Klicks, Aluhüte, Goldene Masten, Spielzeit), Einstellungen. **Wird zurückgesetzt:** FP, Anlagen, Masten, Upgrades, übernommene Gebiete, Phase.
 - Nach dem Neustart wird die Seite neu geladen (einfacher und robuster als alle Karten im Betrieb zurückzubauen).

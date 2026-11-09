@@ -29,7 +29,12 @@ if (phase > 1) {
   s.phase = phase; s.phaseReached = phase;
   for (const p of PHASES) if (p.id < phase) for (const r of p.open) if (!s.taken.includes(r.code)) s.taken.push(r.code);
   s.fp = 1e30; s.settings.autoPlace = true;
-  const extra = { 2: { chemtrail: 30, reptil: 20, euro: 2 }, 3: { chemtrail: 35, reptil: 25, haarp: 4, euro: 12, sat: 2 }, 4: { euro: 20, sat: 10, haarp: 10, mond: 3 }, 5: { euro: 25, sat: 18, mond: 12, quant: 3 } }[phase];
+  const extra = {
+    2: { chemtrail: 30, reptil: 20, norm: 4, euro: 2 },
+    3: { chemtrail: 35, reptil: 25, haarp: 4, norm: 15, euro: 12, eurovision: 6, krake: 4, sat: 2 },
+    4: { norm: 20, euro: 20, eurovision: 12, krake: 10, sat: 10, pyramide: 4, haarp: 10, schrott: 4, mond: 3 },
+    5: { euro: 25, eurovision: 18, sat: 18, pyramide: 10, schrott: 10, mond: 12, mars: 4, loch: 4, quant: 3 },
+  }[phase];
   for (const [id, n] of Object.entries(extra)) g.buy(id, n);
   g.buy('toaster', 3);
   s.settings.autoPlace = false;

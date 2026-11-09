@@ -10,7 +10,7 @@ export const TEAR_BONUS = 0.08;         // +8 % FP/s je Aluhut-Träne
 export const ALUHUT_PENALTY = 0.1;      // −10 % FP/s je aktivem Aluhutträger
 export const ALUHUT_PENALTY_MAX = 0.5;
 export const OFFLINE_RATE = 0.5;
-export const TEAR_DIVISOR = 4.6e9;      // Tränen = floor(Kubikwurzel(Gesamt-FP / TEAR_DIVISOR))
+export const TEAR_DIVISOR = 2.1e9;      // Tränen = floor(Kubikwurzel(Gesamt-FP / TEAR_DIVISOR)); 2.1e9 seit den 8 neuen Anlagen (vorher 4.6e9)
 export const TEAR_EXP = 3;              // 3 = Kubikwurzel (bis 09.11.2026: Quadratwurzel, siehe DESIGN.md §4.9)
 
 /** Gesamtkosten für n Stück, wenn bereits `owned` vorhanden sind. */
