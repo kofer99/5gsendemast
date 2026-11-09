@@ -74,7 +74,7 @@ Falls doch schon vorher:
 
 ## Was Claude von dir braucht
 
-- [ ] GitHub-Repo-Adresse (und dass die Anmeldung am Rechner geklappt hat)
+- [x] GitHub-Repo-Adresse: https://github.com/kofer99/5gsendemast (gepusht am 09.11.2026)
 - [ ] D1 Database ID
 
 Weitere Details: `DESIGN.md` §5 (Bestenliste) und §11 (Hosting & Deployment).
