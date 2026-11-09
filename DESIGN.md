@@ -10,7 +10,7 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 0. **🟢 LIVE seit 09.11.2026:** https://5gsendemast.de (Cloudflare Pages-Projekt `sendemast`, auch https://sendemast.pages.dev). Spiel, Seiten und Bestenliste (D1) laufen. `www` läuft, `IP_SALT` gesetzt. Offen: Redirect-Regel www → Hauptdomain (sonst getrennte Spielstände je Adresse, weil localStorage pro Origin gilt); Spiel komplett durchspielen.
+> 0. **🟢 LIVE seit 09.11.2026:** https://5gsendemast.de (Cloudflare Pages-Projekt `sendemast`, auch https://sendemast.pages.dev). Spiel, Seiten und Bestenliste (D1) laufen. `IP_SALT` gesetzt, `www` und `http` leiten per 301 auf `https://5gsendemast.de` um (Pfad und Parameter bleiben). Offen: Spiel komplett durchspielen.
 > 1. ~~**Online gehen (§11, M7)**~~, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Erledigt (09.11.2026): GitHub-Repo, D1-Datenbank, Domain in Cloudflare, **Nameserver auf Cloudflare umgestellt**. Offen: Pages-Projekt, Secret `IP_SALT`, Custom Domain. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
 > 2. Impressum und Datenschutz sind ausgefüllt (09.11.2026). Damit ist alles für den Live-Gang bereit: Pages-Projekt anlegen (HOSTING-ANLEITUNG.md Schritt 5/6).
 > 3. Nach dem Online-Gang: Spiel komplett durchspielen, Bestenliste und Prestige echt testen.

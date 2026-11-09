@@ -76,6 +76,12 @@ Falls doch schon vorher:
 5. ~~Nameserver bei CheckDomain umstellen~~ (bereits am 09.11.2026 erledigt). Die alten Einträge für `@` und `www` (CheckDomain-Parkseite, `88.99.101.251`) werden beim Verbinden der Custom Domain ersetzt.
 6. Prüfen, dass `https://5gsendemast.de` die Seite zeigt. Dann „Always Use HTTPS“ aktivieren.
 
+> ✅ 09.11.2026 erledigt. **So ist `www` eingerichtet** (wichtig, damit es nicht zwei getrennte Spielstände je Adresse gibt):
+> - `www.5gsendemast.de` ist **nicht** als Custom Domain im Pages-Projekt eingetragen. Sonst überspringt Cloudflare die Umleitungsregeln der Zone.
+> - DNS: `CNAME www → 5gsendemast.de`, **Proxied** (orange Wolke).
+> - Regeln → Umleitungsregeln: Platzhaltermuster `https://www.5gsendemast.de/*` → `https://5gsendemast.de/${1}`, 301, Abfragezeichenfolge beibehalten.
+> - SSL/TLS → Edge-Zertifikate: **„Immer HTTPS verwenden“ an** (sonst endet `http://www…` mit Fehler 522).
+
 ---
 
 ## Was Claude von dir braucht
