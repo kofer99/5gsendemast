@@ -18,10 +18,7 @@
 - [x] ~~Prestige-Balancing entscheiden~~: Kubikwurzel, +8 % je Träne, Patente billiger (09.11.2026, §4.9)
 - [ ] Prestige im Spiel einmal durchspielen: Fühlen sich 5 Tränen nach der Welt bzw. 47 nach dem Universum gut an? (nach dem Online-Gang)
 - [ ] Portal-Texte gegenlesen: 14 Rundschreiben, 8 Stellen, Kantinenplan, Organigramm, 8 Dienstgrade (`data/portal.js`).
-- [ ] **Datenschutzerklärung** (beim Ausfüllen), mindestens:
-  - Browser-Speicher: `sendemast.save` (Spielstand), `sendemast.lb` (nur der Spitzname für die Bestenliste), `sendemast.portal.seen` (gelesene Rundschreiben), `sendemast.portal.session` (sessionStorage, nur „angemeldet“). Bleibt im Browser.
-  - **Bestenliste (Server, nur nach aktivem Eintragen):** Spitzname, Bestwert, Phase, Gesamt-FP, Spielzeit, zufällige Spielstand-ID, `ip_hash` = SHA-256(IP + Tagesdatum + geheimes Salz), gekürzt auf 128 Bit. Zweck: Spam- und Missbrauchsschutz. Löschung jederzeit per „Austragen“. Speicherort: Cloudflare D1. Rechtsgrundlage klären (vermutlich berechtigtes Interesse bzw. Einwilligung durch Eintragen).
-  - Hosting bei Cloudflare (Server-Logs, Auftragsverarbeitung).
+- [ ] **Datenschutz:** Bestandsaufnahme, offene Maßnahmen und Checkliste für die Erklärung stehen in [`DATENSCHUTZ-NOTIZEN.md`](DATENSCHUTZ-NOTIZEN.md). Vier kleine Änderungen sind noch offen (z. B. `ip_hash` nach 24 h löschen).
 - [x] ~~M3-Texte gegenlesen~~ („Das Spiel passt so“, 09.11.2026)
 - [ ] Leertaste nach Klick auf eine Anlage drücken: Es darf **nichts** gekauft werden (automatisch nicht testbar).
 - [ ] Einwohnerzahlen Europa/Welt stammen aus Natural Earth (POP_EST, Stand 2019, Welt ≈ 7,68 Mrd.). Vor dem Release ggf. aktualisieren (`tools/build_world.py`).
