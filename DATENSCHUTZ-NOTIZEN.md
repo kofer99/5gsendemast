@@ -64,6 +64,8 @@ Getestet: `tests/index.html` (Kürzen, Löschen nach 24 h), `python tools/check_
 
 ## 5. Was in die Datenschutzerklärung muss (Checkliste)
 
+> ✅ 09.11.2026: Erklärung erstellt (`/datenschutz/`). Grundlage Datenschutz-Generator.de (Schwenke), bereinigt (Instart- und Hinweisgeber-Abschnitt entfernt, unzutreffende Datenarten gestrichen) und um Cloudflare, Bestenliste, Browser-Speicher, Portal und Kontakt ergänzt. Zuständige Aufsicht: BayLDA, Promenade 18, 91522 Ansbach. Impressum ausgefüllt. **Offen:** am besten einmal fachkundig gegenlesen lassen; bei jeder Änderung an Bestenliste, Speicher oder Hosting den Text mitpflegen.
+
 - [ ] Verantwortliche:r (Name, Anschrift, E-Mail) – gleiche Angaben wie im Impressum
 - [ ] Hosting durch Cloudflare: welche Daten, Zweck, Rechtsgrundlage, Drittlandübermittlung, Auftragsverarbeitung
 - [ ] Bestenliste: Daten aus Abschnitt 2, Zweck, Freiwilligkeit, Speicherdauer (bis „Austragen“; `ip_hash` höchstens etwa 24 h), Löschmöglichkeit
