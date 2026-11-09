@@ -10,7 +10,7 @@
 > Hier steht immer, wo wir stehen geblieben sind. Bei jeder Sitzung aktualisieren.
 
 > **▶ HIER GEHT'S WEITER (nächste Sitzung):**
-> 1. **Online gehen (§11, M7):** GitHub-Repo, Cloudflare Pages, D1-Datenbank, Secret `IP_SALT`, Domain-Umzug inkl. E-Mail-Einträge. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
+> 1. **Online gehen (§11, M7)**, Schritt-für-Schritt in [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md). Du legst zuerst Konten und Datenbank an (noch nicht live) und schickst Repo-Adresse und D1-ID. GitHub-Repo, Cloudflare Pages, D1-Datenbank, Secret `IP_SALT`, Domain-Umzug inkl. E-Mail-Einträge. Die Bestenliste ist fertig, aber erst online testbar (lokal nur mit `?mock=1`).
 > 2. Vorher von dir: Impressum und Datenschutz ausfüllen (eigene Daten). Was in die Datenschutzerklärung muss, steht unter „Offen“.
 > 3. Nach dem Online-Gang: Spiel komplett durchspielen, Bestenliste und Prestige echt testen.
 
@@ -476,6 +476,8 @@ Eine Parodie auf ein Behörden-Intranet mit übertriebener Bürokratie. **Status
 ---
 
 ## 11. Hosting & Deployment
+
+> Ausführliche Anleitung mit Live-Gang: [`HOSTING-ANLEITUNG.md`](HOSTING-ANLEITUNG.md).
 
 1. **GitHub:** privates oder öffentliches Repository, Push auf `main`
 2. **Cloudflare Pages:** mit dem GitHub-Repo verbinden. Build-Befehl: keiner. Ausgabeordner: `/`. Jeder Push deployt automatisch, Branches erhalten Preview-URLs.
